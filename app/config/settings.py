@@ -12,8 +12,10 @@ class Settings(BaseSettings):
     data_dir: Path = Path("data")
     vector_backend: str = "filesystem"
     extraction_provider: str = "deterministic"
+    answer_provider: str = "deterministic"
     openai_api_key: str | None = None
     openai_extraction_model: str = "gpt-4o-mini"
+    openai_answer_model: str = "gpt-4o-mini"
     chunk_size: int = 900
     chunk_overlap: int = 150
     vector_top_k: int = 5

@@ -39,3 +39,11 @@
 **Why:** Regulatory questions need predictable behavior and evidence provenance. Templates make the allowed traversal scope reviewable, testable, and measurable by question type.
 
 **Trade-off:** Coverage grows incrementally as new templates are designed. Unsupported relationship questions return limited evidence rather than an unbounded graph search.
+
+## ADR-006: Fail closed on invalid citations
+
+**Decision:** Generated answers are validated against the exact retrieved chunk IDs. Invalid citations produce a verification-failure response rather than a best-effort answer.
+
+**Why:** A regulatory assistant must not make its evidence trail look stronger than it is. This check is deterministic and independently testable.
+
+**Trade-off:** A useful but incorrectly formatted model response is withheld. The model prompt and retry behavior can be improved later, but citation validity remains non-negotiable.

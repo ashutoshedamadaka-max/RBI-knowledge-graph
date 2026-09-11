@@ -6,7 +6,7 @@ Regulatory lending information is fragmented across documents, and conventional 
 
 ## What I built
 
-A graph-enhanced regulatory intelligence system combining vector retrieval, knowledge graphs, routing, grounded generation, and citation validation. The repository is being delivered in testable phases; Phases 1–4 establish provenance-first ingestion, vector retrieval, a constrained evidence graph, and relationship-aware routing.
+A graph-enhanced regulatory intelligence system combining vector retrieval, knowledge graphs, routing, grounded generation, and citation validation. The repository is being delivered in testable phases; Phases 1–5 establish provenance-first ingestion, vector retrieval, a constrained evidence graph, relationship-aware routing, and verified answers.
 
 ## Results
 
@@ -57,6 +57,10 @@ The graph is deliberately constrained: it admits only documented entity and rela
 
 The query router selects vector retrieval for direct factual questions, graph retrieval for relationship and change questions, and hybrid retrieval for questions that need both. Graph retrieval is limited to reviewed templates rather than arbitrary model-generated queries. [Phase 4 details](docs/phase-4-plan.md) describe the supported patterns.
 
+## Phase 5: grounded answers
+
+`POST /query` merges routed evidence and returns an answer only from retrieved chunks. Every material statement is tagged with a chunk ID, and citation validation rejects answer citations that are absent from the retrieved evidence. The default response composer is free and deterministic; OpenAI generation is an opt-in, evidence-only adapter. [Phase 5 details](docs/phase-5-plan.md) describe the failure behavior.
+
 ## Architecture roadmap
 
 `RBI sources → ingestion → parsed pages → chunking + metadata → vector index and provenance graph → router → evidence merger → grounded answer → citation validator`
@@ -68,6 +72,7 @@ The initial ontology and the NetworkX-to-Neo4j migration boundary are documented
 - `POST /ingest` — acquire, hash, parse, cache a source
 - `GET /documents` — list ingested metadata
 - `GET /search` — retrieve the top matching chunks from the vector baseline
+- `POST /query` — answer from routed evidence with validated citations
 - `GET /health` — service status
 
 `/query` and `/metrics` are intentionally deferred until the vector, graph, evaluation, and observability layers are implemented; they will not return misleading partial answers.

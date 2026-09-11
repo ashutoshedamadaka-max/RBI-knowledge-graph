@@ -38,3 +38,6 @@ class LocalVectorStore:
         ]
         return sorted(matches, key=lambda result: result.similarity_score, reverse=True)[:top_k]
 
+    def get_by_ids(self, chunk_ids: list[str]) -> list[ChunkMetadata]:
+        wanted = set(chunk_ids)
+        return [ChunkMetadata.model_validate(row["chunk"]) for row in self._read() if row["chunk"]["chunk_id"] in wanted]
