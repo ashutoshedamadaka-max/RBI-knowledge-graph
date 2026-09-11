@@ -11,10 +11,10 @@ def create_app() -> FastAPI:
     settings = get_settings()
     logging.basicConfig(level=settings.log_level, format="%(asctime)s %(levelname)s %(name)s %(message)s")
     application = FastAPI(title=settings.app_name, version="0.1.0")
+    application.state.settings = settings
     application.state.ingestion_service = IngestionService(settings)
     application.include_router(router)
     return application
 
 
 app = create_app()
-

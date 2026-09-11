@@ -6,7 +6,7 @@ Regulatory lending information is fragmented across documents, and conventional 
 
 ## What I built
 
-A graph-enhanced regulatory intelligence system combining vector retrieval, knowledge graphs, routing, grounded generation, and citation validation. The repository is being delivered in testable phases; Phase 1 is a runnable, provenance-first ingestion foundation.
+A graph-enhanced regulatory intelligence system combining vector retrieval, knowledge graphs, routing, grounded generation, and citation validation. The repository is being delivered in testable phases; Phases 1–2 establish provenance-first ingestion and a runnable local vector baseline.
 
 ## Results
 
@@ -43,6 +43,12 @@ Example local source payload:
 
 Only obtain documents from authoritative RBI pages. The system preserves the supplied source URL and never presents unsupported regulations as facts.
 
+## Phase 2: chunking and vector baseline
+
+Ingested pages are split into page-bounded chunks using configurable size and overlap. Each chunk receives a stable ID shared by vector retrieval, future graph provenance, citations, evaluation, and debugging. `GET /search?query=...&top_k=5` exposes the local vector baseline and returns chunk text, document, page, source URL, and score.
+
+The local baseline uses deterministic feature hashing to stay free and reproducible. It is intentionally documented as lexical—not semantic—and does not claim benchmark quality. [Phase 2 details](docs/phase-2-plan.md) explain the adapter boundary for a sentence-transformer and pgvector production store.
+
 ## Architecture roadmap
 
 `RBI sources → ingestion → parsed pages → chunking + metadata → vector index and provenance graph → router → evidence merger → grounded answer → citation validator`
@@ -53,7 +59,7 @@ The initial ontology and the NetworkX-to-Neo4j migration boundary are documented
 
 - `POST /ingest` — acquire, hash, parse, cache a source
 - `GET /documents` — list ingested metadata
+- `GET /search` — retrieve the top matching chunks from the vector baseline
 - `GET /health` — service status
 
 `/query` and `/metrics` are intentionally deferred until the vector, graph, evaluation, and observability layers are implemented; they will not return misleading partial answers.
-

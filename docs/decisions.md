@@ -24,3 +24,10 @@
 
 **Trade-off:** NetworkX is single-process and not a multi-user graph store. A Neo4j adapter can replace it later without changing route selection or answer generation contracts.
 
+## ADR-004: Deterministic hashing vectors for the first retrieval baseline
+
+**Decision:** Phase 2 uses a local feature-hashing embedder, persisted beside the document manifest, behind a vector-retrieval service boundary.
+
+**Why:** It creates a free, reproducible, testable retrieval baseline without a model download, GPU requirement, database migration, or API spend. It also makes the later Graph RAG comparison honest: vector-only metrics start from a known baseline.
+
+**Trade-off:** Feature hashing captures lexical overlap rather than semantic similarity, so it is not the production-quality embedding choice. Before publishing benchmark claims, the adapter will be switched to sentence-transformer embeddings and pgvector persistence; the API and evidence contracts will remain unchanged.
