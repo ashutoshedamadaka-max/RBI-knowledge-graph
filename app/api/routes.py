@@ -10,6 +10,7 @@ from app.observability.costs import CostTracker
 from app.observability.metrics import MetricsService
 from app.monitoring.store import MonitoringStore
 from app.models.monitoring import Materiality, RegulatoryUpdate
+from app.llm.generation import AnswerGenerationError
 
 router = APIRouter()
 
@@ -41,7 +42,10 @@ def search(request: Request, query: str, top_k: int | None = None) -> list[Vecto
 @router.post("/query", response_model=QueryResponse)
 def query(request: Request, payload: QueryRequest) -> QueryResponse:
     request_id = request.headers.get("X-Request-ID")
-    return RegulatoryQueryService(request.app.state.settings).query(payload.query, payload.top_k, request_id)
+    try:
+        return RegulatoryQueryService(request.app.state.settings).query(payload.query, payload.top_k, request_id)
+    except AnswerGenerationError as exc:
+        raise HTTPException(status_code=503, detail=str(exc)) from exc
 
 
 @router.get("/metrics")

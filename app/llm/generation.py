@@ -16,6 +16,10 @@ class GenerationResult(BaseModel):
     estimated_cost_usd: float = 0.0
 
 
+class AnswerGenerationError(RuntimeError):
+    """A configured model provider could not produce a grounded answer."""
+
+
 class AnswerGenerator(ABC):
     @abstractmethod
     def generate(self, query: str, evidence: list[ChunkMetadata]) -> GenerationResult:
@@ -44,11 +48,21 @@ class DeterministicAnswerGenerator(AnswerGenerator):
 
 
 class OpenAIAnswerGenerator(AnswerGenerator):
-    def __init__(self, api_key: str, model: str, input_rate: float, output_rate: float) -> None:
+    def __init__(
+        self,
+        api_key: str,
+        model: str,
+        input_rate: float,
+        output_rate: float,
+        timeout_seconds: float,
+        max_output_tokens: int,
+    ) -> None:
         self.api_key = api_key
         self.model = model
         self.input_rate = input_rate
         self.output_rate = output_rate
+        self.timeout_seconds = timeout_seconds
+        self.max_output_tokens = max_output_tokens
 
     def generate(self, query: str, evidence: list[ChunkMetadata]) -> GenerationResult:
         context = "\n\n".join(
@@ -61,13 +75,26 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             "from the evidence. Do not cite a chunk not provided.\n\n"
             f"QUESTION: {query}\n\nEVIDENCE:\n{context}"
         )
-        response = httpx.post(
-            "https://api.openai.com/v1/chat/completions",
-            headers={"Authorization": f"Bearer {self.api_key}"},
-            json={"model": self.model, "messages": [{"role": "system", "content": "Grounded regulatory assistant."}, {"role": "user", "content": prompt}], "temperature": 0},
-            timeout=45,
-        )
-        response.raise_for_status()
+        try:
+            response = httpx.post(
+                "https://api.openai.com/v1/chat/completions",
+                headers={"Authorization": f"Bearer {self.api_key}"},
+                json={
+                    "model": self.model,
+                    "messages": [
+                        {"role": "system", "content": "Grounded regulatory assistant."},
+                        {"role": "user", "content": prompt},
+                    ],
+                    "temperature": 0,
+                    "max_tokens": self.max_output_tokens,
+                },
+                timeout=self.timeout_seconds,
+            )
+            response.raise_for_status()
+        except httpx.HTTPError as exc:
+            raise AnswerGenerationError(
+                "The AI answer service is temporarily unavailable. Please retry in a moment."
+            ) from exc
         body = response.json()
         usage = body.get("usage", {})
         input_tokens = usage.get("prompt_tokens", 0)
@@ -91,5 +118,7 @@ def get_answer_generator(settings: Settings) -> AnswerGenerator:
             settings.openai_answer_model,
             settings.openai_input_cost_per_million,
             settings.openai_output_cost_per_million,
+            settings.openai_timeout_seconds,
+            settings.openai_max_output_tokens,
         )
     return DeterministicAnswerGenerator()
