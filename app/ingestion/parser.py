@@ -1,5 +1,8 @@
 from dataclasses import dataclass
+from html import unescape
+from html.parser import HTMLParser
 from pathlib import Path
+import re
 
 import fitz
 
@@ -10,6 +13,37 @@ from app.ingestion.exceptions import IngestionError
 class ParsedDocument:
     page_count: int
     pages: list[str]
+
+
+class _RbiHtmlTextExtractor(HTMLParser):
+    """Extract readable text from official RBI notification pages without a web-scraping dependency."""
+
+    def __init__(self) -> None:
+        super().__init__()
+        self.parts: list[str] = []
+        self._ignored_depth = 0
+
+    def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
+        if tag in {"script", "style", "noscript"}:
+            self._ignored_depth += 1
+        elif tag in {"p", "br", "div", "li", "tr", "h1", "h2", "h3", "h4"}:
+            self.parts.append("\n")
+
+    def handle_endtag(self, tag: str) -> None:
+        if tag in {"script", "style", "noscript"} and self._ignored_depth:
+            self._ignored_depth -= 1
+        elif tag in {"p", "div", "li", "tr", "h1", "h2", "h3", "h4"}:
+            self.parts.append("\n")
+
+    def handle_data(self, data: str) -> None:
+        if not self._ignored_depth:
+            self.parts.append(data)
+
+    def text(self) -> str:
+        text = unescape("".join(self.parts))
+        text = re.sub(r"[\t \r\f\v]+", " ", text)
+        text = re.sub(r"\n\s*\n+", "\n", text)
+        return text.strip()
 
 
 def parse_document(path: Path, mime_type: str) -> ParsedDocument:
@@ -29,6 +63,11 @@ def parse_document(path: Path, mime_type: str) -> ParsedDocument:
             raise IngestionError("Text document must be UTF-8 encoded.") from exc
         if not text.strip():
             raise IngestionError("Document contains no text.")
+        if mime_type in {"text/html", "application/xhtml+xml"}:
+            extractor = _RbiHtmlTextExtractor()
+            extractor.feed(text)
+            text = extractor.text()
+        if not text:
+            raise IngestionError("HTML document contains no readable text.")
         return ParsedDocument(page_count=1, pages=[text.strip()])
-    raise IngestionError("Only PDF, TXT, and Markdown sources are supported in Phase 1.")
-
+    raise IngestionError("Only PDF, HTML, TXT, and Markdown sources are supported in Phase 1.")
