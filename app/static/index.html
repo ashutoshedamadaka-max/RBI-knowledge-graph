@@ -1,0 +1,76 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Evidence-first RBI lending regulatory intelligence.">
+  <title>RBI Lending Intelligence</title>
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a2533'/%3E%3Cpath d='M17 45V20h18c8 0 12 4 12 10 0 4-2 7-6 8l8 7H38l-7-6h-4v6zm10-14h7c3 0 4-1 4-3s-1-3-4-3h-7z' fill='%2347d6c4'/%3E%3C/svg%3E">
+  <link rel="stylesheet" href="/styles.css">
+</head>
+<body>
+  <main class="shell">
+    <header class="topbar">
+      <div class="brand"><span class="brand-mark">R</span><span>RBI Lending Intelligence</span></div>
+      <div class="status"><span class="status-dot"></span> Evidence-first regulatory research</div>
+    </header>
+
+    <section class="workspace">
+      <aside class="context">
+        <p class="eyebrow">LENDING REGULATIONS</p>
+        <h1>Trace every answer back to its source.</h1>
+        <p class="intro">Ask a direct question or investigate how requirements, entities, and regulatory changes connect.</p>
+        <div class="mode-key">
+          <p>Retrieval modes</p>
+          <span><b class="badge vector">V</b> Vector · direct facts</span>
+          <span><b class="badge graph">G</b> Graph · relationships</span>
+          <span><b class="badge hybrid">H</b> Hybrid · both</span>
+        </div>
+      </aside>
+
+      <section class="research">
+        <form id="query-form" class="query-box">
+          <label for="question">Ask a regulatory question</label>
+          <div class="input-row">
+            <textarea id="question" rows="3" placeholder="For example: Which entities do the penal-charge instructions apply to?" required></textarea>
+            <button id="submit" type="submit">Analyse <span>↗</span></button>
+          </div>
+          <div class="suggestions">
+            <button type="button" data-question="What does RBI say about penal charges?">Penal charges</button>
+            <button type="button" data-question="Which entities do Digital Lending Directions apply to?">Applicability</button>
+            <button type="button" data-question="What changed for existing loans after April 1, 2024?">Regulatory change</button>
+          </div>
+        </form>
+
+        <div id="empty-state" class="empty-state">
+          <div class="empty-icon">⌁</div>
+          <h2>Ready for a grounded answer</h2>
+          <p>Results will show the retrieval approach, source pages, and the supporting evidence.</p>
+        </div>
+
+        <section id="result" class="result hidden" aria-live="polite">
+          <div class="result-meta">
+            <span id="route-pill" class="route-pill"></span>
+            <span id="request-id"></span>
+            <span id="latency"></span>
+          </div>
+          <article class="answer-card">
+            <p class="eyebrow">ANSWER</p>
+            <div id="answer"></div>
+          </article>
+          <section class="sources-section">
+            <div class="section-title"><h2>Sources</h2><span id="citation-status"></span></div>
+            <div id="citations" class="citations"></div>
+          </section>
+          <details class="evidence">
+            <summary>Why this answer?</summary>
+            <p class="evidence-note">Retrieved source excerpts used to produce this response.</p>
+            <div id="evidence-list"></div>
+          </details>
+        </section>
+      </section>
+    </section>
+  </main>
+  <script src="/app.js"></script>
+</body>
+</html>

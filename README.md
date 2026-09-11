@@ -18,6 +18,29 @@ A graph-enhanced regulatory intelligence system combining vector retrieval, know
 
 No benchmark values are fabricated. Placeholders will be replaced only by evaluation output.
 
+## Architecture
+
+The system keeps vector chunks, graph edges, citations, evaluation cases, and debugging identifiers anchored to the same stable chunk ID. See the full [architecture diagram](docs/architecture.md).
+
+## System design
+
+- **Ingestion:** provenance-first PDF/text extraction, document hashing, page metadata, and cache reuse.
+- **Retrieval:** lexical vector baseline for direct facts; reviewed graph templates for entity scope, amendments, replacements, and multi-hop connections.
+- **Generation:** answer only from retrieved evidence; decline when evidence is absent.
+- **Verification:** every answer citation must resolve to a retrieved chunk or the response fails closed.
+
+## Ontology and trade-offs
+
+The graph deliberately restricts entity types (such as Regulation, Requirement, RegulatedEntity, LendingProduct, and Authority) and relationships (such as APPLIES_TO, REQUIRES, AMENDS, and SUPERSEDES). This makes graph retrieval auditable but means new relationship types need an explicit, tested template. The decision record is in [docs/decisions.md](docs/decisions.md).
+
+## Evaluation methodology
+
+The checked-in 36-question set covers single-hop, two-hop, multi-hop, comparison, temporal/change, and out-of-scope queries. It compares vector-only source recall to routed retrieval by hop count, plus citation validity, routing accuracy, latency, and cost. Results are only meaningful after the real source URLs have been ingested.
+
+## Failure handling
+
+The service handles unparseable documents, duplicate content, empty retrieval, malformed extraction, invalid citations, and unavailable model configuration. It does not return a confident answer when supporting evidence cannot be verified.
+
 ## Phase 1: ingestion foundation
 
 This phase accepts a local PDF/TXT/Markdown file or an HTTPS document URL through `POST /ingest`. It records RBI-oriented provenance metadata, extracts page-preserving text, assigns a content-addressed stable document ID, and caches unchanged source bytes. Parsed pages are written to `data/processed/`; no LLM calls occur in this phase.
@@ -69,6 +92,10 @@ The evaluation harness compares vector-only retrieval against routed retrieval a
 
 Each `POST /query` response now has a request ID and produces a structured event containing its route, evidence IDs, graph footprint, model usage, latency, cost, and citation status. `GET /metrics` reports aggregate recorded token and cost usage. [Phase 7 details](docs/phase-7-plan.md) document the cost model.
 
+## Phase 8: product surface
+
+The root page is a focused regulatory research workspace: submit a question, inspect its retrieval mode, read the grounded answer, open the cited RBI source, and inspect the underlying evidence if needed. [Phase 8 details](docs/phase-8-plan.md) explain the product choices.
+
 ## Architecture roadmap
 
 `RBI sources → ingestion → parsed pages → chunking + metadata → vector index and provenance graph → router → evidence merger → grounded answer → citation validator`
@@ -84,4 +111,4 @@ The initial ontology and the NetworkX-to-Neo4j migration boundary are documented
 - `GET /metrics` — aggregate model usage and estimated cost
 - `GET /health` — service status
 
-`/query` and `/metrics` are intentionally deferred until the vector, graph, evaluation, and observability layers are implemented; they will not return misleading partial answers.
+The default mode is deterministic and has no API cost. Configure an OpenAI provider only after reviewing the documented cost controls and source corpus.
