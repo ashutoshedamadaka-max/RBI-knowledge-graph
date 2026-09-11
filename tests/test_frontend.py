@@ -8,7 +8,7 @@ def test_frontend_and_metrics_are_available() -> None:
 
     homepage = client.get("/")
     metrics = client.get("/metrics")
-    script = client.get("/app.js")
+    script = client.get("/assets/app.js")
 
     assert homepage.status_code == 200
     assert "RBI Lending Intelligence" in homepage.text

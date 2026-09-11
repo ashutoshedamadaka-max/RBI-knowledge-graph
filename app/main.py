@@ -2,6 +2,7 @@ import logging
 from pathlib import Path
 
 from fastapi import FastAPI
+from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 
 from app.api.routes import router
@@ -16,7 +17,12 @@ def create_app() -> FastAPI:
     application.state.settings = settings
     application.state.ingestion_service = IngestionService(settings)
     application.include_router(router)
-    application.mount("/", StaticFiles(directory=Path(__file__).parent / "static", html=True), name="frontend")
+    static_dir = Path(__file__).parent / "static"
+    application.mount("/assets", StaticFiles(directory=static_dir), name="assets")
+
+    @application.get("/", include_in_schema=False)
+    def frontend() -> FileResponse:
+        return FileResponse(static_dir / "index.html")
     return application
 
 
