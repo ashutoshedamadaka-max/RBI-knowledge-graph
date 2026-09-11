@@ -1,0 +1,12 @@
+.env
+__pycache__/
+.pytest_cache/
+.coverage
+*.py[cod]
+data/raw/*
+!data/raw/.gitkeep
+data/processed/*
+!data/processed/.gitkeep
+data/runtime/*
+!data/runtime/.gitkeep
+

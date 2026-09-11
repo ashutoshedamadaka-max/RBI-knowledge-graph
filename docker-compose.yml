@@ -1,0 +1,27 @@
+services:
+  api:
+    build: .
+    env_file: .env
+    environment:
+      DATABASE_URL: postgresql+psycopg://rag:rag@postgres:5432/rbi_rag
+    ports: ["8000:8000"]
+    volumes: ["./data:/service/data"]
+    depends_on:
+      postgres:
+        condition: service_healthy
+  postgres:
+    image: pgvector/pgvector:pg16
+    environment:
+      POSTGRES_DB: rbi_rag
+      POSTGRES_USER: rag
+      POSTGRES_PASSWORD: rag
+    ports: ["5432:5432"]
+    volumes: ["postgres_data:/var/lib/postgresql/data"]
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U rag -d rbi_rag"]
+      interval: 5s
+      timeout: 5s
+      retries: 10
+volumes:
+  postgres_data:
+
