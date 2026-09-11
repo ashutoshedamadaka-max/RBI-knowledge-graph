@@ -32,6 +32,28 @@ class IngestionService:
 
     def ingest(self, request: IngestRequest) -> IngestResponse:
         source_path, source_url, file_name, mime_type = self._acquire(request)
+        return self._ingest_acquired(
+            source_path, source_url, file_name, mime_type, request.title,
+            request.publication_date, request.issuing_authority,
+        )
+
+    def ingest_content(
+        self, content: bytes, source_url: str, file_name: str, title: str,
+        publication_date=None, document_version: int = 1,
+    ) -> IngestResponse:
+        suffix = Path(file_name).suffix or ".txt"
+        temporary = self.settings.raw_dir / f"monitor_{hashlib.sha256(content).hexdigest()[:16]}{suffix}"
+        temporary.write_bytes(content)
+        mime_type = mimetypes.guess_type(file_name)[0] or "text/plain"
+        return self._ingest_acquired(
+            temporary, source_url, file_name, mime_type, title, publication_date,
+            "Reserve Bank of India", document_version,
+        )
+
+    def _ingest_acquired(
+        self, source_path: Path, source_url: str | None, file_name: str, mime_type: str,
+        title: str | None, publication_date, issuing_authority: str, document_version: int = 1,
+    ) -> IngestResponse:
         content = source_path.read_bytes()
         content_hash = hashlib.sha256(content).hexdigest()
         existing = self.manifest.get_by_hash(content_hash)
@@ -45,15 +67,17 @@ class IngestionService:
         parsed = parse_document(raw_path, mime_type)
         metadata = DocumentMetadata(
             document_id=document_id,
-            title=request.title or self._title_from_name(file_name),
-            issuing_authority=request.issuing_authority,
-            publication_date=request.publication_date,
+            title=title or self._title_from_name(file_name),
+            issuing_authority=issuing_authority,
+            publication_date=publication_date,
             source_url=source_url,
             content_hash=content_hash,
             file_name=file_name,
             mime_type=mime_type,
             ingested_at=datetime.now(UTC),
             page_count=parsed.page_count,
+            document_version=document_version,
+            valid_from=datetime.now(UTC),
         )
         self.manifest.save(metadata)
         chunks = chunk_pages(

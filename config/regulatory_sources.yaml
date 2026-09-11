@@ -1,0 +1,28 @@
+sources:
+  - source_id: rbi_notifications
+    authority: Reserve Bank of India
+    source_name: RBI Notifications
+    url: https://www.rbi.org.in/scripts/NotificationUser.aspx
+    source_type: notifications
+    regulatory_topics: [digital lending, lending norms, penal charges, fair practices, NBFC, co-lending, MSME]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_listing
+  - source_id: rbi_master_directions
+    authority: Reserve Bank of India
+    source_name: RBI Master Directions
+    url: https://www.rbi.org.in/scripts/BS_ViewMasterCirculardetails.aspx
+    source_type: master_directions
+    regulatory_topics: [lending, NBFC, fair practices, outsourcing, recovery]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_listing
+  - source_id: rbi_lending_faqs
+    authority: Reserve Bank of India
+    source_name: RBI Lending FAQs
+    url: https://www.rbi.org.in/scripts/FAQView.aspx
+    source_type: faq
+    regulatory_topics: [penal charges, lending, customer protection]
+    enabled: true
+    polling_frequency: weekly
+    parser_strategy: rbi_listing

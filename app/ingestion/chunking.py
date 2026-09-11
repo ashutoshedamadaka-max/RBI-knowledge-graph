@@ -29,10 +29,13 @@ def chunk_pages(document: DocumentMetadata, pages: list[str], chunk_size: int, o
                     chunk_index=page_index,
                     text=text,
                     source_url=document.source_url,
+                    document_version=document.document_version,
+                    is_current=document.is_current,
+                    valid_from=document.valid_from,
+                    valid_to=document.valid_to,
                 ))
                 page_index += 1
             if end == len(words):
                 break
             start = end - overlap
     return chunks
-

@@ -1,4 +1,4 @@
-# RBI Lending Intelligence Graph RAG
+# RBI Regulatory Intelligence Engine
 
 ## Problem
 
@@ -6,7 +6,7 @@ Regulatory lending information is fragmented across documents, and conventional 
 
 ## What I built
 
-A graph-enhanced regulatory intelligence system combining vector retrieval, knowledge graphs, routing, grounded generation, and citation validation. The repository is being delivered in testable phases; Phases 1–7 establish provenance-first ingestion, vector retrieval, a constrained evidence graph, relationship-aware routing, verified answers, evaluation, and observability.
+An AI-powered regulatory intelligence system that monitors RBI lending regulations, detects changes, maps their impact across regulated entities and lending processes, and answers current and historical regulatory questions using graph + vector retrieval with source-level citations.
 
 ## Results
 
@@ -17,6 +17,10 @@ A graph-enhanced regulatory intelligence system combining vector retrieval, know
 - $X estimated cost per query (measured after model-backed operations are enabled)
 
 No benchmark values are fabricated. Placeholders will be replaced only by evaluation output.
+
+## Regulatory monitoring coverage
+
+The registry monitors official RBI Notifications, Master Directions, and lending FAQs on RBI-owned domains. It is configured for daily or weekly polling by source and records every successful, failed, and partial check. Monitoring is deliberately scoped to lending-related title/topic signals; it is not a guarantee of complete regulatory compliance. Regulatory interpretation and operational decisions should be reviewed by qualified compliance and legal professionals.
 
 ## Architecture
 
@@ -95,6 +99,10 @@ Each `POST /query` response now has a request ID and produces a structured event
 ## Phase 8: product surface
 
 The root page is a focused regulatory research workspace: submit a question, inspect its retrieval mode, read the grounded answer, open the cited RBI source, and inspect the underlying evidence if needed. [Phase 8 details](docs/phase-8-plan.md) explain the product choices.
+
+## Phase 9: monitoring and change intelligence
+
+The monitoring pipeline uses source URL, listing metadata, and normalized content hashes to detect new and modified RBI material without using an LLM. It preserves document versions, marks earlier chunks as non-current, creates deduplicated update records, and exposes them through the Regulatory Updates panel. Phase 9 integration and the local-schema migration are documented in [docs/phase-9-plan.md](docs/phase-9-plan.md).
 
 ## Architecture roadmap
 

@@ -9,6 +9,14 @@ class IngestStatus(str, Enum):
     CACHED = "cached"
 
 
+class DocumentLifecycle(str, Enum):
+    ACTIVE = "ACTIVE"
+    AMENDED = "AMENDED"
+    SUPERSEDED = "SUPERSEDED"
+    WITHDRAWN = "WITHDRAWN"
+    UNKNOWN = "UNKNOWN"
+
+
 class DocumentMetadata(BaseModel):
     document_id: str
     title: str
@@ -20,6 +28,11 @@ class DocumentMetadata(BaseModel):
     mime_type: str
     ingested_at: datetime
     page_count: int | None = None
+    lifecycle: DocumentLifecycle = DocumentLifecycle.UNKNOWN
+    document_version: int = 1
+    is_current: bool = True
+    valid_from: datetime | None = None
+    valid_to: datetime | None = None
 
 
 class IngestRequest(BaseModel):
@@ -45,4 +58,3 @@ class IngestResponse(BaseModel):
 class DocumentListResponse(BaseModel):
     documents: list[DocumentMetadata]
     count: int
-

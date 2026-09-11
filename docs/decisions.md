@@ -63,3 +63,11 @@
 **Why:** This gives a small local deployment auditable cost visibility without introducing paid observability infrastructure or exposing prompts in the UI.
 
 **Trade-off:** The file is single-process development storage. A production deployment should emit the same event schema to a durable telemetry service.
+
+## ADR-009: Deterministic monitoring before change interpretation
+
+**Decision:** Phase 9 introduces a configurable RBI source registry and a monitoring history store. Source and document changes are detected with canonical URLs, metadata, and content hashes before any relevance or LLM interpretation step.
+
+**Why:** Website availability, source changes, and regulatory meaning are separate concerns. Deterministic detection makes monitoring idempotent, auditable, and inexpensive; it also creates a concrete old/new evidence set for later interpretation.
+
+**Trade-off:** The local JSON implementation is a development repository rather than a concurrent production database. Its versioned records intentionally mirror the later PostgreSQL schema: source checks, document versions, change reports, alerts, and evidence references.

@@ -3,9 +3,25 @@ const question = document.querySelector('#question');
 const submit = document.querySelector('#submit');
 const result = document.querySelector('#result');
 const emptyState = document.querySelector('#empty-state');
+const updatesView = document.querySelector('#updates-view');
 
 document.querySelectorAll('[data-question]').forEach((button) => {
   button.addEventListener('click', () => { question.value = button.dataset.question; question.focus(); });
+});
+
+document.querySelector('#updates-toggle').addEventListener('click', async () => {
+  updatesView.classList.toggle('hidden');
+  if (updatesView.classList.contains('hidden')) return;
+  const [updatesResponse, statusResponse] = await Promise.all([fetch('/regulatory-updates'), fetch('/monitoring-status')]);
+  const updates = await updatesResponse.json();
+  const status = await statusResponse.json();
+  const checks = status.last_checks || [];
+  document.querySelector('#monitoring-health').textContent = checks.length
+    ? 'Last RBI check: ' + new Date(checks[0].checked_at).toLocaleString()
+    : 'No successful check recorded';
+  document.querySelector('#updates-list').innerHTML = updates.length
+    ? updates.map((update, index) => '<article class="citation"><span class="citation-index">' + escapeHtml(update.materiality[0]) + '</span><div><h3>' + escapeHtml(update.title) + '</h3><p>' + escapeHtml(update.change_type) + ' · ' + new Date(update.detected_at).toLocaleDateString() + '</p><p class="update-summary">' + escapeHtml(update.summary) + '</p></div><a href="' + escapeHtml(update.source_url) + '" target="_blank" rel="noreferrer">Evidence ↗</a></article>').join('')
+    : '<p class="intro">No lending-relevant regulatory updates have been detected yet.</p>';
 });
 
 function escapeHtml(value) {
@@ -66,4 +82,3 @@ form.addEventListener('submit', async (event) => {
     submit.innerHTML = 'Analyse <span>↗</span>';
   }
 });
-

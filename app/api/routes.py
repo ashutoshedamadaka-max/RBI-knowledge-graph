@@ -8,6 +8,8 @@ from app.retrieval.query_service import RegulatoryQueryService
 from app.retrieval.service import VectorRetrievalService
 from app.observability.costs import CostTracker
 from app.observability.metrics import MetricsService
+from app.monitoring.store import MonitoringStore
+from app.models.monitoring import Materiality, RegulatoryUpdate
 
 router = APIRouter()
 
@@ -45,3 +47,32 @@ def query(request: Request, payload: QueryRequest) -> QueryResponse:
 @router.get("/metrics")
 def metrics(request: Request) -> dict[str, float | int]:
     return MetricsService(CostTracker(request.app.state.settings.runtime_dir / "cost_events.json")).snapshot()
+
+
+@router.get("/regulatory-updates", response_model=list[RegulatoryUpdate])
+def regulatory_updates(
+    request: Request, topic: str | None = None, materiality: Materiality | None = None,
+) -> list[RegulatoryUpdate]:
+    updates = MonitoringStore(request.app.state.settings.runtime_dir / "monitoring.json").updates()
+    if materiality:
+        updates = [item for item in updates if item.materiality is materiality]
+    if topic:
+        updates = [item for item in updates if topic.lower() in (item.title + " " + item.summary).lower()]
+    return sorted(updates, key=lambda item: item.detected_at, reverse=True)
+
+
+@router.get("/regulatory-updates/{update_id}", response_model=RegulatoryUpdate)
+def regulatory_update(request: Request, update_id: str) -> RegulatoryUpdate:
+    update = next((item for item in MonitoringStore(request.app.state.settings.runtime_dir / "monitoring.json").updates() if item.update_id == update_id), None)
+    if not update:
+        raise HTTPException(status_code=404, detail="Regulatory update not found.")
+    return update
+
+
+@router.get("/monitoring-status")
+def monitoring_status(request: Request) -> dict[str, object]:
+    checks = MonitoringStore(request.app.state.settings.runtime_dir / "monitoring.json").checks()
+    latest = {}
+    for check in checks:
+        latest[check.source_id] = check.model_dump(mode="json")
+    return {"last_checks": list(latest.values())}

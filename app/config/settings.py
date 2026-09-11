@@ -10,6 +10,7 @@ class Settings(BaseSettings):
     app_name: str = "RBI Lending Intelligence Graph RAG"
     app_env: str = "development"
     data_dir: Path = Path("data")
+    regulatory_sources_path: Path = Path("config/regulatory_sources.yaml")
     vector_backend: str = "filesystem"
     extraction_provider: str = "deterministic"
     answer_provider: str = "deterministic"

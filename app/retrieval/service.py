@@ -8,7 +8,6 @@ class VectorRetrievalService:
         self.settings = settings
         self.store = LocalVectorStore(settings.runtime_dir / "vectors.json")
 
-    def retrieve_vector(self, query: str, top_k: int | None = None) -> list[VectorSearchResult]:
+    def retrieve_vector(self, query: str, top_k: int | None = None, current_only: bool = True) -> list[VectorSearchResult]:
         limit = top_k if top_k is not None else self.settings.vector_top_k
-        return self.store.search(query, top_k=limit)
-
+        return self.store.search(query, top_k=limit, current_only=current_only)

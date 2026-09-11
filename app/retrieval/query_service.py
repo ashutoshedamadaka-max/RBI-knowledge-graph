@@ -33,7 +33,8 @@ class RegulatoryQueryService:
         graph_edge_count = 0
 
         if decision.route in {RetrievalRoute.VECTOR, RetrievalRoute.HYBRID}:
-            evidence.extend(self.vector.retrieve_vector(user_query, top_k))
+            historical = any(term in user_query.lower() for term in ("before", "previous", "historical", "what changed"))
+            evidence.extend(self.vector.retrieve_vector(user_query, top_k, current_only=not historical))
         if decision.route in {RetrievalRoute.GRAPH, RetrievalRoute.HYBRID}:
             graph_result = self.graph.retrieve_graph(user_query)
             graph_node_count = len(graph_result.nodes)

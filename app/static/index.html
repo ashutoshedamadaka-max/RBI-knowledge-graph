@@ -26,6 +26,7 @@
           <span><b class="badge graph">G</b> Graph · relationships</span>
           <span><b class="badge hybrid">H</b> Hybrid · both</span>
         </div>
+        <button id="updates-toggle" class="updates-toggle" type="button">Regulatory updates <span>→</span></button>
       </aside>
 
       <section class="research">
@@ -47,6 +48,12 @@
           <h2>Ready for a grounded answer</h2>
           <p>Results will show the retrieval approach, source pages, and the supporting evidence.</p>
         </div>
+
+        <section id="updates-view" class="updates-view hidden" aria-live="polite">
+          <div class="section-title"><h2>Regulatory updates</h2><span id="monitoring-health"></span></div>
+          <p class="evidence-note">Detected RBI lending-regulation changes. Source availability is shown separately from “no changes”.</p>
+          <div id="updates-list" class="citations"></div>
+        </section>
 
         <section id="result" class="result hidden" aria-live="polite">
           <div class="result-meta">
