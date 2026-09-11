@@ -16,6 +16,8 @@ class Settings(BaseSettings):
     openai_api_key: str | None = None
     openai_extraction_model: str = "gpt-4o-mini"
     openai_answer_model: str = "gpt-4o-mini"
+    openai_input_cost_per_million: float = 0.15
+    openai_output_cost_per_million: float = 0.60
     chunk_size: int = 900
     chunk_overlap: int = 150
     vector_top_k: int = 5

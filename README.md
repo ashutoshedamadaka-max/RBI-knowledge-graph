@@ -6,7 +6,7 @@ Regulatory lending information is fragmented across documents, and conventional 
 
 ## What I built
 
-A graph-enhanced regulatory intelligence system combining vector retrieval, knowledge graphs, routing, grounded generation, and citation validation. The repository is being delivered in testable phases; Phases 1–6 establish provenance-first ingestion, vector retrieval, a constrained evidence graph, relationship-aware routing, verified answers, and an honest evaluation harness.
+A graph-enhanced regulatory intelligence system combining vector retrieval, knowledge graphs, routing, grounded generation, and citation validation. The repository is being delivered in testable phases; Phases 1–7 establish provenance-first ingestion, vector retrieval, a constrained evidence graph, relationship-aware routing, verified answers, evaluation, and observability.
 
 ## Results
 
@@ -65,6 +65,10 @@ The query router selects vector retrieval for direct factual questions, graph re
 
 The evaluation harness compares vector-only retrieval against routed retrieval across 36 labeled questions, stratified by hop count and question type. It calculates source recall@k, citation validity, routing accuracy, latency, and cost—but leaves portfolio result placeholders untouched until the real RBI source documents have been ingested. [Phase 6 details](docs/phase-6-plan.md) describe the methodology.
 
+## Phase 7: observability and cost
+
+Each `POST /query` response now has a request ID and produces a structured event containing its route, evidence IDs, graph footprint, model usage, latency, cost, and citation status. `GET /metrics` reports aggregate recorded token and cost usage. [Phase 7 details](docs/phase-7-plan.md) document the cost model.
+
 ## Architecture roadmap
 
 `RBI sources → ingestion → parsed pages → chunking + metadata → vector index and provenance graph → router → evidence merger → grounded answer → citation validator`
@@ -77,6 +81,7 @@ The initial ontology and the NetworkX-to-Neo4j migration boundary are documented
 - `GET /documents` — list ingested metadata
 - `GET /search` — retrieve the top matching chunks from the vector baseline
 - `POST /query` — answer from routed evidence with validated citations
+- `GET /metrics` — aggregate model usage and estimated cost
 - `GET /health` — service status
 
 `/query` and `/metrics` are intentionally deferred until the vector, graph, evaluation, and observability layers are implemented; they will not return misleading partial answers.

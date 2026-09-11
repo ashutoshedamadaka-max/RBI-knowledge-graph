@@ -70,4 +70,3 @@ class EvaluationHarness:
             by_hop_count=by_hop,
             results=results,
         )
-

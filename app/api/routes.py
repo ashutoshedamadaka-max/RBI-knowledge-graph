@@ -6,6 +6,8 @@ from app.models.chunks import VectorSearchResult
 from app.models.query import QueryRequest, QueryResponse
 from app.retrieval.query_service import RegulatoryQueryService
 from app.retrieval.service import VectorRetrievalService
+from app.observability.costs import CostTracker
+from app.observability.metrics import MetricsService
 
 router = APIRouter()
 
@@ -36,4 +38,10 @@ def search(request: Request, query: str, top_k: int | None = None) -> list[Vecto
 
 @router.post("/query", response_model=QueryResponse)
 def query(request: Request, payload: QueryRequest) -> QueryResponse:
-    return RegulatoryQueryService(request.app.state.settings).query(payload.query, payload.top_k)
+    request_id = request.headers.get("X-Request-ID")
+    return RegulatoryQueryService(request.app.state.settings).query(payload.query, payload.top_k, request_id)
+
+
+@router.get("/metrics")
+def metrics(request: Request) -> dict[str, float | int]:
+    return MetricsService(CostTracker(request.app.state.settings.runtime_dir / "cost_events.json")).snapshot()

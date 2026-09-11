@@ -18,6 +18,7 @@ class Citation(BaseModel):
 
 
 class QueryResponse(BaseModel):
+    request_id: str
     answer: str
     citations: list[Citation]
     route: RetrievalRoute
@@ -25,4 +26,3 @@ class QueryResponse(BaseModel):
     latency_ms: float
     estimated_cost_usd: float
     citation_valid: bool
-

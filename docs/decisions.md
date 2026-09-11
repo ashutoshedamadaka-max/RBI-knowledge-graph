@@ -55,3 +55,11 @@
 **Why:** Stable chunk IDs are content-addressed and cannot be guessed before a source is ingested. URL-level expected evidence makes the dataset reviewable while preserving a hard link to authoritative material.
 
 **Trade-off:** Scores are corpus-dependent. The harness must be rerun after changing documents, parsers, or chunking configuration.
+
+## ADR-008: Persist aggregate model-cost events locally
+
+**Decision:** Model token usage and estimated cost are written to a local, ignored event file and aggregated by the metrics endpoint.
+
+**Why:** This gives a small local deployment auditable cost visibility without introducing paid observability infrastructure or exposing prompts in the UI.
+
+**Trade-off:** The file is single-process development storage. A production deployment should emit the same event schema to a durable telemetry service.
