@@ -43,4 +43,3 @@ def test_rejects_unsupported_file(service: IngestionService, tmp_path: Path) -> 
 
     with pytest.raises(IngestionError, match="Only PDF"):
         service.ingest(IngestRequest(local_path=str(source)))
-
