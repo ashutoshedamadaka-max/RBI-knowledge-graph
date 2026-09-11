@@ -1,5 +1,6 @@
 import hashlib
 import json
+import logging
 import mimetypes
 import re
 from datetime import UTC, datetime
@@ -13,8 +14,11 @@ from app.ingestion.chunking import chunk_pages
 from app.ingestion.exceptions import IngestionError
 from app.ingestion.manifest import DocumentManifest
 from app.ingestion.parser import parse_document
+from app.graph.service import GraphIngestionService
 from app.models.documents import DocumentMetadata, IngestRequest, IngestResponse, IngestStatus
 from app.retrieval.vector_store import LocalVectorStore
+
+logger = logging.getLogger(__name__)
 
 
 class IngestionService:
@@ -24,6 +28,7 @@ class IngestionService:
         settings.processed_dir.mkdir(parents=True, exist_ok=True)
         self.manifest = DocumentManifest(settings.runtime_dir / "documents.json")
         self.vector_store = LocalVectorStore(settings.runtime_dir / "vectors.json")
+        self.graph_service = GraphIngestionService(settings)
 
     def ingest(self, request: IngestRequest) -> IngestResponse:
         source_path, source_url, file_name, mime_type = self._acquire(request)
@@ -51,12 +56,17 @@ class IngestionService:
             page_count=parsed.page_count,
         )
         self.manifest.save(metadata)
-        self.vector_store.upsert(chunk_pages(
+        chunks = chunk_pages(
             metadata,
             parsed.pages,
             chunk_size=self.settings.chunk_size,
             overlap=self.settings.chunk_overlap,
-        ))
+        )
+        self.vector_store.upsert(chunks)
+        try:
+            self.graph_service.index_chunks(chunks)
+        except Exception:
+            logger.exception("graph_extraction_failed document_id=%s", document_id)
         payload = {"document_id": document_id, "pages": [
             {"page_number": index + 1, "text": text} for index, text in enumerate(parsed.pages)
         ]}

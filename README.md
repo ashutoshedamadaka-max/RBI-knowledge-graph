@@ -6,7 +6,7 @@ Regulatory lending information is fragmented across documents, and conventional 
 
 ## What I built
 
-A graph-enhanced regulatory intelligence system combining vector retrieval, knowledge graphs, routing, grounded generation, and citation validation. The repository is being delivered in testable phases; Phases 1–2 establish provenance-first ingestion and a runnable local vector baseline.
+A graph-enhanced regulatory intelligence system combining vector retrieval, knowledge graphs, routing, grounded generation, and citation validation. The repository is being delivered in testable phases; Phases 1–3 establish provenance-first ingestion, vector retrieval, and a constrained evidence graph.
 
 ## Results
 
@@ -48,6 +48,10 @@ Only obtain documents from authoritative RBI pages. The system preserves the sup
 Ingested pages are split into page-bounded chunks using configurable size and overlap. Each chunk receives a stable ID shared by vector retrieval, future graph provenance, citations, evaluation, and debugging. `GET /search?query=...&top_k=5` exposes the local vector baseline and returns chunk text, document, page, source URL, and score.
 
 The local baseline uses deterministic feature hashing to stay free and reproducible. It is intentionally documented as lexical—not semantic—and does not claim benchmark quality. [Phase 2 details](docs/phase-2-plan.md) explain the adapter boundary for a sentence-transformer and pgvector production store.
+
+## Phase 3: provenance graph
+
+The graph is deliberately constrained: it admits only documented entity and relationship types, performs deterministic alias resolution, and retains source chunk/document provenance on every edge. The default extractor is conservative and free; an OpenAI strict-JSON adapter can be enabled only through configuration. [Phase 3 details](docs/phase-3-plan.md) document its limitations and safety controls.
 
 ## Architecture roadmap
 
