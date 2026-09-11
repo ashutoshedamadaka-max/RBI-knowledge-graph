@@ -6,7 +6,7 @@ Regulatory lending information is fragmented across documents, and conventional 
 
 ## What I built
 
-A graph-enhanced regulatory intelligence system combining vector retrieval, knowledge graphs, routing, grounded generation, and citation validation. The repository is being delivered in testable phases; Phases 1–3 establish provenance-first ingestion, vector retrieval, and a constrained evidence graph.
+A graph-enhanced regulatory intelligence system combining vector retrieval, knowledge graphs, routing, grounded generation, and citation validation. The repository is being delivered in testable phases; Phases 1–4 establish provenance-first ingestion, vector retrieval, a constrained evidence graph, and relationship-aware routing.
 
 ## Results
 
@@ -52,6 +52,10 @@ The local baseline uses deterministic feature hashing to stay free and reproduci
 ## Phase 3: provenance graph
 
 The graph is deliberately constrained: it admits only documented entity and relationship types, performs deterministic alias resolution, and retains source chunk/document provenance on every edge. The default extractor is conservative and free; an OpenAI strict-JSON adapter can be enabled only through configuration. [Phase 3 details](docs/phase-3-plan.md) document its limitations and safety controls.
+
+## Phase 4: relationship-aware routing
+
+The query router selects vector retrieval for direct factual questions, graph retrieval for relationship and change questions, and hybrid retrieval for questions that need both. Graph retrieval is limited to reviewed templates rather than arbitrary model-generated queries. [Phase 4 details](docs/phase-4-plan.md) describe the supported patterns.
 
 ## Architecture roadmap
 
