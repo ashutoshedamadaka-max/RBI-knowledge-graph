@@ -10,3 +10,4 @@ data/processed/*
 data/runtime/*
 !data/runtime/.gitkeep
 data/evaluation/latest-results.json
+frontend/dist/

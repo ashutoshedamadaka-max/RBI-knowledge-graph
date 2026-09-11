@@ -23,6 +23,11 @@ class Settings(BaseSettings):
     chunk_overlap: int = 150
     vector_top_k: int = 5
     log_level: str = "INFO"
+    cors_allowed_origins: str = ""
+
+    @property
+    def cors_origins(self) -> list[str]:
+        return [origin.strip().rstrip("/") for origin in self.cors_allowed_origins.split(",") if origin.strip()]
 
     @property
     def raw_dir(self) -> Path:

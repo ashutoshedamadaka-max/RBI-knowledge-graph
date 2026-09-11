@@ -120,3 +120,7 @@ The initial ontology and the NetworkX-to-Neo4j migration boundary are documented
 - `GET /health` — service status
 
 The default mode is deterministic and has no API cost. Configure an OpenAI provider only after reviewing the documented cost controls and source corpus.
+
+## Deployment
+
+The current product deploys its persistent Python API on Render and its static browser interface on Vercel. The step-by-step configuration is in [the deployment guide](docs/deployment.md). This separation preserves the local graph, vector index, documents, and monitoring history on a persistent disk while allowing the interface to be served globally.

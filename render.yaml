@@ -1,0 +1,9 @@
+services:
+  - type: web
+    name: rbi-knowledge-graph-api
+    runtime: docker
+    healthCheckPath: /health
+    disk:
+      name: rbi-regulatory-data
+      mountPath: /service/data
+      sizeGB: 1
