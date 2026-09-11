@@ -47,3 +47,11 @@
 **Why:** A regulatory assistant must not make its evidence trail look stronger than it is. This check is deterministic and independently testable.
 
 **Trade-off:** A useful but incorrectly formatted model response is withheld. The model prompt and retry behavior can be improved later, but citation validity remains non-negotiable.
+
+## ADR-007: Evaluate against authoritative source URLs
+
+**Decision:** Evaluation cases define expected RBI source URLs and are scored only against the corpus actually ingested into the system.
+
+**Why:** Stable chunk IDs are content-addressed and cannot be guessed before a source is ingested. URL-level expected evidence makes the dataset reviewable while preserving a hard link to authoritative material.
+
+**Trade-off:** Scores are corpus-dependent. The harness must be rerun after changing documents, parsers, or chunking configuration.

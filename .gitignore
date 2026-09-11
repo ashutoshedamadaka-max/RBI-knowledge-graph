@@ -9,4 +9,4 @@ data/processed/*
 !data/processed/.gitkeep
 data/runtime/*
 !data/runtime/.gitkeep
-
+data/evaluation/latest-results.json

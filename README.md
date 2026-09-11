@@ -6,7 +6,7 @@ Regulatory lending information is fragmented across documents, and conventional 
 
 ## What I built
 
-A graph-enhanced regulatory intelligence system combining vector retrieval, knowledge graphs, routing, grounded generation, and citation validation. The repository is being delivered in testable phases; Phases 1–5 establish provenance-first ingestion, vector retrieval, a constrained evidence graph, relationship-aware routing, and verified answers.
+A graph-enhanced regulatory intelligence system combining vector retrieval, knowledge graphs, routing, grounded generation, and citation validation. The repository is being delivered in testable phases; Phases 1–6 establish provenance-first ingestion, vector retrieval, a constrained evidence graph, relationship-aware routing, verified answers, and an honest evaluation harness.
 
 ## Results
 
@@ -60,6 +60,10 @@ The query router selects vector retrieval for direct factual questions, graph re
 ## Phase 5: grounded answers
 
 `POST /query` merges routed evidence and returns an answer only from retrieved chunks. Every material statement is tagged with a chunk ID, and citation validation rejects answer citations that are absent from the retrieved evidence. The default response composer is free and deterministic; OpenAI generation is an opt-in, evidence-only adapter. [Phase 5 details](docs/phase-5-plan.md) describe the failure behavior.
+
+## Phase 6: evaluation
+
+The evaluation harness compares vector-only retrieval against routed retrieval across 36 labeled questions, stratified by hop count and question type. It calculates source recall@k, citation validity, routing accuracy, latency, and cost—but leaves portfolio result placeholders untouched until the real RBI source documents have been ingested. [Phase 6 details](docs/phase-6-plan.md) describe the methodology.
 
 ## Architecture roadmap
 

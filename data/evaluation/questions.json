@@ -1,0 +1,350 @@
+[
+  {
+    "case_id": "single_01",
+    "question": "What are penal charges?",
+    "category": "single-hop",
+    "hop_count": 1,
+    "expected_route": "VECTOR",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "single_02",
+    "question": "Can penal charges be added to the interest rate?",
+    "category": "single-hop",
+    "hop_count": 1,
+    "expected_route": "VECTOR",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "single_03",
+    "question": "Must penal charges be disclosed in the loan agreement?",
+    "category": "single-hop",
+    "hop_count": 1,
+    "expected_route": "VECTOR",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "single_04",
+    "question": "What is the purpose of penal charges?",
+    "category": "single-hop",
+    "hop_count": 1,
+    "expected_route": "VECTOR",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "single_05",
+    "question": "What should happen when reminders are sent to borrowers?",
+    "category": "single-hop",
+    "hop_count": 1,
+    "expected_route": "VECTOR",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "single_06",
+    "question": "What is a Key Facts Statement for loans?",
+    "category": "single-hop",
+    "hop_count": 1,
+    "expected_route": "VECTOR",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/AnnualReportPublications.aspx?Id=1436"
+    ]
+  },
+  {
+    "case_id": "two_01",
+    "question": "Which entities are covered by the penal charges circular?",
+    "category": "two-hop",
+    "hop_count": 2,
+    "expected_route": "GRAPH",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "two_02",
+    "question": "Which entities must disclose penal charges?",
+    "category": "two-hop",
+    "hop_count": 2,
+    "expected_route": "GRAPH",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "two_03",
+    "question": "How are borrowers connected to penal-charge disclosures?",
+    "category": "two-hop",
+    "hop_count": 2,
+    "expected_route": "GRAPH",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "two_04",
+    "question": "Which entities are covered by the KFS requirement?",
+    "category": "two-hop",
+    "hop_count": 2,
+    "expected_route": "GRAPH",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/AnnualReportPublications.aspx?Id=1436"
+    ]
+  },
+  {
+    "case_id": "two_05",
+    "question": "Which loan types are addressed by the KFS circular?",
+    "category": "two-hop",
+    "hop_count": 2,
+    "expected_route": "GRAPH",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/AnnualReportPublications.aspx?Id=1436"
+    ]
+  },
+  {
+    "case_id": "two_06",
+    "question": "Which RBI document governs the implementation transition for penal charges?",
+    "category": "two-hop",
+    "hop_count": 2,
+    "expected_route": "HYBRID",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/FAQView.aspx/Scripts/FAQView.aspx?Id=162"
+    ]
+  },
+  {
+    "case_id": "multi_01",
+    "question": "Which RBI regulation introduced penal-charge requirements and which entities does it apply to?",
+    "category": "multi-hop",
+    "hop_count": 3,
+    "expected_route": "GRAPH",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "multi_02",
+    "question": "How does the penal-charge circular connect loan agreements and customer disclosures?",
+    "category": "multi-hop",
+    "hop_count": 3,
+    "expected_route": "GRAPH",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "multi_03",
+    "question": "What chain links the penal-charge rules, NBFCs, and individual borrowers?",
+    "category": "multi-hop",
+    "hop_count": 3,
+    "expected_route": "GRAPH",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "multi_04",
+    "question": "How are KFS requirements related to borrowers and MSME loans?",
+    "category": "multi-hop",
+    "hop_count": 3,
+    "expected_route": "GRAPH",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/AnnualReportPublications.aspx?Id=1436"
+    ]
+  },
+  {
+    "case_id": "multi_05",
+    "question": "Which requirements link regulated entities to KFS disclosures for borrowers?",
+    "category": "multi-hop",
+    "hop_count": 3,
+    "expected_route": "HYBRID",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/AnnualReportPublications.aspx?Id=1436"
+    ]
+  },
+  {
+    "case_id": "multi_06",
+    "question": "How does RBI connect penal charges, default, and non-capitalisation?",
+    "category": "multi-hop",
+    "hop_count": 3,
+    "expected_route": "HYBRID",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/FAQView.aspx/Scripts/FAQView.aspx?Id=162"
+    ]
+  },
+  {
+    "case_id": "comparison_01",
+    "question": "Compare penal interest and penal charges under RBI instructions.",
+    "category": "comparison",
+    "hop_count": 2,
+    "expected_route": "HYBRID",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "comparison_02",
+    "question": "What is the difference between a loan agreement disclosure and a website disclosure for penal charges?",
+    "category": "comparison",
+    "hop_count": 2,
+    "expected_route": "HYBRID",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "comparison_03",
+    "question": "How do rules for individual and non-individual borrowers differ for penal charges?",
+    "category": "comparison",
+    "hop_count": 2,
+    "expected_route": "HYBRID",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "comparison_04",
+    "question": "Compare the penal-charge circular with its FAQ treatment of default.",
+    "category": "comparison",
+    "hop_count": 2,
+    "expected_route": "HYBRID",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/FAQView.aspx/Scripts/FAQView.aspx?Id=162"
+    ]
+  },
+  {
+    "case_id": "comparison_05",
+    "question": "How does KFS differ from other loan agreement information?",
+    "category": "comparison",
+    "hop_count": 2,
+    "expected_route": "HYBRID",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/AnnualReportPublications.aspx?Id=1436"
+    ]
+  },
+  {
+    "case_id": "comparison_06",
+    "question": "Compare direct penal charges with compounding of normal interest.",
+    "category": "comparison",
+    "hop_count": 2,
+    "expected_route": "HYBRID",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/FAQView.aspx/Scripts/FAQView.aspx?Id=162"
+    ]
+  },
+  {
+    "case_id": "temporal_01",
+    "question": "When did the penal-charge instructions take effect for existing loans?",
+    "category": "temporal-change",
+    "hop_count": 2,
+    "expected_route": "HYBRID",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/FAQView.aspx/Scripts/FAQView.aspx?Id=162"
+    ]
+  },
+  {
+    "case_id": "temporal_02",
+    "question": "What changed for existing loans after April 1, 2024?",
+    "category": "temporal-change",
+    "hop_count": 2,
+    "expected_route": "HYBRID",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/FAQView.aspx/Scripts/FAQView.aspx?Id=162"
+    ]
+  },
+  {
+    "case_id": "temporal_03",
+    "question": "Which circular extended the timeline for penal-charge implementation?",
+    "category": "temporal-change",
+    "hop_count": 2,
+    "expected_route": "GRAPH",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/FAQView.aspx/Scripts/FAQView.aspx?Id=162"
+    ]
+  },
+  {
+    "case_id": "temporal_04",
+    "question": "What RBI material explains the transition timeline for existing penal-charge loans?",
+    "category": "temporal-change",
+    "hop_count": 2,
+    "expected_route": "GRAPH",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/AnnualReportPublications.aspx?Id=1436"
+    ]
+  },
+  {
+    "case_id": "temporal_05",
+    "question": "What is the effective date of the KFS framework for loans?",
+    "category": "temporal-change",
+    "hop_count": 1,
+    "expected_route": "VECTOR",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/scripts/AnnualReportPublications.aspx?Id=1436"
+    ]
+  },
+  {
+    "case_id": "temporal_06",
+    "question": "What changed from penal interest to penal charges?",
+    "category": "temporal-change",
+    "hop_count": 2,
+    "expected_route": "HYBRID",
+    "expected_source_urls": [
+      "https://systemhealth.rbi.org.in/Scripts/NotificationUser.aspx_Id%3D12527%26Mode%3D0%281%29.html"
+    ]
+  },
+  {
+    "case_id": "scope_01",
+    "question": "What is the weather in Mumbai?",
+    "category": "out-of-scope",
+    "hop_count": 0,
+    "expected_route": "VECTOR",
+    "expected_source_urls": []
+  },
+  {
+    "case_id": "scope_02",
+    "question": "Should I buy RBI shares?",
+    "category": "out-of-scope",
+    "hop_count": 0,
+    "expected_route": "VECTOR",
+    "expected_source_urls": []
+  },
+  {
+    "case_id": "scope_03",
+    "question": "Write a Python web scraper.",
+    "category": "out-of-scope",
+    "hop_count": 0,
+    "expected_route": "VECTOR",
+    "expected_source_urls": []
+  },
+  {
+    "case_id": "scope_04",
+    "question": "What is the capital of Japan?",
+    "category": "out-of-scope",
+    "hop_count": 0,
+    "expected_route": "VECTOR",
+    "expected_source_urls": []
+  },
+  {
+    "case_id": "scope_05",
+    "question": "Can you give me personal investment advice?",
+    "category": "out-of-scope",
+    "hop_count": 0,
+    "expected_route": "VECTOR",
+    "expected_source_urls": []
+  },
+  {
+    "case_id": "scope_06",
+    "question": "Who won the latest cricket match?",
+    "category": "out-of-scope",
+    "hop_count": 0,
+    "expected_route": "VECTOR",
+    "expected_source_urls": []
+  }
+]
