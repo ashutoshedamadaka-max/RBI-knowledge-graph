@@ -3,7 +3,7 @@ services:
     build: .
     env_file: .env
     environment:
-      DATABASE_URL: postgresql+psycopg://rag:rag@postgres:5432/rbi_rag
+      DATABASE_URL: postgresql://rag:rag@postgres:5432/rbi_rag
     ports: ["8000:8000"]
     volumes: ["./data:/service/data"]
     depends_on:
@@ -24,4 +24,3 @@ services:
       retries: 10
 volumes:
   postgres_data:
-

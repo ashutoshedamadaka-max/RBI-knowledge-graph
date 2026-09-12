@@ -9,11 +9,14 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
 from app.config.settings import get_settings
 from app.ingestion.service import IngestionService
+from app.persistence.runtime_state import DurableRuntimeState
 
 
 def create_app() -> FastAPI:
     settings = get_settings()
     logging.basicConfig(level=settings.log_level, format="%(message)s")
+    durable_state = DurableRuntimeState(settings)
+    durable_state.restore()
     application = FastAPI(title=settings.app_name, version="0.1.0")
     if settings.cors_origins:
         application.add_middleware(
@@ -24,10 +27,18 @@ def create_app() -> FastAPI:
             allow_headers=["*"],
         )
     application.state.settings = settings
+    application.state.durable_state = durable_state
     application.state.ingestion_service = IngestionService(settings)
     application.include_router(router)
     static_dir = Path(__file__).parent / "static"
     application.mount("/assets", StaticFiles(directory=static_dir), name="assets")
+
+    @application.middleware("http")
+    async def persist_runtime_state(request, call_next):
+        try:
+            return await call_next(request)
+        finally:
+            durable_state.sync()
 
     @application.get("/", include_in_schema=False)
     def frontend() -> FileResponse:

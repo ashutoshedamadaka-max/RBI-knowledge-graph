@@ -11,6 +11,14 @@ from app.observability.metrics import MetricsService
 from app.monitoring.store import MonitoringStore
 from app.models.monitoring import Materiality, RegulatoryUpdate
 from app.llm.generation import AnswerGenerationError
+from app.monitoring.runner import run_due_monitoring
+
+
+def _require_secret(received: str | None, expected: str | None, label: str) -> None:
+    if not expected:
+        raise HTTPException(status_code=503, detail=f"{label} is not configured.")
+    if received != expected:
+        raise HTTPException(status_code=401, detail="Unauthorized.")
 
 router = APIRouter()
 
@@ -22,10 +30,20 @@ def health() -> dict[str, str]:
 
 @router.post("/ingest", response_model=IngestResponse)
 def ingest(request: Request, payload: IngestRequest) -> IngestResponse:
+    settings = request.app.state.settings
+    if settings.admin_api_key:
+        _require_secret(request.headers.get("X-Admin-Key"), settings.admin_api_key, "ADMIN_API_KEY")
     try:
         return request.app.state.ingestion_service.ingest(payload)
     except IngestionError as exc:
         raise HTTPException(status_code=422, detail=str(exc)) from exc
+
+
+@router.post("/monitor/run")
+def run_monitor(request: Request) -> dict[str, object]:
+    settings = request.app.state.settings
+    _require_secret(request.headers.get("X-Monitor-Secret"), settings.monitor_secret, "MONITOR_SECRET")
+    return run_due_monitoring(settings)
 
 
 @router.get("/documents", response_model=DocumentListResponse)
