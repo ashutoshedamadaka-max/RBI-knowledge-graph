@@ -1,4 +1,4 @@
-from fastapi import APIRouter, HTTPException, Request
+from fastapi import APIRouter, Header, HTTPException, Request
 
 from app.ingestion.exceptions import IngestionError
 from app.models.documents import DocumentListResponse, IngestRequest, IngestResponse
@@ -29,10 +29,14 @@ def health() -> dict[str, str]:
 
 
 @router.post("/ingest", response_model=IngestResponse)
-def ingest(request: Request, payload: IngestRequest) -> IngestResponse:
+def ingest(
+    request: Request,
+    payload: IngestRequest,
+    x_admin_key: str | None = Header(default=None),
+) -> IngestResponse:
     settings = request.app.state.settings
     if settings.admin_api_key:
-        _require_secret(request.headers.get("X-Admin-Key"), settings.admin_api_key, "ADMIN_API_KEY")
+        _require_secret(x_admin_key, settings.admin_api_key, "ADMIN_API_KEY")
     try:
         return request.app.state.ingestion_service.ingest(payload)
     except IngestionError as exc:
@@ -40,9 +44,12 @@ def ingest(request: Request, payload: IngestRequest) -> IngestResponse:
 
 
 @router.post("/monitor/run")
-def run_monitor(request: Request) -> dict[str, object]:
+def run_monitor(
+    request: Request,
+    x_monitor_secret: str | None = Header(default=None),
+) -> dict[str, object]:
     settings = request.app.state.settings
-    _require_secret(request.headers.get("X-Monitor-Secret"), settings.monitor_secret, "MONITOR_SECRET")
+    _require_secret(x_monitor_secret, settings.monitor_secret, "MONITOR_SECRET")
     return run_due_monitoring(settings)
 
 
