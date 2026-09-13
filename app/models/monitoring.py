@@ -11,6 +11,7 @@ class SourceType(str, Enum):
     MASTER_DIRECTIONS = "master_directions"
     FAQ = "faq"
     PRESS_RELEASE = "press_release"
+    DOCUMENT = "document"
 
 
 class MonitoringRunStatus(str, Enum):

@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from app.models.documents import DocumentMetadata
 
@@ -22,8 +23,23 @@ class DocumentManifest:
     def get_by_hash(self, content_hash: str) -> DocumentMetadata | None:
         return next((item for item in self._read() if item.content_hash == content_hash), None)
 
+    def get_by_source_url(self, source_url: str | None) -> DocumentMetadata | None:
+        """Return an existing record for the same authoritative source page."""
+        if not source_url:
+            return None
+        expected = self._canonical_url(source_url)
+        return next(
+            (item for item in self._read() if item.source_url and self._canonical_url(item.source_url) == expected),
+            None,
+        )
+
     def save(self, document: DocumentMetadata) -> None:
         documents = [item for item in self._read() if item.document_id != document.document_id]
         documents.append(document)
         self.path.write_text(json.dumps([item.model_dump(mode="json") for item in documents], indent=2))
 
+    @staticmethod
+    def _canonical_url(value: str) -> str:
+        parsed = urlsplit(value)
+        query = urlencode(sorted(parse_qsl(parsed.query, keep_blank_values=True)))
+        return urlunsplit((parsed.scheme.lower(), parsed.netloc.lower(), parsed.path.rstrip("/"), query, ""))

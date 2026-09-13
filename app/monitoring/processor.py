@@ -9,6 +9,12 @@ class MonitoringDocumentProcessor:
         self.ingestion = ingestion
 
     def __call__(self, document: DiscoveredDocument, text: str, version: int) -> tuple[str | None, list[str]]:
+        # A curated source may have been deliberately loaded before monitoring was enabled.
+        # Adopt that evidence for its initial monitored version instead of creating a duplicate.
+        existing = self.ingestion.manifest.get_by_source_url(document.canonical_url)
+        if existing and version == 1:
+            chunks = self.ingestion.vector_store.get_by_document_id(existing.document_id)
+            return existing.document_id, [chunk.chunk_id for chunk in chunks]
         response = self.ingestion.ingest_content(
             content=text.encode("utf-8"),
             source_url=document.canonical_url,

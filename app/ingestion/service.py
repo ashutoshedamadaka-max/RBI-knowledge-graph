@@ -60,6 +60,13 @@ class IngestionService:
         if existing:
             return IngestResponse(status=IngestStatus.CACHED, document=existing, message="Unchanged document already ingested.")
 
+        # RBI HTML pages can include changing presentation markup. A manual re-upload of
+        # the same official page should therefore reuse the existing source record; actual
+        # regulatory revisions are handled by the monitored versioning workflow.
+        existing_source = self.manifest.get_by_source_url(source_url) if document_version == 1 else None
+        if existing_source:
+            return IngestResponse(status=IngestStatus.CACHED, document=existing_source, message="Official source page already ingested.")
+
         document_id = f"doc_{content_hash[:16]}"
         raw_path = self.settings.raw_dir / f"{document_id}{source_path.suffix.lower()}"
         if source_path.resolve() != raw_path.resolve():

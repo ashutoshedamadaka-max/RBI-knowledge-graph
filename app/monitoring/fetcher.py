@@ -23,6 +23,13 @@ class RbiHttpFetcher(SourceFetcher):
     """Minimal RBI listing reader; exact parsers remain source-strategy specific."""
 
     def discover(self, source: RegulatorySource) -> list[DiscoveredDocument]:
+        if source.parser_strategy == "rbi_document":
+            key = f"{source.url}|{source.source_name}"
+            return [DiscoveredDocument(
+                canonical_url=str(source.url),
+                title=source.source_name,
+                metadata_hash=hashlib.sha256(key.encode()).hexdigest(),
+            )]
         response = httpx.get(str(source.url), follow_redirects=True, timeout=30)
         response.raise_for_status()
         matches = re.findall(r'<a[^>]+href=["\']([^"\']+)["\'][^>]*>(.*?)</a>', response.text, flags=re.I | re.S)
@@ -39,4 +46,3 @@ class RbiHttpFetcher(SourceFetcher):
         response = httpx.get(document.canonical_url, follow_redirects=True, timeout=45)
         response.raise_for_status()
         return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html.unescape(response.text))).strip()
-

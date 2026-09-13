@@ -26,3 +26,41 @@ sources:
     enabled: true
     polling_frequency: weekly
     parser_strategy: rbi_listing
+  # Curated RBI lending sources. These pages are monitored individually so a revision
+  # is detected even when it is no longer prominent in an RBI listing page.
+  - source_id: rbi_digital_lending_directions
+    authority: Reserve Bank of India
+    source_name: RBI Digital Lending Directions, 2025
+    url: https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0
+    source_type: document
+    regulatory_topics: [digital lending, borrower protection]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_document
+  - source_id: rbi_penal_charges
+    authority: Reserve Bank of India
+    source_name: RBI Guidelines on Penal Charges in Loan Accounts
+    url: https://rbi.org.in/Scripts/NotificationUser.aspx?Id=12527&Mode=0
+    source_type: document
+    regulatory_topics: [penal charges, fair practices]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_document
+  - source_id: rbi_floating_rate_personal_loans
+    authority: Reserve Bank of India
+    source_name: Reset of Floating Interest Rate on EMI based Personal Loans
+    url: https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12529
+    source_type: document
+    regulatory_topics: [personal loans, floating interest rate, borrower disclosure]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_document
+  - source_id: rbi_irac_advances
+    authority: Reserve Bank of India
+    source_name: Prudential Norms on Income Recognition, Asset Classification and Provisioning pertaining to Advances
+    url: https://rbi.org.in/scripts/NotificationUser.aspx?Id=12822
+    source_type: document
+    regulatory_topics: [loan classification, defaults, provisioning, advances]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_document
