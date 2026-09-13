@@ -62,3 +62,16 @@ class MonitoringStore:
         data["alerted_update_ids"].append(update_id)
         self._write(data)
         return True
+
+    def remove_initial_catalogue_updates(self, source_ids: set[str]) -> int:
+        """Remove historical first-scan events from curated document baselines."""
+        data = self._read()
+        before = len(data["updates"])
+        data["updates"] = [
+            item for item in data["updates"]
+            if not (item.get("source_id") in source_ids and item.get("change_type") == "NEW")
+        ]
+        removed = before - len(data["updates"])
+        if removed:
+            self._write(data)
+        return removed

@@ -45,3 +45,15 @@ class ProvenanceGraph:
                 extraction_method=relationship.extraction_method,
             )
         self.path.write_text(json.dumps(json_graph.node_link_data(self.graph, edges="edges"), indent=2))
+
+    def remove_document_ids(self, document_ids: set[str]) -> None:
+        if not document_ids:
+            return
+        stale_edges = [
+            (source, target, key)
+            for source, target, key, data in self.graph.edges(keys=True, data=True)
+            if data.get("source_document_id") in document_ids
+        ]
+        self.graph.remove_edges_from(stale_edges)
+        self.graph.remove_nodes_from(list(nx.isolates(self.graph)))
+        self.path.write_text(json.dumps(json_graph.node_link_data(self.graph, edges="edges"), indent=2))

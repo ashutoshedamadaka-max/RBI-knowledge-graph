@@ -38,6 +38,12 @@ class DocumentManifest:
         documents.append(document)
         self.path.write_text(json.dumps([item.model_dump(mode="json") for item in documents], indent=2))
 
+    def remove_document_ids(self, document_ids: set[str]) -> None:
+        if not document_ids:
+            return
+        remaining = [item for item in self._read() if item.document_id not in document_ids]
+        self.path.write_text(json.dumps([item.model_dump(mode="json") for item in remaining], indent=2))
+
     @staticmethod
     def _canonical_url(value: str) -> str:
         parsed = urlsplit(value)

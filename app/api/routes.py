@@ -12,6 +12,7 @@ from app.monitoring.store import MonitoringStore
 from app.models.monitoring import Materiality, RegulatoryUpdate
 from app.llm.generation import AnswerGenerationError
 from app.monitoring.runner import run_due_monitoring
+from app.monitoring.registry import RegulatorySourceRegistry
 
 
 def _require_secret(received: str | None, expected: str | None, label: str) -> None:
@@ -100,8 +101,18 @@ def regulatory_update(request: Request, update_id: str) -> RegulatoryUpdate:
 
 @router.get("/monitoring-status")
 def monitoring_status(request: Request) -> dict[str, object]:
-    checks = MonitoringStore(request.app.state.settings.runtime_dir / "monitoring.json").checks()
+    settings = request.app.state.settings
+    checks = MonitoringStore(settings.runtime_dir / "monitoring.json").checks()
     latest = {}
     for check in checks:
         latest[check.source_id] = check.model_dump(mode="json")
-    return {"last_checks": list(latest.values())}
+    last_checks = sorted(latest.values(), key=lambda check: check["checked_at"], reverse=True)
+    sources = RegulatorySourceRegistry(settings.regulatory_sources_path).enabled_sources()
+    documents = request.app.state.ingestion_service.list_documents()
+    unavailable = sum(check["status"] in {"SOURCE_UNAVAILABLE", "PARSING_FAILURE", "PARTIAL_FAILURE"} for check in last_checks)
+    return {
+        "document_count": len(documents),
+        "tracked_source_count": len(sources),
+        "last_checks": last_checks,
+        "health": "attention" if unavailable else "healthy",
+    }

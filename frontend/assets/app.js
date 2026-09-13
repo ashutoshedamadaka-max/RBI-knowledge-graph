@@ -6,6 +6,32 @@ const submit = document.querySelector('#submit');
 const result = document.querySelector('#result');
 const emptyState = document.querySelector('#empty-state');
 const updatesView = document.querySelector('#updates-view');
+const knowledgeStatus = document.querySelector('#knowledge-status');
+
+function formatCheckTime(checks) {
+  return checks.length ? new Date(checks[0].checked_at).toLocaleString() : 'No check recorded yet';
+}
+
+async function loadKnowledgeStatus() {
+  try {
+    const response = await fetch(apiUrl('/monitoring-status'));
+    if (!response.ok) throw new Error('Status is temporarily unavailable.');
+    const status = await response.json();
+    const checks = status.last_checks || [];
+    document.querySelector('#knowledge-status h2').textContent = status.document_count + ' RBI lending documents available';
+    document.querySelector('#knowledge-summary').textContent = status.tracked_source_count + ' official RBI sources monitored · Last checked ' + formatCheckTime(checks);
+    const health = document.querySelector('#knowledge-health');
+    health.textContent = status.health === 'healthy' ? 'Monitoring healthy' : 'Needs review';
+    health.classList.toggle('attention', status.health !== 'healthy');
+  } catch (error) {
+    knowledgeStatus.classList.add('status-unavailable');
+    document.querySelector('#knowledge-status h2').textContent = 'Knowledge-base status unavailable';
+    document.querySelector('#knowledge-summary').textContent = 'You can still ask a question while the status reconnects.';
+    document.querySelector('#knowledge-health').textContent = 'Retrying';
+  }
+}
+
+loadKnowledgeStatus();
 
 document.querySelectorAll('[data-question]').forEach((button) => { button.addEventListener('click', () => { question.value = button.dataset.question; question.focus(); }); });
 document.querySelector('#updates-toggle').addEventListener('click', async () => {
@@ -17,8 +43,10 @@ document.querySelector('#updates-toggle').addEventListener('click', async () => 
     const updates = await updatesResponse.json();
     const status = await statusResponse.json();
     const checks = status.last_checks || [];
-    document.querySelector('#monitoring-health').textContent = checks.length ? 'Last RBI check: ' + new Date(checks[0].checked_at).toLocaleString() : 'No successful check recorded';
-    document.querySelector('#updates-list').innerHTML = updates.length ? updates.map((update) => '<article class="citation"><span class="citation-index">' + escapeHtml(update.materiality[0]) + '</span><div><h3>' + escapeHtml(update.title) + '</h3><p>' + escapeHtml(update.change_type) + ' · ' + new Date(update.detected_at).toLocaleDateString() + '</p><p class="update-summary">' + escapeHtml(update.summary) + '</p></div><a href="' + escapeHtml(update.source_url) + '" target="_blank" rel="noreferrer">Evidence ↗</a></article>').join('') : '<p class="intro">No lending-relevant regulatory updates have been detected yet.</p>';
+    document.querySelector('#monitoring-health').textContent = checks.length ? 'Last RBI check: ' + formatCheckTime(checks) : 'No successful check recorded';
+    const changes = updates.length ? updates.map((update) => '<article class="citation"><span class="citation-index">' + escapeHtml(update.materiality[0]) + '</span><div><h3>' + escapeHtml(update.title) + '</h3><p>' + escapeHtml(update.change_type) + ' · ' + new Date(update.detected_at).toLocaleDateString() + '</p><p class="update-summary">' + escapeHtml(update.summary) + '</p></div><a href="' + escapeHtml(update.source_url) + '" target="_blank" rel="noreferrer">Evidence ↗</a></article>').join('') : '<p class="intro">No new or revised RBI lending documents were detected in the latest check.</p>';
+    const sourceHealth = checks.length ? '<div class="source-health">' + checks.map((check) => '<span class="source-check ' + (check.status === 'NO_CHANGES' ? 'healthy' : 'attention') + '">' + escapeHtml(check.source_id.replace(/^rbi_/, '').replaceAll('_', ' ')) + ' · ' + escapeHtml(check.status.replaceAll('_', ' ').toLowerCase()) + '</span>').join('') + '</div>' : '';
+    document.querySelector('#updates-list').innerHTML = changes + sourceHealth;
   } catch (error) { document.querySelector('#updates-list').innerHTML = '<p class="intro">' + escapeHtml(error.message) + '</p>'; }
 });
 function escapeHtml(value) { return String(value).replace(/[&<>"']/g, (character) => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#039;' }[character])); }

@@ -63,6 +63,10 @@ class RegulatoryMonitor:
                 self.store.add_version(version)
                 if previous and previous.document_id and hasattr(self.processor, "mark_previous"):
                     self.processor.mark_previous(previous.document_id, now.isoformat())
+                # Curated cornerstone documents establish the initial baseline. They are
+                # not regulatory changes merely because monitoring was enabled later.
+                if previous is None and source.parser_strategy == "rbi_document":
+                    continue
                 diff = deterministic_diff(previous.text_snapshot, text) if previous else None
                 interpretation = self.interpreter.interpret(status, diff, chunk_ids)
                 update = RegulatoryUpdate(

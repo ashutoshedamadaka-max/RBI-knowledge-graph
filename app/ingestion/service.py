@@ -107,6 +107,25 @@ class IngestionService:
     def list_documents(self) -> list[DocumentMetadata]:
         return sorted(self.manifest.all(), key=lambda item: item.ingested_at, reverse=True)
 
+    def cleanup_duplicate_sources(self) -> int:
+        """Retain the newest copy of each RBI page and remove stale retrieval evidence."""
+        by_source: dict[str, list[DocumentMetadata]] = {}
+        for document in self.manifest.all():
+            if document.source_url:
+                key = self.manifest._canonical_url(document.source_url)
+                by_source.setdefault(key, []).append(document)
+        stale_ids: set[str] = set()
+        for documents in by_source.values():
+            if len(documents) > 1:
+                keep = max(documents, key=lambda item: item.ingested_at)
+                stale_ids.update(item.document_id for item in documents if item.document_id != keep.document_id)
+        if not stale_ids:
+            return 0
+        self.manifest.remove_document_ids(stale_ids)
+        self.vector_store.remove_document_ids(stale_ids)
+        self.graph_service.store.remove_document_ids(stale_ids)
+        return len(stale_ids)
+
     def _acquire(self, request: IngestRequest) -> tuple[Path, str | None, str, str]:
         if request.local_path:
             path = Path(request.local_path)

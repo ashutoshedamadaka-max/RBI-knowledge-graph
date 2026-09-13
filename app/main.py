@@ -9,6 +9,8 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.api.routes import router
 from app.config.settings import get_settings
 from app.ingestion.service import IngestionService
+from app.monitoring.registry import RegulatorySourceRegistry
+from app.monitoring.store import MonitoringStore
 from app.persistence.runtime_state import DurableRuntimeState
 
 
@@ -29,6 +31,13 @@ def create_app() -> FastAPI:
     application.state.settings = settings
     application.state.durable_state = durable_state
     application.state.ingestion_service = IngestionService(settings)
+    application.state.ingestion_service.cleanup_duplicate_sources()
+    curated_source_ids = {
+        source.source_id for source in RegulatorySourceRegistry(settings.regulatory_sources_path).enabled_sources()
+        if source.parser_strategy == "rbi_document"
+    }
+    MonitoringStore(settings.runtime_dir / "monitoring.json").remove_initial_catalogue_updates(curated_source_ids)
+    durable_state.sync()
     application.include_router(router)
     static_dir = Path(__file__).parent / "static"
     application.mount("/assets", StaticFiles(directory=static_dir), name="assets")

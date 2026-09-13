@@ -53,3 +53,9 @@ class LocalVectorStore:
                 row["chunk"]["is_current"] = False
                 row["chunk"]["valid_to"] = valid_to
         self.path.write_text(json.dumps(rows, indent=2))
+
+    def remove_document_ids(self, document_ids: set[str]) -> None:
+        if not document_ids:
+            return
+        rows = [row for row in self._read() if row["chunk"]["document_id"] not in document_ids]
+        self.path.write_text(json.dumps(rows, indent=2))

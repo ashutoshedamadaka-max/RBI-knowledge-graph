@@ -64,6 +64,18 @@ def test_unavailable_source_is_not_reported_as_no_changes(tmp_path: Path) -> Non
     assert updates == []
 
 
+def test_curated_document_first_scan_establishes_a_baseline(tmp_path: Path) -> None:
+    curated = source()
+    curated.parser_strategy = "rbi_document"
+    store = MonitoringStore(tmp_path / "monitoring.json")
+
+    check, updates = RegulatoryMonitor(store, FixtureFetcher("RBI lending baseline")).check_source(curated)
+
+    assert check.status.value == "NO_CHANGES"
+    assert updates == []
+    assert len(store.versions()) == 1
+
+
 def test_official_registry_loads_only_rbi_sources() -> None:
     sources = RegulatorySourceRegistry(Path("config/regulatory_sources.yaml")).enabled_sources()
 
