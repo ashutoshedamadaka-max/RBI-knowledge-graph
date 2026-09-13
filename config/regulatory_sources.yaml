@@ -64,3 +64,30 @@ sources:
     enabled: true
     polling_frequency: daily
     parser_strategy: rbi_document
+  - source_id: rbi_property_document_release
+    authority: Reserve Bank of India
+    source_name: Responsible Lending Conduct - Release of Property Documents on Repayment or Settlement of Personal Loans
+    url: https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12535&Mode=0
+    source_type: document
+    regulatory_topics: [personal loans, borrower protection, loan closure, property documents]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_document
+  - source_id: rbi_colending_faqs
+    authority: Reserve Bank of India
+    source_name: RBI FAQs on Co-lending by Banks and NBFCs
+    url: https://www.rbi.org.in/commonperson/english/Scripts/FAQs.aspx?Id=1105
+    source_type: document
+    regulatory_topics: [co-lending, banks, NBFC]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_document
+  - source_id: rbi_ucb_management_of_advances
+    authority: Reserve Bank of India
+    source_name: Management of Advances - Primary Urban Co-operative Banks
+    url: https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12827
+    source_type: document
+    regulatory_topics: [key facts statement, borrower disclosure, housing loans, gold loans]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_document

@@ -346,5 +346,35 @@
     "hop_count": 0,
     "expected_route": "VECTOR",
     "expected_source_urls": []
+  },
+  {
+    "case_id": "single_07",
+    "question": "What must a lender do with property documents after a personal loan is fully repaid?",
+    "category": "single-hop",
+    "hop_count": 1,
+    "expected_route": "VECTOR",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12535&Mode=0"
+    ]
+  },
+  {
+    "case_id": "two_07",
+    "question": "How are banks and NBFCs connected under RBI co-lending guidance?",
+    "category": "two-hop",
+    "hop_count": 2,
+    "expected_route": "GRAPH",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/commonperson/english/Scripts/FAQs.aspx?Id=1105"
+    ]
+  },
+  {
+    "case_id": "temporal_07",
+    "question": "When must a lender release property documents after settlement of a personal loan?",
+    "category": "temporal-change",
+    "hop_count": 2,
+    "expected_route": "HYBRID",
+    "expected_source_urls": [
+      "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12535&Mode=0"
+    ]
   }
 ]

@@ -83,3 +83,8 @@ def test_official_registry_loads_only_rbi_sources() -> None:
     assert all("rbi.org.in" in str(item.url) for item in sources)
     assert any(item.parser_strategy == "rbi_document" for item in sources)
     assert all(item.regulatory_topics for item in sources)
+    assert {
+        "rbi_digital_lending_directions",
+        "rbi_colending_faqs",
+        "rbi_property_document_release",
+    }.issubset({item.source_id for item in sources})
