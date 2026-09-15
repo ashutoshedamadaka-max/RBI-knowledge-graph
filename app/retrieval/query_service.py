@@ -64,7 +64,11 @@ class RegulatoryQueryService:
         generation = self.generator.generate(user_query, merged)
         research = generation.research
         fallback_used = False
-        if research is None or not validate_structured_citations(research, merged):
+        if (
+            research is None
+            or not validate_structured_citations(research, merged)
+            or (research.status is ResearchStatus.INSUFFICIENT_EVIDENCE and merged)
+        ):
             research = DeterministicAnswerGenerator().generate(user_query, merged).research
             fallback_used = True
         assert research is not None

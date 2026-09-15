@@ -69,6 +69,26 @@ def test_query_falls_back_to_cited_evidence_when_model_citation_is_invalid(tmp_p
     assert "RBI Penal Charges Direction states" in response.answer
 
 
+def test_query_uses_direct_evidence_when_model_is_too_conservative(tmp_path: Path) -> None:
+    source = tmp_path / "rbi.txt"
+    source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")
+    settings = Settings(data_dir=tmp_path / "data")
+    IngestionService(settings).ingest(IngestRequest(local_path=str(source), title="RBI Penal Charges Direction"))
+    service = RegulatoryQueryService(settings)
+
+    class ConservativeGenerator:
+        def generate(self, query, evidence):
+            from app.models.research import ResearchStatus, StructuredResearch
+            return GenerationResult(answer="Insufficient evidence", model="test", research=StructuredResearch(status=ResearchStatus.INSUFFICIENT_EVIDENCE))
+
+    service.generator = ConservativeGenerator()
+    response = service.query("What must lenders disclose about penal charges?")
+
+    assert response.research is not None
+    assert response.research.status.value == "grounded"
+    assert response.citations
+
+
 def test_deterministic_research_selects_the_consent_provision_not_page_chrome() -> None:
     chunk = ChunkMetadata(
         chunk_id="chunk_consent",
