@@ -23,12 +23,12 @@ def resolve_lifecycle(text: str) -> LifecycleResolution:
     normalized = " ".join(text.split())
     checked_at = datetime.now(UTC)
     patterns = (
-        (DocumentLifecycle.WITHDRAWN, r".{0,160}\bwithdrawn\b.{0,160}"),
-        (DocumentLifecycle.SUPERSEDED, r".{0,160}\bsuperseded(?: by)?\b.{0,160}"),
+        (DocumentLifecycle.WITHDRAWN, r"(?:^|\n)\s*withdrawn\s*(?:$|\n)|\bwithdrawn\b\s*[.?!]?\s*$|\bthis (?:circular|master circular|direction|directions)\b.{0,80}\b(?:stands?|is) withdrawn\b"),
+        (DocumentLifecycle.SUPERSEDED, r"\bthis (?:circular|master circular|direction|directions)\b.{0,80}\bsuperseded(?: by)?\b"),
         (DocumentLifecycle.REPEALED, r".{0,160}\bthis (?:circular|master circular|direction|directions)\b.{0,80}\b(?:stands?|is) repealed\b.{0,160}"),
     )
     for lifecycle, pattern in patterns:
-        match = re.search(pattern, normalized, flags=re.IGNORECASE)
+        match = re.search(pattern, text, flags=re.IGNORECASE | re.MULTILINE)
         if match:
             return LifecycleResolution(lifecycle, match.group(0).strip(), checked_at)
     return LifecycleResolution(

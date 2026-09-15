@@ -34,6 +34,7 @@ class DocumentMetadata(BaseModel):
     status_evidence_url: str | None = None
     status_evidence_excerpt: str | None = None
     status_checked_at: datetime | None = None
+    last_checked_at: datetime | None = None
     document_identifier: str | None = None
     effective_date: date | None = None
     document_type: str | None = None

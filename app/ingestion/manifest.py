@@ -55,6 +55,22 @@ class DocumentManifest:
             self.path.write_text(json.dumps([item.model_dump(mode="json") for item in documents], indent=2))
         return updated
 
+    def update_monitoring_metadata(self, document_id: str, document_identifier: str | None, effective_date, checked_at) -> DocumentMetadata | None:
+        documents = self._read()
+        updated = None
+        for index, document in enumerate(documents):
+            if document.document_id == document_id:
+                updated = document.model_copy(update={
+                    "document_identifier": document_identifier or document.document_identifier,
+                    "effective_date": effective_date or document.effective_date,
+                    "last_checked_at": checked_at,
+                })
+                documents[index] = updated
+                break
+        if updated:
+            self.path.write_text(json.dumps([item.model_dump(mode="json") for item in documents], indent=2))
+        return updated
+
     def remove_document_ids(self, document_ids: set[str]) -> None:
         if not document_ids:
             return

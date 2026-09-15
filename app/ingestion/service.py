@@ -117,6 +117,12 @@ class IngestionService:
             self.graph_service.apply_document_lifecycle(updated)
         return updated
 
+    def apply_monitoring_metadata(self, source_url: str, document_identifier: str | None, effective_date, checked_at: datetime) -> DocumentMetadata | None:
+        document = self.manifest.get_by_source_url(source_url)
+        if not document:
+            return None
+        return self.manifest.update_monitoring_metadata(document.document_id, document_identifier, effective_date, checked_at)
+
     def cleanup_duplicate_sources(self) -> int:
         """Retain the newest copy of each RBI page and remove stale retrieval evidence."""
         by_source: dict[str, list[DocumentMetadata]] = {}

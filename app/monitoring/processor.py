@@ -1,6 +1,7 @@
 from app.ingestion.service import IngestionService
 from app.models.monitoring import DiscoveredDocument
 from app.monitoring.lifecycle import resolve_lifecycle
+from app.monitoring.metadata import extract_rbi_document_facts
 
 
 class MonitoringDocumentProcessor:
@@ -32,7 +33,11 @@ class MonitoringDocumentProcessor:
 
     def assess_lifecycle(self, document: DiscoveredDocument, text: str):
         resolution = resolve_lifecycle(text)
+        facts = extract_rbi_document_facts(text)
         self.ingestion.apply_lifecycle(
             document.canonical_url, resolution.lifecycle, resolution.excerpt, resolution.checked_at,
+        )
+        self.ingestion.apply_monitoring_metadata(
+            document.canonical_url, facts.document_identifier, facts.effective_date, resolution.checked_at,
         )
         return resolution
