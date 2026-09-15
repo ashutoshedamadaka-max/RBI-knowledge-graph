@@ -33,3 +33,11 @@ def test_graph_edges_preserve_chunk_provenance(tmp_path: Path) -> None:
     assert all(edge[2]["source_document_id"] == "doc_123" for edge in edges)
     assert any(edge[2]["relationship_type"] == "REQUIRES" for edge in edges)
 
+
+def test_graph_retains_lifecycle_evidence_without_inventing_a_successor(tmp_path: Path) -> None:
+    service = GraphIngestionService(Settings(data_dir=tmp_path / "data"))
+    service.store.apply_document_lifecycle("doc_old", "Withdrawn IRAC Circular", "WITHDRAWN", "https://rbi.org.in/example", "Withdrawn")
+
+    node = service.store.graph.nodes[entity_id("Withdrawn IRAC Circular", EntityType.REGULATION)]
+    assert node["lifecycle"] == "WITHDRAWN"
+    assert node["status_evidence_excerpt"] == "Withdrawn"

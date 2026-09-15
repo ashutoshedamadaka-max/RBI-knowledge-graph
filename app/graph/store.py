@@ -7,7 +7,7 @@ from networkx.readwrite import json_graph
 
 from app.graph.resolution import entity_id
 from app.models.chunks import ChunkMetadata
-from app.models.graph import ExtractionResult
+from app.models.graph import EntityType, ExtractionResult
 
 
 class ProvenanceGraph:
@@ -63,6 +63,19 @@ class ProvenanceGraph:
             )
         if persist:
             self._persist()
+
+    def apply_document_lifecycle(self, document_id: str, title: str, lifecycle: str, evidence_url: str, excerpt: str) -> None:
+        """Attach lifecycle provenance to the regulation node without inferring links."""
+        node_id = entity_id(title, EntityType.REGULATION)
+        self.graph.add_node(node_id, name=title, entity_type="Regulation", aliases=[])
+        node = self.graph.nodes[node_id]
+        node.update({
+            "lifecycle": lifecycle,
+            "status_evidence_url": evidence_url,
+            "status_evidence_excerpt": excerpt,
+            "source_document_id": document_id,
+        })
+        self._persist()
 
     def remove_document_ids(self, document_ids: set[str]) -> None:
         if not document_ids:

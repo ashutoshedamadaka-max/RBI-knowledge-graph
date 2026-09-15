@@ -39,10 +39,20 @@ class MonitoringStore:
         for item in data["versions"]:
             if item["canonical_url"] == version.canonical_url and item.get("is_current"):
                 item["is_current"] = False
-                item["lifecycle"] = "AMENDED"
                 item["valid_to"] = version.valid_from.isoformat()
         data["versions"].append(version.model_dump(mode="json"))
         self._write(data)
+
+    def update_current_lifecycle(self, canonical_url: str, lifecycle: str) -> bool:
+        data = self._read()
+        changed = False
+        for item in data["versions"]:
+            if item["canonical_url"] == canonical_url and item.get("is_current") and item.get("lifecycle") != lifecycle:
+                item["lifecycle"] = lifecycle
+                changed = True
+        if changed:
+            self._write(data)
+        return changed
 
     def add_update_once(self, update: RegulatoryUpdate) -> bool:
         data = self._read()

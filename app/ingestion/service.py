@@ -114,6 +114,7 @@ class IngestionService:
         updated = self.manifest.update_lifecycle(document.document_id, lifecycle, source_url, evidence_excerpt, checked_at)
         if updated:
             self.vector_store.apply_lifecycle(updated.document_id, updated.lifecycle.value)
+            self.graph_service.apply_document_lifecycle(updated)
         return updated
 
     def cleanup_duplicate_sources(self) -> int:
