@@ -14,6 +14,8 @@ class DocumentLifecycle(str, Enum):
     AMENDED = "AMENDED"
     SUPERSEDED = "SUPERSEDED"
     WITHDRAWN = "WITHDRAWN"
+    REPEALED = "REPEALED"
+    REVIEW_REQUIRED = "REVIEW_REQUIRED"
     UNKNOWN = "UNKNOWN"
 
 
@@ -29,6 +31,15 @@ class DocumentMetadata(BaseModel):
     ingested_at: datetime
     page_count: int | None = None
     lifecycle: DocumentLifecycle = DocumentLifecycle.UNKNOWN
+    status_evidence_url: str | None = None
+    status_evidence_excerpt: str | None = None
+    status_checked_at: datetime | None = None
+    document_identifier: str | None = None
+    effective_date: date | None = None
+    document_type: str | None = None
+    applicable_entities: list[str] = Field(default_factory=list)
+    topics: list[str] = Field(default_factory=list)
+    successor_document_id: str | None = None
     document_version: int = 1
     is_current: bool = True
     valid_from: datetime | None = None

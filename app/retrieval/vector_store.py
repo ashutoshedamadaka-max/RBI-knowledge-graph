@@ -57,7 +57,9 @@ class LocalVectorStore:
         matches = []
         for row in self._read():
             chunk = row["chunk"]
-            if current_only and not chunk.get("is_current", True):
+            # File-version recency is not regulatory authority. Current-guidance
+            # retrieval is limited to evidence-backed, operative sources.
+            if current_only and not chunk.get("authority_current", False):
                 continue
             vector_score = max(0.0, self.embedder.similarity(query_embedding, row["embedding"]))
             lexical_score = self._lexical_score(query_terms, chunk["text"], chunk["document_title"])
@@ -80,6 +82,15 @@ class LocalVectorStore:
             if row["chunk"]["document_id"] == document_id:
                 row["chunk"]["is_current"] = False
                 row["chunk"]["valid_to"] = valid_to
+        self.path.write_text(json.dumps(rows, indent=2))
+
+    def apply_lifecycle(self, document_id: str, lifecycle: str) -> None:
+        rows = self._read()
+        authority_current = lifecycle in {"ACTIVE", "AMENDED"}
+        for row in rows:
+            if row["chunk"]["document_id"] == document_id:
+                row["chunk"]["lifecycle"] = lifecycle
+                row["chunk"]["authority_current"] = authority_current
         self.path.write_text(json.dumps(rows, indent=2))
 
     def remove_document_ids(self, document_ids: set[str]) -> None:

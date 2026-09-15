@@ -1,5 +1,6 @@
 from app.ingestion.service import IngestionService
 from app.models.monitoring import DiscoveredDocument
+from app.monitoring.lifecycle import resolve_lifecycle
 
 
 class MonitoringDocumentProcessor:
@@ -28,3 +29,9 @@ class MonitoringDocumentProcessor:
 
     def mark_previous(self, document_id: str, valid_to: str) -> None:
         self.ingestion.vector_store.mark_document_not_current(document_id, valid_to)
+
+    def assess_lifecycle(self, document: DiscoveredDocument, text: str) -> None:
+        resolution = resolve_lifecycle(text)
+        self.ingestion.apply_lifecycle(
+            document.canonical_url, resolution.lifecycle, resolution.excerpt, resolution.checked_at,
+        )

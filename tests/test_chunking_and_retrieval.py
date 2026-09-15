@@ -3,7 +3,7 @@ from pathlib import Path
 
 from app.config.settings import Settings
 from app.ingestion.chunking import chunk_pages
-from app.models.documents import DocumentMetadata
+from app.models.documents import DocumentLifecycle, DocumentMetadata
 from app.models.chunks import ChunkMetadata
 from app.retrieval.service import VectorRetrievalService
 from app.retrieval.vector_store import LocalVectorStore
@@ -17,6 +17,7 @@ def document() -> DocumentMetadata:
         file_name="directions.txt",
         mime_type="text/plain",
         ingested_at=datetime.now(UTC),
+        lifecycle=DocumentLifecycle.ACTIVE,
     )
 
 
@@ -53,6 +54,8 @@ def test_title_and_keyword_matches_outrank_unrelated_document_boilerplate(tmp_pa
             page_number=1,
             chunk_index=0,
             text="A Regulated Entity must obtain explicit consent before collecting borrower data.",
+            lifecycle=DocumentLifecycle.ACTIVE,
+            authority_current=True,
         ),
         ChunkMetadata(
             chunk_id="irac-consent",
@@ -61,6 +64,8 @@ def test_title_and_keyword_matches_outrank_unrelated_document_boilerplate(tmp_pa
             page_number=1,
             chunk_index=0,
             text="The borrower consent and related documentation should be retained by the regulated entity.",
+            lifecycle=DocumentLifecycle.WITHDRAWN,
+            authority_current=False,
         ),
     ]
     store.upsert(chunks)
@@ -68,3 +73,19 @@ def test_title_and_keyword_matches_outrank_unrelated_document_boilerplate(tmp_pa
     results = store.search("What consent is required in digital lending?", top_k=2)
 
     assert results[0].chunk_id == "digital-consent"
+
+
+def test_current_retrieval_excludes_withdrawn_and_unknown_sources(tmp_path: Path) -> None:
+    store = LocalVectorStore(tmp_path / "vectors.json")
+    chunks = [
+        ChunkMetadata(chunk_id="old", document_id="old", document_title="Old circular", page_number=1, chunk_index=0,
+                      text="Penal charges must be disclosed.", lifecycle=DocumentLifecycle.WITHDRAWN),
+        ChunkMetadata(chunk_id="uncertain", document_id="uncertain", document_title="Unverified circular", page_number=1, chunk_index=0,
+                      text="Penal charges must be disclosed.", lifecycle=DocumentLifecycle.REVIEW_REQUIRED),
+        ChunkMetadata(chunk_id="current", document_id="current", document_title="Current circular", page_number=1, chunk_index=0,
+                      text="Penal charges must be disclosed.", lifecycle=DocumentLifecycle.ACTIVE, authority_current=True),
+    ]
+    store.upsert(chunks)
+
+    assert [item.chunk_id for item in store.search("penal charges", top_k=3)] == ["current"]
+    assert {item.chunk_id for item in store.search("penal charges", top_k=3, current_only=False)} == {"old", "uncertain", "current"}

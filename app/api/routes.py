@@ -147,10 +147,14 @@ def monitoring_status(request: Request) -> dict[str, object]:
     sources = RegulatorySourceRegistry(settings.regulatory_sources_path).enabled_sources()
     documents = request.app.state.ingestion_service.list_documents()
     unavailable = sum(check["status"] in {"SOURCE_UNAVAILABLE", "PARSING_FAILURE", "PARTIAL_FAILURE"} for check in last_checks)
+    lifecycle_counts = {status: sum(item.lifecycle.value == status for item in documents) for status in (
+        "ACTIVE", "AMENDED", "SUPERSEDED", "WITHDRAWN", "REPEALED", "REVIEW_REQUIRED", "UNKNOWN"
+    )}
     return {
         "document_count": len(documents),
         "tracked_source_count": len(sources),
         "topics": sorted({topic for source in sources for topic in source.regulatory_topics}),
         "last_checks": last_checks,
         "health": "attention" if unavailable else "healthy",
+        "lifecycle_counts": lifecycle_counts,
     }

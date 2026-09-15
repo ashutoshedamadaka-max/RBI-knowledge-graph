@@ -44,6 +44,8 @@ class RegulatoryMonitor:
                     continue
                 previous = self.store.current_version(document.canonical_url)
                 text = self.fetcher.download_text(document)
+                if hasattr(self.processor, "assess_lifecycle"):
+                    self.processor.assess_lifecycle(document, text)
                 normalized_text = normalize_regulatory_text(text)
                 content_hash = hashlib.sha256(normalized_text.encode()).hexdigest()
                 if previous and previous.normalized_text_hash == content_hash:
@@ -58,7 +60,7 @@ class RegulatoryMonitor:
                     content_hash=content_hash,
                     normalized_text_hash=content_hash,
                     text_snapshot=text,
-                    document_id=document_id, version=version_number, lifecycle=DocumentLifecycle.ACTIVE,
+                    document_id=document_id, version=version_number, lifecycle=DocumentLifecycle.REVIEW_REQUIRED,
                     is_current=True, valid_from=now,
                 )
                 self.store.add_version(version)

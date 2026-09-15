@@ -1,6 +1,8 @@
 from pydantic import BaseModel
 from datetime import datetime
 
+from app.models.documents import DocumentLifecycle
+
 
 class ChunkMetadata(BaseModel):
     chunk_id: str
@@ -12,6 +14,8 @@ class ChunkMetadata(BaseModel):
     source_url: str | None = None
     document_version: int = 1
     is_current: bool = True
+    lifecycle: DocumentLifecycle = DocumentLifecycle.UNKNOWN
+    authority_current: bool = False
     valid_from: datetime | None = None
     valid_to: datetime | None = None
 

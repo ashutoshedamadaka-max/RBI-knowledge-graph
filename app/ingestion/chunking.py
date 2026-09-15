@@ -2,7 +2,7 @@ import hashlib
 import re
 
 from app.models.chunks import ChunkMetadata
-from app.models.documents import DocumentMetadata
+from app.models.documents import DocumentLifecycle, DocumentMetadata
 
 
 def chunk_pages(document: DocumentMetadata, pages: list[str], chunk_size: int, overlap: int) -> list[ChunkMetadata]:
@@ -31,6 +31,8 @@ def chunk_pages(document: DocumentMetadata, pages: list[str], chunk_size: int, o
                     source_url=document.source_url,
                     document_version=document.document_version,
                     is_current=document.is_current,
+                    lifecycle=document.lifecycle,
+                    authority_current=document.lifecycle in {DocumentLifecycle.ACTIVE, DocumentLifecycle.AMENDED},
                     valid_from=document.valid_from,
                     valid_to=document.valid_to,
                 ))

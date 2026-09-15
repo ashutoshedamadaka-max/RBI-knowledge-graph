@@ -5,8 +5,16 @@ from app.ingestion.service import IngestionService
 from app.llm.citations import validate_citations
 from app.llm.generation import GenerationResult, deterministic_research
 from app.models.chunks import ChunkMetadata
-from app.models.documents import IngestRequest
+from app.models.documents import DocumentLifecycle, IngestRequest
 from app.retrieval.query_service import RegulatoryQueryService
+
+
+def ingest_verified_active(settings: Settings, source: Path) -> None:
+    ingestion = IngestionService(settings)
+    response = ingestion.ingest(IngestRequest(local_path=str(source), title="RBI Penal Charges Direction"))
+    document = response.document.model_copy(update={"lifecycle": DocumentLifecycle.ACTIVE})
+    ingestion.manifest.save(document)
+    ingestion.vector_store.apply_lifecycle(document.document_id, DocumentLifecycle.ACTIVE.value)
 
 
 def test_citation_validator_rejects_unknown_chunk() -> None:
@@ -19,7 +27,7 @@ def test_query_returns_only_verifiable_evidence(tmp_path: Path) -> None:
     source = tmp_path / "rbi.txt"
     source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")
     settings = Settings(data_dir=tmp_path / "data")
-    IngestionService(settings).ingest(IngestRequest(local_path=str(source), title="RBI Penal Charges Direction"))
+    ingest_verified_active(settings, source)
 
     response = RegulatoryQueryService(settings).query("What must lenders disclose about penal charges?")
 
@@ -54,7 +62,7 @@ def test_query_falls_back_to_cited_evidence_when_model_citation_is_invalid(tmp_p
     source = tmp_path / "rbi.txt"
     source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")
     settings = Settings(data_dir=tmp_path / "data")
-    IngestionService(settings).ingest(IngestRequest(local_path=str(source), title="RBI Penal Charges Direction"))
+    ingest_verified_active(settings, source)
     service = RegulatoryQueryService(settings)
 
     class InvalidCitationGenerator:
@@ -73,7 +81,7 @@ def test_query_uses_direct_evidence_when_model_is_too_conservative(tmp_path: Pat
     source = tmp_path / "rbi.txt"
     source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")
     settings = Settings(data_dir=tmp_path / "data")
-    IngestionService(settings).ingest(IngestRequest(local_path=str(source), title="RBI Penal Charges Direction"))
+    ingest_verified_active(settings, source)
     service = RegulatoryQueryService(settings)
 
     class ConservativeGenerator:
@@ -115,7 +123,7 @@ def test_query_progress_reports_only_entered_backend_stages(tmp_path: Path) -> N
     source = tmp_path / "rbi.txt"
     source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")
     settings = Settings(data_dir=tmp_path / "data")
-    IngestionService(settings).ingest(IngestRequest(local_path=str(source), title="RBI Penal Charges Direction"))
+    ingest_verified_active(settings, source)
     stages: list[str] = []
 
     RegulatoryQueryService(settings).query("What must lenders disclose about penal charges?", progress=stages.append)

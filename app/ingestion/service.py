@@ -107,6 +107,15 @@ class IngestionService:
     def list_documents(self) -> list[DocumentMetadata]:
         return sorted(self.manifest.all(), key=lambda item: item.ingested_at, reverse=True)
 
+    def apply_lifecycle(self, source_url: str, lifecycle, evidence_excerpt: str, checked_at: datetime) -> DocumentMetadata | None:
+        document = self.manifest.get_by_source_url(source_url)
+        if not document:
+            return None
+        updated = self.manifest.update_lifecycle(document.document_id, lifecycle, source_url, evidence_excerpt, checked_at)
+        if updated:
+            self.vector_store.apply_lifecycle(updated.document_id, updated.lifecycle.value)
+        return updated
+
     def cleanup_duplicate_sources(self) -> int:
         """Retain the newest copy of each RBI page and remove stale retrieval evidence."""
         by_source: dict[str, list[DocumentMetadata]] = {}

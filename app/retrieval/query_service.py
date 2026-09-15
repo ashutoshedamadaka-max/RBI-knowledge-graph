@@ -8,6 +8,7 @@ from app.graph.query_service import GraphRetrievalService
 from app.llm.citations import validate_structured_citations
 from app.llm.generation import DeterministicAnswerGenerator, get_answer_generator, research_to_markdown
 from app.models.chunks import ChunkMetadata
+from app.models.documents import DocumentLifecycle
 from app.models.query import Citation, QueryResponse
 from app.models.research import ResearchClaim, ResearchGraphContext, ResearchStatus, StructuredResearch
 from app.models.retrieval import RetrievalRoute
@@ -50,7 +51,7 @@ class RegulatoryQueryService:
         if decision.route in {RetrievalRoute.VECTOR, RetrievalRoute.HYBRID}:
             if progress:
                 progress("retrieving_official_evidence")
-            historical = any(term in user_query.lower() for term in ("before", "previous", "historical", "what changed"))
+            historical = self._is_historical_query(user_query)
             evidence.extend(self.vector.retrieve_vector(user_query, top_k, current_only=not historical))
         if decision.route in {RetrievalRoute.GRAPH, RetrievalRoute.HYBRID}:
             graph_evidence = self.vector.store.get_by_ids(graph_result.chunk_ids)
@@ -58,6 +59,10 @@ class RegulatoryQueryService:
             if decision.route is RetrievalRoute.GRAPH and not graph_evidence:
                 evidence.extend(self.vector.retrieve_vector(user_query, top_k))
 
+        # Graph retrieval is semantic discovery, not a validity exception. Apply
+        # regulatory authority resolution after every candidate source is merged.
+        if not self._is_historical_query(user_query):
+            evidence = [chunk for chunk in evidence if chunk.lifecycle in {DocumentLifecycle.ACTIVE, DocumentLifecycle.AMENDED}]
         merged = list({chunk.chunk_id: chunk for chunk in evidence}.values())[: top_k or self.settings.vector_top_k]
         if progress:
             progress("building_grounded_answer")
@@ -114,6 +119,11 @@ class RegulatoryQueryService:
             retrieved_evidence=merged, latency_ms=latency_ms, estimated_cost_usd=generation.estimated_cost_usd,
             citation_valid=citation_valid, research=research,
         )
+
+    @staticmethod
+    def _is_historical_query(query: str) -> bool:
+        normalized = query.lower()
+        return any(term in normalized for term in ("before", "previous", "historical", "what changed", "as of", "in 20"))
 
     @staticmethod
     def _cited_ids(research: StructuredResearch) -> set[str]:
