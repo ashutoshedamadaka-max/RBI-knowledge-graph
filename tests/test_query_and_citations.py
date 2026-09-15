@@ -3,6 +3,7 @@ from pathlib import Path
 from app.config.settings import Settings
 from app.ingestion.service import IngestionService
 from app.llm.citations import validate_citations
+from app.llm.generation import GenerationResult
 from app.models.chunks import ChunkMetadata
 from app.models.documents import IngestRequest
 from app.retrieval.query_service import RegulatoryQueryService
@@ -35,3 +36,22 @@ def test_query_explains_the_rbi_lending_scope_for_unrelated_question(tmp_path: P
     assert not response.retrieved_evidence
     assert not response.citations
     assert "RBI lending guidelines" in response.answer
+
+
+def test_query_falls_back_to_cited_evidence_when_model_citation_is_invalid(tmp_path: Path) -> None:
+    source = tmp_path / "rbi.txt"
+    source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")
+    settings = Settings(data_dir=tmp_path / "data")
+    IngestionService(settings).ingest(IngestRequest(local_path=str(source), title="RBI Penal Charges Direction"))
+    service = RegulatoryQueryService(settings)
+
+    class InvalidCitationGenerator:
+        def generate(self, query, evidence):
+            return GenerationResult(answer="Unverified statement [chunk_00000000000000000000]", model="test")
+
+    service.generator = InvalidCitationGenerator()
+    response = service.query("What must lenders disclose about penal charges?")
+
+    assert response.citation_valid
+    assert response.citations
+    assert "retrieved RBI material" in response.answer

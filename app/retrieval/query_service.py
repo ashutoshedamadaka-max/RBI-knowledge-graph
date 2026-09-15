@@ -5,7 +5,7 @@ from uuid import uuid4
 from app.config.settings import Settings
 from app.graph.query_service import GraphRetrievalService
 from app.llm.citations import validate_citations
-from app.llm.generation import get_answer_generator
+from app.llm.generation import DeterministicAnswerGenerator, get_answer_generator
 from app.models.chunks import ChunkMetadata
 from app.models.query import Citation, QueryResponse
 from app.models.retrieval import RetrievalRoute
@@ -76,12 +76,13 @@ class RegulatoryQueryService:
         generation = self.generator.generate(user_query, merged)
         answer = generation.answer
         citation_valid = validate_citations(answer, merged) if merged else not bool(answer and "[" in answer)
+        fallback_used = False
         if merged and not citation_valid:
-            answer = (
-                "### Answer\n"
-                "I cannot provide a verified answer because the generated citations did not resolve to the retrieved evidence.\n\n"
-                "### Regulatory basis\nPlease retry after reviewing the source material."
-            )
+            # Never show an uncited model answer. The deterministic composer retains the
+            # retrieved RBI text and its exact chunk citations without making another paid call.
+            answer = DeterministicAnswerGenerator().generate(user_query, merged).answer
+            citation_valid = validate_citations(answer, merged)
+            fallback_used = True
 
         citations = [
             Citation(
@@ -120,7 +121,7 @@ class RegulatoryQueryService:
             estimated_cost_usd=generation.estimated_cost_usd,
             latency_ms=latency_ms,
             citation_valid=citation_valid,
-            status="ok" if citation_valid else "citation_validation_failed",
+            status="citation_fallback" if fallback_used else ("ok" if citation_valid else "citation_validation_failed"),
         ))
         return QueryResponse(
             request_id=request_id,
