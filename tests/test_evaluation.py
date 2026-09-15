@@ -6,6 +6,7 @@ from app.evaluation.models import EvaluationCase, QuestionCategory
 from app.ingestion.service import IngestionService
 from app.models.documents import IngestRequest
 from app.models.retrieval import RetrievalRoute
+from scripts.run_evaluation import bootstrap_curated_corpus
 
 
 def test_harness_reports_measured_source_recall(tmp_path: Path) -> None:
@@ -33,3 +34,20 @@ def test_labeled_dataset_has_required_breadth() -> None:
 
     assert 30 <= len(cases) <= 50
     assert {case.category for case in cases} == set(QuestionCategory)
+
+
+def test_bootstrap_uses_only_individually_curated_sources(tmp_path: Path, monkeypatch) -> None:
+    settings = Settings(data_dir=tmp_path / "evaluation-data")
+    calls = []
+
+    def fake_ingest(self, request):
+        calls.append(request)
+        return None
+
+    monkeypatch.setattr(IngestionService, "ingest", fake_ingest)
+
+    count = bootstrap_curated_corpus(settings)
+
+    assert count >= 7
+    assert len(calls) == count
+    assert all(item.source_url for item in calls)

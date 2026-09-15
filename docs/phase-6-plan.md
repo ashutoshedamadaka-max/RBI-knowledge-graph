@@ -13,7 +13,11 @@ The harness exists before benchmark claims. It does **not** write results into t
 
 ## Run
 
-`python scripts/run_evaluation.py`
+For a reproducible, no-cost benchmark against the current curated RBI lending corpus:
+
+`python scripts/run_evaluation.py --bootstrap-curated`
+
+This creates an isolated local evaluation corpus and forces deterministic answer generation.
+It does not call OpenAI or modify the deployed Supabase knowledge base.
 
 The command writes local output to `data/evaluation/latest-results.json`. This file is ignored because it reflects the particular ingested corpus and configuration.
-
