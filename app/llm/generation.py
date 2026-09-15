@@ -1,4 +1,5 @@
 import json
+import re
 from abc import ABC, abstractmethod
 
 import httpx
@@ -43,20 +44,65 @@ def research_to_markdown(research: StructuredResearch) -> str:
     return "\n\n".join(parts)
 
 
-def deterministic_research(evidence: list[ChunkMetadata]) -> StructuredResearch:
+def _query_terms(query: str) -> set[str]:
+    ignored = {"about", "and", "are", "can", "does", "for", "from", "how", "must", "of", "on", "or", "rbi", "the", "to", "under", "what", "when", "which", "with"}
+    return {term for term in re.findall(r"[a-z0-9]{3,}", query.lower()) if term not in ignored}
+
+
+def _clean_sentence(sentence: str) -> str:
+    sentence = re.sub(r"\s+", " ", sentence).strip()
+    sentence = re.sub(r"^Chapter [IVXLC]+:\s*", "", sentence, flags=re.IGNORECASE)
+    sentence = re.sub(r"^\d+\.\s+[^.]+?\s+(?=[ivxlcdm]+\.\s)", "", sentence, flags=re.IGNORECASE)
+    return re.sub(r"^[ivxlcdm]+\.\s+", "", sentence, flags=re.IGNORECASE)
+
+
+def _relevant_sentences(query: str, evidence: list[ChunkMetadata]) -> list[tuple[ChunkMetadata, str]]:
+    """Select concise source sentences when an LLM response cannot be used safely."""
+    terms = _query_terms(query)
+    candidates: list[tuple[float, int, ChunkMetadata, str]] = []
+    for evidence_order, chunk in enumerate(evidence):
+        title_terms = set(re.findall(r"[a-z0-9]{3,}", chunk.document_title.lower()))
+        for sentence in re.split(r"(?<=[.!?])\s+", chunk.text):
+            cleaned = _clean_sentence(sentence)
+            sentence_terms = set(re.findall(r"[a-z0-9]{3,}", cleaned.lower()))
+            overlap = len(terms & sentence_terms)
+            if len(cleaned) < 45 or overlap == 0:
+                continue
+            title_overlap = len(terms & title_terms)
+            score = (2 * overlap) + (0.35 * title_overlap)
+            candidates.append((score, evidence_order, chunk, cleaned[:700]))
+    candidates.sort(key=lambda item: (-item[0], item[1]))
+    selected: list[tuple[ChunkMetadata, str]] = []
+    seen: set[str] = set()
+    for _, _, chunk, sentence in candidates:
+        normalised = sentence.lower()
+        if normalised in seen:
+            continue
+        selected.append((chunk, sentence))
+        seen.add(normalised)
+        if len(selected) == 3:
+            break
+    return selected
+
+
+def deterministic_research(query: str, evidence: list[ChunkMetadata]) -> StructuredResearch:
     if not evidence:
         return StructuredResearch(status=ResearchStatus.INSUFFICIENT_EVIDENCE)
+    selected = _relevant_sentences(query, evidence)
+    if not selected:
+        return StructuredResearch(status=ResearchStatus.INSUFFICIENT_EVIDENCE)
+    lead_chunk, lead_sentence = selected[0]
     claims = [
-        ResearchClaim(text=chunk.text.replace("\n", " ").strip()[:650], citation_ids=[chunk.chunk_id])
-        for chunk in evidence[:5]
+        ResearchClaim(text=sentence, citation_ids=[chunk.chunk_id])
+        for chunk, sentence in selected[1:]
     ]
     return StructuredResearch(
         status=ResearchStatus.GROUNDED,
         direct_answer=ResearchClaim(
-            text="The retrieved RBI material contains the following directly relevant provisions.",
-            citation_ids=[evidence[0].chunk_id],
+            text=f"{lead_chunk.document_title} states: “{lead_sentence}”",
+            citation_ids=[lead_chunk.chunk_id],
         ),
-        sections=[ResearchSection(id="evidence-backed-provisions", title="Evidence-backed provisions", claims=claims)],
+        sections=[ResearchSection(id="supporting-provisions", title="Supporting provisions", claims=claims)] if claims else [],
     )
 
 
@@ -64,7 +110,7 @@ class DeterministicAnswerGenerator(AnswerGenerator):
     """Evidence-only response composer used when no model is configured."""
 
     def generate(self, query: str, evidence: list[ChunkMetadata]) -> GenerationResult:
-        research = deterministic_research(evidence)
+        research = deterministic_research(query, evidence)
         return GenerationResult(answer=research_to_markdown(research), model="deterministic", research=research)
 
 

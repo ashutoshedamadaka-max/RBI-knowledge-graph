@@ -3,7 +3,7 @@ from pathlib import Path
 from app.config.settings import Settings
 from app.ingestion.service import IngestionService
 from app.llm.citations import validate_citations
-from app.llm.generation import GenerationResult
+from app.llm.generation import GenerationResult, deterministic_research
 from app.models.chunks import ChunkMetadata
 from app.models.documents import IngestRequest
 from app.retrieval.query_service import RegulatoryQueryService
@@ -66,4 +66,26 @@ def test_query_falls_back_to_cited_evidence_when_model_citation_is_invalid(tmp_p
 
     assert response.citation_valid
     assert response.citations
-    assert "retrieved RBI material" in response.answer
+    assert "RBI Penal Charges Direction states" in response.answer
+
+
+def test_deterministic_research_selects_the_consent_provision_not_page_chrome() -> None:
+    chunk = ChunkMetadata(
+        chunk_id="chunk_consent",
+        document_id="digital_lending",
+        document_title="RBI Digital Lending Directions, 2025",
+        page_number=1,
+        chunk_index=0,
+        text=(
+            "Notifications | Official Website of Reserve Bank of India. "
+            "RE shall ensure that any collection of data by their DLA and DLA of their LSP is need-based "
+            "and with prior and explicit consent of the borrower having audit trail. "
+            "The borrower shall be provided with an option to give or deny consent for use of specific data."
+        ),
+    )
+
+    research = deterministic_research("What consent is required in digital lending?", [chunk])
+
+    assert research.direct_answer is not None
+    assert "prior and explicit consent" in research.direct_answer.text
+    assert "Notifications |" not in research.direct_answer.text
