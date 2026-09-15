@@ -22,6 +22,7 @@ class QueryResponse(BaseModel):
     answer: str
     citations: list[Citation]
     route: RetrievalRoute
+    in_scope: bool = True
     retrieved_evidence: list[ChunkMetadata]
     latency_ms: float
     estimated_cost_usd: float

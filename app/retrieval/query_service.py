@@ -34,6 +34,31 @@ class RegulatoryQueryService:
         graph_edge_count = 0
         in_scope = is_rbi_lending_question(user_query)
 
+        if not in_scope:
+            answer = (
+                "### Outside the RBI lending knowledge base\n"
+                "This assistant is designed for RBI lending guidelines, so it cannot answer that question from its monitored sources.\n\n"
+                "You can ask about digital lending, penal charges, loan repayment, co-lending, "
+                "floating-rate personal loans, or loan classification.\n\n"
+                "### Try one of these\n"
+                "- Which entities do the RBI Digital Lending Directions, 2025 apply to?\n"
+                "- What are RBI's rules on penal charges in loan accounts?\n"
+                "- When should a lender release property documents after loan repayment?"
+            )
+            latency_ms = round((perf_counter() - started) * 1000, 2)
+            log_query_event(QueryEvent(
+                timestamp=datetime.now(UTC), request_id=request_id, query=user_query,
+                route=decision.route.value, retrieval_method="out_of_scope", retrieved_chunk_ids=[],
+                graph_node_count=0, graph_edge_count=0, model="scope_guard", input_tokens=0,
+                output_tokens=0, estimated_cost_usd=0.0, latency_ms=latency_ms,
+                citation_valid=True, status="out_of_scope",
+            ))
+            return QueryResponse(
+                request_id=request_id, answer=answer, citations=[], route=decision.route,
+                in_scope=False, retrieved_evidence=[], latency_ms=latency_ms,
+                estimated_cost_usd=0.0, citation_valid=True,
+            )
+
         if in_scope and decision.route in {RetrievalRoute.VECTOR, RetrievalRoute.HYBRID}:
             historical = any(term in user_query.lower() for term in ("before", "previous", "historical", "what changed"))
             evidence.extend(self.vector.retrieve_vector(user_query, top_k, current_only=not historical))
@@ -102,6 +127,7 @@ class RegulatoryQueryService:
             answer=answer,
             citations=citations,
             route=decision.route,
+            in_scope=True,
             retrieved_evidence=merged,
             latency_ms=latency_ms,
             estimated_cost_usd=generation.estimated_cost_usd,

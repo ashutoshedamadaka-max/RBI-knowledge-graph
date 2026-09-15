@@ -27,3 +27,11 @@ def test_query_returns_only_verifiable_evidence(tmp_path: Path) -> None:
     assert all(citation.chunk_id in response.answer for citation in response.citations)
     assert response.estimated_cost_usd == 0.0
 
+
+def test_query_explains_the_rbi_lending_scope_for_unrelated_question(tmp_path: Path) -> None:
+    response = RegulatoryQueryService(Settings(data_dir=tmp_path / "data")).query("What is the weather in Mumbai?")
+
+    assert not response.in_scope
+    assert not response.retrieved_evidence
+    assert not response.citations
+    assert "RBI lending guidelines" in response.answer
