@@ -5,40 +5,35 @@
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <meta name="description" content="Evidence-first RBI lending regulatory intelligence.">
   <title>RBI Lending Intelligence</title>
-  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230a2533'/%3E%3Cpath d='M17 45V20h18c8 0 12 4 12 10 0 4-2 7-6 8l8 7H38l-7-6h-4v6zm10-14h7c3 0 4-1 4-3s-1-3-4-3h-7z' fill='%2347d6c4'/%3E%3C/svg%3E">
+  <link rel="icon" type="image/svg+xml" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 64 64'%3E%3Crect width='64' height='64' rx='14' fill='%230b1f33'/%3E%3Cpath d='M17 45V20h18c8 0 12 4 12 10 0 4-2 7-6 8l8 7H38l-7-6h-4v6zm10-14h7c3 0 4-1 4-3s-1-3-4-3h-7z' fill='%2345d6c3'/%3E%3C/svg%3E">
   <link rel="stylesheet" href="./assets/styles.css">
 </head>
 <body>
-  <main class="shell">
+  <main class="app-shell">
     <header class="topbar">
-      <div class="brand"><span class="brand-mark">R</span><span>RBI Lending Intelligence</span></div>
-      <div class="status"><span class="status-dot"></span> Evidence-first regulatory research</div>
+      <a class="brand" href="/" aria-label="RBI Lending Intelligence home"><span class="brand-mark">R</span><span>RBI Lending <em>Intelligence</em></span></a>
+      <div class="topbar-status"><span class="live-dot"></span>Official RBI sources monitored</div>
     </header>
-    <section class="workspace">
-      <aside class="context">
-        <p class="eyebrow">LENDING REGULATIONS</p>
-        <h1>Trace every answer back to its source.</h1>
-        <p class="intro">Ask a direct question or investigate how requirements, entities, and regulatory changes connect.</p>
-        <div class="mode-key"><p>Retrieval modes</p><span><b class="badge vector">V</b> Vector · direct facts</span><span><b class="badge graph">G</b> Graph · relationships</span><span><b class="badge hybrid">H</b> Hybrid · both</span></div>
-        <button id="updates-toggle" class="updates-toggle" type="button">Regulatory updates <span>→</span></button>
-      </aside>
-      <section class="research">
-        <form id="query-form" class="query-box">
-          <label for="question">Ask a regulatory question</label>
-          <div class="input-row"><textarea id="question" rows="3" placeholder="For example: Which entities do the penal-charge instructions apply to?" required></textarea><button id="submit" type="submit">Analyse <span>↗</span></button></div>
-          <div class="suggestions"><button type="button" data-question="What must lenders disclose about penal charges?">Penal-charge rules</button><button type="button" data-question="Which entities do the RBI Digital Lending Directions, 2025 apply to?">Digital lending scope</button><button type="button" data-question="What data can a digital lending app access under RBI rules?">Borrower data</button></div>
-        </form>
-        <section id="knowledge-status" class="knowledge-status" aria-live="polite">
-          <div><p class="eyebrow">KNOWLEDGE BASE</p><h2>Checking RBI lending coverage…</h2><p id="knowledge-summary">Loading the latest source-check status.</p></div>
-          <span id="knowledge-health" class="health-pill">Checking</span>
-        </section>
-        <div id="empty-state" class="empty-state"><div class="empty-icon">⌁</div><h2>Ready for a grounded answer</h2><p>Results will show the retrieval approach, source pages, and the supporting evidence.</p></div>
-        <section id="updates-view" class="updates-view hidden" aria-live="polite"><div class="section-title"><h2>Regulatory updates</h2><span id="monitoring-health"></span></div><p class="evidence-note">Detected RBI lending-regulation changes. Source availability is shown separately from “no changes”.</p><div id="updates-list" class="citations"></div></section>
-        <section id="result" class="result hidden" aria-live="polite"><div class="result-meta"><span id="route-pill" class="route-pill"></span><span id="request-id"></span><span id="latency"></span></div><article class="answer-card"><p class="eyebrow">ANSWER</p><div id="answer"></div></article><section class="sources-section"><div class="section-title"><h2>Sources</h2><span id="citation-status"></span></div><div id="citations" class="citations"></div></section><details class="evidence"><summary>Why this answer?</summary><p class="evidence-note">Retrieved source excerpts used to produce this response.</p><div id="evidence-list"></div></details></section>
-      </section>
+    <section class="hero">
+      <div class="hero-copy"><p class="kicker">Evidence-first regulatory research</p><h1>Clear lending guidance,<br><i>with the source attached.</i></h1><p>Ask about RBI lending rules and receive an answer grounded in the official material that supports it.</p></div>
+      <button id="updates-toggle" class="updates-toggle" type="button"><span class="updates-icon">↗</span><span>Regulatory updates</span></button>
     </section>
+    <section class="research-panel" aria-label="Ask an RBI lending question">
+      <form id="query-form" class="query-box">
+        <div class="query-heading"><label for="question">Research a lending question</label><span>RBI lending scope only</span></div>
+        <textarea id="question" rows="3" placeholder="For example: What must lenders disclose about penal charges?" required></textarea>
+        <div class="query-footer"><div class="suggestions" aria-label="Suggested questions"><span>Explore</span><button type="button" data-question="What must lenders disclose about penal charges?">Penal charges</button><button type="button" data-question="Which entities do the RBI Digital Lending Directions, 2025 apply to?">Digital lending</button><button type="button" data-question="What data can a digital lending app access under RBI rules?">Borrower data</button></div><button id="submit" type="submit">Analyse <span>↗</span></button></div>
+      </form>
+      <section id="knowledge-status" class="knowledge-status" aria-live="polite"><div class="knowledge-icon">⌁</div><div><p class="kicker">Knowledge base</p><h2>Checking RBI lending coverage…</h2><p id="knowledge-summary">Loading the latest source-check status.</p></div><span id="knowledge-health" class="health-pill">Checking</span></section>
+    </section>
+    <section id="analysis-state" class="analysis-state hidden" aria-live="polite" aria-label="Preparing a grounded answer">
+      <div class="analysis-heading"><span class="thinking-mark"><i></i><i></i><i></i></span><div><p class="kicker">Analysing your question</p><h2>Building a grounded answer</h2></div></div>
+      <ol class="analysis-steps"><li data-step="1"><span>01</span><div><strong>Checking regulatory scope</strong><small>Confirming this is covered by the RBI lending knowledge base.</small></div></li><li data-step="2"><span>02</span><div><strong>Retrieving official evidence</strong><small>Searching the monitored RBI lending material.</small></div></li><li data-step="3"><span>03</span><div><strong>Verifying citations</strong><small>Making sure every source reference resolves correctly.</small></div></li></ol>
+    </section>
+    <div id="empty-state" class="empty-state"><div class="empty-rule"></div><p class="kicker">Start with a question</p><h2>Every answer is built from the source material—not memory.</h2><p>Use the examples above to explore the current RBI lending corpus.</p></div>
+    <section id="updates-view" class="updates-view hidden" aria-live="polite"><div class="section-heading"><div><p class="kicker">Source monitoring</p><h2>Regulatory updates</h2></div><span id="monitoring-health"></span></div><div id="updates-list"></div></section>
+    <section id="result" class="result hidden" aria-live="polite"><div class="result-meta"><span id="route-pill" class="route-pill"></span><span id="result-label">Grounded response</span><span class="meta-separator">·</span><span id="latency"></span></div><article class="answer-card"><div class="answer-card-heading"><p class="kicker">Answer</p><span class="answer-check">✓ Evidence checked</span></div><div id="answer"></div></article><section class="sources-section"><div class="section-heading"><div><p class="kicker">Supporting material</p><h2>Sources</h2></div><span id="citation-status"></span></div><div id="citations" class="citations"></div></section><details class="evidence"><summary><span>Inspect retrieved evidence</span><span>+</span></summary><p class="evidence-note">These are the source excerpts made available to the answer.</p><div id="evidence-list"></div></details></section>
   </main>
-  <script src="./api-config.js"></script>
-  <script src="./assets/app.js"></script>
+  <script src="./api-config.js"></script><script src="./assets/app.js"></script>
 </body>
 </html>
