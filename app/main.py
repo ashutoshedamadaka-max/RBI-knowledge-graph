@@ -39,6 +39,7 @@ def create_app() -> FastAPI:
     monitoring_store = MonitoringStore(settings.runtime_dir / "monitoring.json")
     monitoring_store.remove_initial_catalogue_updates(curated_source_ids)
     monitoring_store.reset_legacy_catalogue_noise(curated_source_ids)
+    monitoring_store.reset_catalogue_after_extraction_upgrade(curated_source_ids)
     durable_state.sync()
     application.include_router(router)
     static_dir = Path(__file__).parent / "static"

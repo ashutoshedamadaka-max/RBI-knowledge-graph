@@ -88,6 +88,20 @@ def test_monitor_ignores_case_and_whitespace_only_changes(tmp_path: Path) -> Non
     assert len(store.versions()) == 1
 
 
+def test_clean_text_migration_resets_catalogue_history_once(tmp_path: Path) -> None:
+    store = MonitoringStore(tmp_path / "monitoring.json")
+    curated = source()
+    curated.source_id = "rbi_curated"
+    monitor = RegulatoryMonitor(store, FixtureFetcher("RBI lending rule."))
+    monitor.check_source(curated)
+
+    assert store.reset_catalogue_after_extraction_upgrade({"rbi_curated"}) == 1
+    assert store.updates() == []
+    assert store.checks() == []
+    assert len(store.versions()) == 1
+    assert store.reset_catalogue_after_extraction_upgrade({"rbi_curated"}) == 0
+
+
 def test_official_registry_loads_only_rbi_sources() -> None:
     sources = RegulatorySourceRegistry(Path("config/regulatory_sources.yaml")).enabled_sources()
 
