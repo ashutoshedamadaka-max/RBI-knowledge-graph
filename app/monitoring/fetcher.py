@@ -7,6 +7,7 @@ from urllib.parse import urljoin
 import httpx
 
 from app.models.monitoring import DiscoveredDocument, RegulatorySource
+from app.ingestion.parser import extract_html_text
 
 
 class SourceFetcher(ABC):
@@ -45,4 +46,4 @@ class RbiHttpFetcher(SourceFetcher):
     def download_text(self, document: DiscoveredDocument) -> str:
         response = httpx.get(document.canonical_url, follow_redirects=True, timeout=45)
         response.raise_for_status()
-        return re.sub(r"\s+", " ", re.sub(r"<[^>]+>", " ", html.unescape(response.text))).strip()
+        return extract_html_text(response.text)

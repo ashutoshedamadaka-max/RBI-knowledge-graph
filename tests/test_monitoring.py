@@ -76,6 +76,18 @@ def test_curated_document_first_scan_establishes_a_baseline(tmp_path: Path) -> N
     assert len(store.versions()) == 1
 
 
+def test_monitor_ignores_case_and_whitespace_only_changes(tmp_path: Path) -> None:
+    store = MonitoringStore(tmp_path / "monitoring.json")
+    first = RegulatoryMonitor(store, FixtureFetcher("RBI lending rule: disclose penal charges."))
+    first.check_source(source())
+
+    check, updates = RegulatoryMonitor(store, FixtureFetcher("  rbi   LENDING RULE: disclose PENAL charges. ")).check_source(source())
+
+    assert check.status.value == "NO_CHANGES"
+    assert updates == []
+    assert len(store.versions()) == 1
+
+
 def test_official_registry_loads_only_rbi_sources() -> None:
     sources = RegulatorySourceRegistry(Path("config/regulatory_sources.yaml")).enabled_sources()
 

@@ -1,4 +1,4 @@
-from app.ingestion.parser import parse_document
+from app.ingestion.parser import extract_html_text, parse_document
 
 
 def test_html_parser_keeps_notification_text_and_drops_scripts(tmp_path) -> None:
@@ -14,3 +14,9 @@ def test_html_parser_keeps_notification_text_and_drops_scripts(tmp_path) -> None
     assert "Penal Charges in Loan Accounts" in parsed.pages[0]
     assert "Penal charges shall not be capitalised." in parsed.pages[0]
     assert "ignore_me" not in parsed.pages[0]
+
+
+def test_extract_html_text_ignores_page_scripts_and_styles() -> None:
+    text = extract_html_text("<style>volatile { value: 1; }</style><p>RBI lending rule</p><script>window.tick = Date.now()</script>")
+
+    assert text == "RBI lending rule"

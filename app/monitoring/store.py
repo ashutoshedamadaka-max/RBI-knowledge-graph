@@ -75,3 +75,30 @@ class MonitoringStore:
         if removed:
             self._write(data)
         return removed
+
+    def reset_legacy_catalogue_noise(self, source_ids: set[str]) -> int:
+        """One-time migration: remove false historical changes from HTML page chrome."""
+        data = self._read()
+        maintenance = data.setdefault("maintenance", {})
+        migration = "normalized_catalogue_baseline_v1"
+        if maintenance.get(migration):
+            return 0
+        original_updates = len(data["updates"])
+        data["updates"] = [item for item in data["updates"] if item.get("source_id") not in source_ids]
+        grouped: dict[str, list[dict]] = {}
+        retained: list[dict] = []
+        for version in data["versions"]:
+            if version.get("source_id") in source_ids:
+                grouped.setdefault(version["canonical_url"], []).append(version)
+            else:
+                retained.append(version)
+        for versions in grouped.values():
+            newest = max(versions, key=lambda item: item["valid_from"])
+            newest["version"] = 1
+            newest["is_current"] = True
+            newest["valid_to"] = None
+            retained.append(newest)
+        data["versions"] = retained
+        maintenance[migration] = True
+        self._write(data)
+        return original_updates - len(data["updates"])

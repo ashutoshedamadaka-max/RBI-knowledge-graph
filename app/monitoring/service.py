@@ -44,8 +44,9 @@ class RegulatoryMonitor:
                     continue
                 previous = self.store.current_version(document.canonical_url)
                 text = self.fetcher.download_text(document)
-                content_hash = hashlib.sha256(text.encode()).hexdigest()
-                if previous and previous.content_hash == content_hash:
+                normalized_text = normalize_regulatory_text(text)
+                content_hash = hashlib.sha256(normalized_text.encode()).hexdigest()
+                if previous and previous.normalized_text_hash == content_hash:
                     continue
                 status = DiscoveryStatus.NEW if previous is None else DiscoveryStatus.MODIFIED
                 version_number = 1 if previous is None else previous.version + 1
@@ -55,7 +56,7 @@ class RegulatoryMonitor:
                     source_id=source.source_id, canonical_url=document.canonical_url, title=document.title,
                     document_identifier=document.document_identifier, publication_date=document.publication_date,
                     content_hash=content_hash,
-                    normalized_text_hash=hashlib.sha256(normalize_regulatory_text(text).encode()).hexdigest(),
+                    normalized_text_hash=content_hash,
                     text_snapshot=text,
                     document_id=document_id, version=version_number, lifecycle=DocumentLifecycle.ACTIVE,
                     is_current=True, valid_from=now,

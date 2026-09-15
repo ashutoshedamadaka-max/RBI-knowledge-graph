@@ -46,6 +46,13 @@ class _RbiHtmlTextExtractor(HTMLParser):
         return text.strip()
 
 
+def extract_html_text(value: str) -> str:
+    """Return readable RBI page text without scripts, styles, or page chrome."""
+    extractor = _RbiHtmlTextExtractor()
+    extractor.feed(value)
+    return extractor.text()
+
+
 def parse_document(path: Path, mime_type: str) -> ParsedDocument:
     if mime_type == "application/pdf" or path.suffix.lower() == ".pdf":
         try:
@@ -64,9 +71,7 @@ def parse_document(path: Path, mime_type: str) -> ParsedDocument:
         if not text.strip():
             raise IngestionError("Document contains no text.")
         if mime_type in {"text/html", "application/xhtml+xml"}:
-            extractor = _RbiHtmlTextExtractor()
-            extractor.feed(text)
-            text = extractor.text()
+            text = extract_html_text(text)
         if not text:
             raise IngestionError("HTML document contains no readable text.")
         return ParsedDocument(page_count=1, pages=[text.strip()])

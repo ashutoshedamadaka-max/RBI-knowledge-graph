@@ -36,7 +36,9 @@ def create_app() -> FastAPI:
         source.source_id for source in RegulatorySourceRegistry(settings.regulatory_sources_path).enabled_sources()
         if source.parser_strategy == "rbi_document"
     }
-    MonitoringStore(settings.runtime_dir / "monitoring.json").remove_initial_catalogue_updates(curated_source_ids)
+    monitoring_store = MonitoringStore(settings.runtime_dir / "monitoring.json")
+    monitoring_store.remove_initial_catalogue_updates(curated_source_ids)
+    monitoring_store.reset_legacy_catalogue_noise(curated_source_ids)
     durable_state.sync()
     application.include_router(router)
     static_dir = Path(__file__).parent / "static"
