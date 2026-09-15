@@ -53,7 +53,16 @@ class RegulatoryQueryService:
             research = DeterministicAnswerGenerator().generate(user_query, merged).research
             fallback_used = True
         assert research is not None
-        if graph_result.edges:
+        if research.status is ResearchStatus.INSUFFICIENT_EVIDENCE:
+            research = research.model_copy(update={
+                "direct_answer": ResearchClaim(
+                    text="I could not find an RBI provision in the indexed lending corpus that directly establishes an answer to this question.",
+                    citation_ids=[],
+                ),
+                "sections": [],
+                "graph_context": None,
+            })
+        elif graph_result.edges:
             research = research.model_copy(update={
                 "graph_context": ResearchGraphContext(nodes=graph_result.nodes, edges=graph_result.edges)
             })

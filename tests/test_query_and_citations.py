@@ -41,6 +41,15 @@ def test_query_explains_the_rbi_lending_scope_for_unrelated_question(tmp_path: P
     assert "RBI lending guidelines" in response.answer
 
 
+def test_query_returns_a_clear_insufficient_evidence_state(tmp_path: Path) -> None:
+    response = RegulatoryQueryService(Settings(data_dir=tmp_path / "data")).query("Can an NBFC charge foreclosure fees?")
+
+    assert response.research is not None
+    assert response.research.status.value == "insufficient_evidence"
+    assert response.research.direct_answer is not None
+    assert response.citation_valid
+
+
 def test_query_falls_back_to_cited_evidence_when_model_citation_is_invalid(tmp_path: Path) -> None:
     source = tmp_path / "rbi.txt"
     source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")

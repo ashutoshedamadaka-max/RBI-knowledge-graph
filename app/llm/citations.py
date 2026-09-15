@@ -19,7 +19,7 @@ def validate_citations(answer: str, retrieved_chunks: list[ChunkMetadata]) -> bo
 
 def validate_structured_citations(research: StructuredResearch, retrieved_chunks: list[ChunkMetadata]) -> bool:
     if research.status.value != "grounded":
-        return not research.direct_answer and not research.sections
+        return not research.sections and (not research.direct_answer or not research.direct_answer.citation_ids)
     claims = ([research.direct_answer] if research.direct_answer else []) + [
         claim for section in research.sections for claim in section.claims
     ]
