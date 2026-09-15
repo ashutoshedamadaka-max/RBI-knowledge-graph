@@ -46,7 +46,7 @@
 
     <section id="knowledge-status" class="knowledge-status" aria-live="polite">
       <div class="kb-label"><b aria-hidden="true">▤</b><strong>Knowledge base</strong></div>
-      <p><strong id="document-count">Checking documents…</strong><span> · </span><span id="source-count">Loading source coverage…</span></p>
+      <p><strong id="document-count">Checking documents…</strong><span> · </span><span id="source-count">Loading source coverage…</span><span> · </span><span id="non-current-count">Checking status…</span><span> · </span><span id="review-count">Checking reviews…</span></p>
       <div class="topic-labels" id="topic-labels" aria-label="Covered topics"></div><span class="topic-overflow hidden" id="topic-overflow"></span>
       <p class="kb-check"><b id="knowledge-health">Checking</b><span id="knowledge-summary"></span></p>
       <button id="view-all-sources" type="button">View sources <i aria-hidden="true">→</i></button>
@@ -68,8 +68,14 @@
     <section id="result" class="research-workspace hidden" aria-live="polite">
       <div id="research-trace" class="research-trace"></div><div id="research-error" class="error-state hidden"></div>
       <div class="workspace-grid" id="workspace-grid">
-        <article class="answer-panel"><div class="answer-heading"><div><p class="eyebrow">Answer</p><h2 id="answer-title">RBI lending guidance</h2></div><span id="evidence-badge"></span></div><div id="structured-answer"></div><section id="related-questions" class="related-questions hidden"><p class="eyebrow">Continue research</p><div id="related-question-list"></div></section></article>
-        <aside class="evidence-panel" id="evidence-panel"><div class="evidence-tabs" role="tablist" aria-label="Evidence views"><button class="active" data-tab="sources" role="tab" aria-selected="true" aria-controls="sources-tab">Sources <span id="source-tab-count"></span></button><button data-tab="relationships" role="tab" aria-selected="false" aria-controls="relationships-tab">Regulatory relationships <span id="graph-tab-count"></span></button></div><div id="sources-tab" class="tab-content" role="tabpanel"></div><div id="relationships-tab" class="tab-content hidden" role="tabpanel"></div></aside>
+        <section class="conversation-panel">
+          <article class="conversation-turn user-turn"><span class="turn-avatar" aria-hidden="true">U</span><div class="turn-bubble"><p id="user-turn-question"></p></div></article>
+          <article class="conversation-turn assistant-turn"><span class="turn-avatar" aria-hidden="true">R</span><div class="assistant-response"><div class="answer-heading"><div><p class="eyebrow">RBI Lending Intelligence</p><h2 id="answer-title">RBI lending guidance</h2></div><span id="evidence-badge"></span></div><div id="structured-answer"></div></div></article>
+          <section class="evidence-panel" id="evidence-panel"><div class="evidence-tabs" role="tablist" aria-label="Evidence views"><button class="active" data-tab="sources" role="tab" aria-selected="true" aria-controls="sources-tab">Sources <span id="source-tab-count"></span></button><button data-tab="relationships" role="tab" aria-selected="false" aria-controls="relationships-tab">Regulatory relationships <span id="graph-tab-count"></span></button></div><div id="sources-tab" class="tab-content" role="tabpanel"></div><div id="relationships-tab" class="tab-content hidden" role="tabpanel"></div></section>
+          <section id="related-questions" class="related-questions hidden"><p class="eyebrow">Continue research</p><div id="related-question-list"></div></section>
+          <form class="follow-up-composer" id="follow-up-form"><label for="follow-up-question">Continue research</label><div><input id="follow-up-question" type="text" placeholder="Ask a follow-up question…"><button class="primary-action" type="submit" aria-label="Research follow-up question">→</button></div><small>Each question is researched against the current RBI evidence set.</small></form>
+        </section>
+        <aside class="behind-panel" id="behind-panel" aria-label="Behind this answer"><div class="behind-heading"><div><p class="eyebrow">Research summary</p><h2>Behind this answer</h2></div><span id="behind-route"></span></div><div id="behind-summary" class="behind-summary"><p>Research details will appear after an answer is returned.</p></div></aside>
       </div>
     </section>
 

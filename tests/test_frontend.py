@@ -40,3 +40,14 @@ def test_primary_navigation_uses_real_updates_and_no_knowledge_base_tab() -> Non
     assert 'id="update-badge"' in page
     assert 'source-catalog-toggle' not in page
     assert "rbi-updates-last-seen-at" in script
+
+
+def test_research_workspace_has_conversation_follow_up_and_artifact_summary() -> None:
+    root = Path(__file__).resolve().parents[1]
+    script = (root / "frontend" / "assets" / "app.js").read_text(encoding="utf-8")
+    page = (root / "frontend" / "index.html").read_text(encoding="utf-8")
+
+    assert 'id="user-turn-question"' in page
+    assert 'id="follow-up-form"' in page
+    assert "Behind this answer" in page
+    assert "This summary uses artifacts returned by this research turn." in script

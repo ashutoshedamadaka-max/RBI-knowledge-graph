@@ -181,6 +181,7 @@ function renderAnswer(data) {
   latestAnswer = data;
   const research = data.research || {}; const citations = data.citations || []; const sourceIndexes = citationMap(data);
   const insufficient = research.status === 'insufficient_evidence'; const outOfScope = research.status === 'out_of_scope';
+  $('#user-turn-question').textContent = lastQuery;
   $('#answer-title').textContent = insufficient ? 'Insufficient evidence' : outOfScope ? 'Outside the knowledge base' : contextualTitle(research, lastQuery);
   $('#evidence-badge').textContent = citations.length ? `Based on ${citations.length} RBI source${citations.length === 1 ? '' : 's'}` : outOfScope ? 'RBI lending scope' : 'No source evidence';
   const direct = research.direct_answer; let html = '';
@@ -193,10 +194,18 @@ function renderAnswer(data) {
   const graph = research.graph_context; $('#relationships-tab').innerHTML = graphHtml(graph, sourceIndexes);
   $('#source-tab-count').textContent = citations.length ? `(${citations.length})` : '';
   $('#graph-tab-count').textContent = graph?.edges?.length ? `(${graph.edges.length})` : '';
-  const hasEvidence = Boolean(citations.length || graph?.edges?.length); $('#evidence-panel').classList.toggle('hidden', !hasEvidence); $('#workspace-grid').classList.toggle('answer-only', !hasEvidence);
+  const hasEvidence = Boolean(citations.length || graph?.edges?.length); $('#evidence-panel').classList.toggle('hidden', !hasEvidence);
   const related = research.related_questions || []; $('#related-questions').classList.toggle('hidden', !related.length); $('#related-question-list').innerHTML = related.map((item) => `<button type="button" data-follow-up="${escapeHtml(item)}">${escapeHtml(item)} →</button>`).join('');
   const trace = [citations.length ? `${citations.length} official source${citations.length === 1 ? '' : 's'} retrieved` : null, data.citation_valid ? 'Answer linked to source evidence' : null, graph?.edges?.length ? `${graph.edges.length} regulatory relationship${graph.edges.length === 1 ? '' : 's'} found` : null].filter(Boolean);
   $('#research-trace').innerHTML = trace.map((item) => `<span>✓ ${escapeHtml(item)}</span>`).join('');
+  const route = String(data.route || 'RETRIEVAL').toLowerCase();
+  $('#behind-route').textContent = `${route} retrieval`;
+  $('#behind-summary').innerHTML = `<dl>
+    <div><dt>Question</dt><dd>RBI lending scope checked</dd></div>
+    <div><dt>Relationships</dt><dd>${graph?.edges?.length ? `${graph.edges.length} relevant relationship${graph.edges.length === 1 ? '' : 's'} retrieved` : 'No query-relevant relationship retrieved'}</dd></div>
+    <div><dt>Evidence</dt><dd>${citations.length ? `${citations.length} official source${citations.length === 1 ? '' : 's'} selected` : 'No citable source selected'}</dd></div>
+    <div><dt>Citations</dt><dd>${citations.length ? (data.citation_valid ? 'Mapped to retrieved evidence' : 'No verified citation mapping') : 'No citations for this response'}</dd></div>
+  </dl><p class="behind-note">This summary uses artifacts returned by this research turn.</p>`;
   bindCitationInteractions(); bindGraphInteractions();
   $$('[data-follow-up]').forEach((button) => button.addEventListener('click', () => { $('#question').value = button.dataset.followUp; $('#query-form').requestSubmit(); }));
 }
@@ -208,11 +217,13 @@ function setProgress(stage) {
 
 function setLoading(loading) {
   $('#analysis-state').classList.toggle('hidden', !loading); $('#analysis-state').setAttribute('aria-busy', String(loading));
-  if (loading) { $('#result').classList.add('hidden'); setProgress('understanding_question'); loadingStartedAt = Date.now(); clearInterval(loadingTimer); loadingTimer = setInterval(() => { $('#loading-time').textContent = `Researching · ${Math.max(1, Math.round((Date.now() - loadingStartedAt) / 1000))}s`; }, 1000); }
+  if (loading) { $('#result').classList.add('hidden'); $('#behind-route').textContent = ''; $('#behind-summary').innerHTML = '<p>Research is preparing a new evidence-backed answer.</p>'; setProgress('understanding_question'); loadingStartedAt = Date.now(); clearInterval(loadingTimer); loadingTimer = setInterval(() => { $('#loading-time').textContent = `Researching · ${Math.max(1, Math.round((Date.now() - loadingStartedAt) / 1000))}s`; }, 1000); }
   else { clearInterval(loadingTimer); }
 }
 
 function showError(message) {
+  $('#behind-route').textContent = '';
+  $('#behind-summary').innerHTML = '<p>The research service did not return evidence for this turn.</p>';
   $('#research-error').innerHTML = `<h2>We couldn’t complete this research request.</h2><p>${escapeHtml(message)}</p><button id="retry-research" type="button">Try again</button>`;
   $('#research-error').classList.remove('hidden'); $('#retry-research').addEventListener('click', () => $('#query-form').requestSubmit());
 }
@@ -244,22 +255,31 @@ async function loadStatus() {
     $('#document-count').textContent = `${status.document_count} RBI documents`; $('#source-count').textContent = `${status.tracked_source_count} official sources`;
     const topics = status.topics || []; $('#topic-labels').innerHTML = topics.slice(0, 4).map((topic) => `<span>${escapeHtml(topic)}</span>`).join(''); $('#topic-overflow').textContent = topics.length > 4 ? `+${topics.length - 4}` : ''; $('#topic-overflow').classList.toggle('hidden', topics.length <= 4);
     const lifecycle = status.lifecycle_counts || {}; const reviewCount = (lifecycle.REVIEW_REQUIRED || 0) + (lifecycle.UNKNOWN || 0); const withdrawnCount = (lifecycle.WITHDRAWN || 0) + (lifecycle.REPEALED || 0) + (lifecycle.SUPERSEDED || 0);
+    $('#non-current-count').textContent = `${withdrawnCount} non-current`; $('#review-count').textContent = `${reviewCount} needs review`;
     $('#knowledge-summary').textContent = relativeTime(latest); $('#header-last-check').textContent = relativeTime(latest); $('#knowledge-health').textContent = reviewCount ? `${reviewCount} status review${reviewCount === 1 ? '' : 's'}` : status.health === 'healthy' ? '● Live' : 'Needs review'; $('#source-live').classList.toggle('healthy', status.health === 'healthy' && !reviewCount);
     if (withdrawnCount) $('#knowledge-health').textContent = `${withdrawnCount} non-current · ${reviewCount} review`;
   } catch {
-    $('#document-count').textContent = 'Knowledge base unavailable'; $('#source-count').textContent = 'Status will retry on refresh'; $('#knowledge-health').textContent = 'Unavailable';
+    $('#document-count').textContent = 'Knowledge base unavailable'; $('#source-count').textContent = 'Status will retry on refresh'; $('#non-current-count').textContent = ''; $('#review-count').textContent = ''; $('#knowledge-health').textContent = 'Unavailable';
   }
 }
 
 $('#query-form').addEventListener('submit', async (event) => {
   event.preventDefault(); const query = $('#question').value.trim(); if (!query) return;
-  lastQuery = query; showResearchMode(query); $('#submit').disabled = true; setLoading(true); $('#research-error').classList.add('hidden');
+  lastQuery = query; $('#user-turn-question').textContent = query; showResearchMode(query); $('#submit').disabled = true; setLoading(true); $('#research-error').classList.add('hidden');
   try { const data = await requestResearch(query); renderAnswer(data); $('#result').classList.remove('hidden'); }
   catch (error) { $('#result').classList.remove('hidden'); $('#evidence-panel').classList.add('hidden'); $('#workspace-grid').classList.add('answer-only'); showError(error.message); }
   finally { setLoading(false); $('#submit').disabled = false; }
 });
 
 $$('[data-question]').forEach((button) => button.addEventListener('click', () => { $('#question').value = button.dataset.question; $('#question').focus(); }));
+$('#follow-up-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const question = $('#follow-up-question').value.trim();
+  if (!question) return;
+  $('#question').value = question;
+  $('#follow-up-question').value = '';
+  $('#query-form').requestSubmit();
+});
 $('#new-research').addEventListener('click', () => { $('#app-shell').classList.remove('research-mode'); $('#result').classList.add('hidden'); $('#analysis-state').classList.add('hidden'); $('#new-research').classList.add('hidden'); $('#question').value = ''; $('#question').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 $$('.evidence-tabs button').forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.tab)));
 $('#updates-toggle').addEventListener('click', async () => {
