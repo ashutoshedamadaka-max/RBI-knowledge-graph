@@ -27,6 +27,9 @@ def test_query_returns_only_verifiable_evidence(tmp_path: Path) -> None:
     assert response.citations
     assert all(citation.chunk_id in response.answer for citation in response.citations)
     assert response.estimated_cost_usd == 0.0
+    assert response.research is not None
+    assert response.research.direct_answer is not None
+    assert set(response.research.direct_answer.citation_ids).issubset({citation.chunk_id for citation in response.citations})
 
 
 def test_query_explains_the_rbi_lending_scope_for_unrelated_question(tmp_path: Path) -> None:

@@ -6,6 +6,7 @@ from pydantic import BaseModel
 
 from app.config.settings import Settings
 from app.models.chunks import ChunkMetadata
+from app.models.research import ResearchClaim, ResearchSection, ResearchStatus, StructuredResearch
 
 
 class GenerationResult(BaseModel):
@@ -14,6 +15,7 @@ class GenerationResult(BaseModel):
     input_tokens: int = 0
     output_tokens: int = 0
     estimated_cost_usd: float = 0.0
+    research: StructuredResearch | None = None
 
 
 class AnswerGenerationError(RuntimeError):
@@ -26,25 +28,44 @@ class AnswerGenerator(ABC):
         raise NotImplementedError
 
 
+def research_to_markdown(research: StructuredResearch) -> str:
+    if research.status is ResearchStatus.INSUFFICIENT_EVIDENCE:
+        return "### Insufficient evidence\nI could not find enough RBI lending evidence in the indexed corpus to answer this responsibly."
+    parts = []
+    if research.direct_answer:
+        citations = " ".join(f"[{item}]" for item in research.direct_answer.citation_ids)
+        parts.extend(["### Direct answer", f"{research.direct_answer.text} {citations}".strip()])
+    for section in research.sections:
+        parts.append(f"### {section.title}")
+        for claim in section.claims:
+            citations = " ".join(f"[{item}]" for item in claim.citation_ids)
+            parts.append(f"- {claim.text} {citations}".strip())
+    return "\n\n".join(parts)
+
+
+def deterministic_research(evidence: list[ChunkMetadata]) -> StructuredResearch:
+    if not evidence:
+        return StructuredResearch(status=ResearchStatus.INSUFFICIENT_EVIDENCE)
+    claims = [
+        ResearchClaim(text=chunk.text.replace("\n", " ").strip()[:650], citation_ids=[chunk.chunk_id])
+        for chunk in evidence[:5]
+    ]
+    return StructuredResearch(
+        status=ResearchStatus.GROUNDED,
+        direct_answer=ResearchClaim(
+            text="The retrieved RBI material contains the following directly relevant provisions.",
+            citation_ids=[evidence[0].chunk_id],
+        ),
+        sections=[ResearchSection(id="evidence-backed-provisions", title="Evidence-backed provisions", claims=claims)],
+    )
+
+
 class DeterministicAnswerGenerator(AnswerGenerator):
     """Evidence-only response composer used when no model is configured."""
 
     def generate(self, query: str, evidence: list[ChunkMetadata]) -> GenerationResult:
-        if not evidence:
-            return GenerationResult(answer=(
-                "### Answer\n"
-                "I do not have sufficient retrieved RBI evidence to answer this question.\n\n"
-                "### Regulatory basis\nNo relevant source chunk was retrieved."
-            ), model="deterministic")
-        lines = [
-            "### Answer",
-            "The retrieved RBI material provides the following directly relevant evidence:",
-        ]
-        for chunk in evidence:
-            text = chunk.text.replace("\n", " ").strip()
-            lines.append(f"- {text[:700]} [{chunk.chunk_id}]")
-        lines.extend(["", "### Regulatory basis", "Each statement above is quoted or condensed from the cited retrieved chunk."])
-        return GenerationResult(answer="\n".join(lines), model="deterministic")
+        research = deterministic_research(evidence)
+        return GenerationResult(answer=research_to_markdown(research), model="deterministic", research=research)
 
 
 class OpenAIAnswerGenerator(AnswerGenerator):
@@ -70,9 +91,11 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             for chunk in evidence
         )
         prompt = (
-            "Answer using only the provided RBI evidence. Do not invent regulations, dates, or legal requirements. "
-            "If evidence is insufficient, say so. Cite every material regulatory claim using only [chunk_id] "
-            "from the evidence. Do not cite a chunk not provided.\n\n"
+            "Return JSON only. Answer using only the provided RBI evidence. Do not invent regulations, dates, "
+            "or legal requirements. Use status 'insufficient_evidence' when the evidence cannot support a direct answer. "
+            "For a grounded answer, direct_answer and every claim must include citation_ids containing only supplied chunk IDs. "
+            "Use only meaningful sections; do not create empty sections. related_questions is optional and must be RBI lending questions.\n"
+            "JSON shape: {status, direct_answer:{text,citation_ids}|null, sections:[{id,title,claims:[{text,citation_ids}]}], related_questions:[...]}.\n\n"
             f"QUESTION: {query}\n\nEVIDENCE:\n{context}"
         )
         try:
@@ -87,6 +110,7 @@ class OpenAIAnswerGenerator(AnswerGenerator):
                     ],
                     "temperature": 0,
                     "max_tokens": self.max_output_tokens,
+                    "response_format": {"type": "json_object"},
                 },
                 timeout=self.timeout_seconds,
             )
@@ -100,12 +124,18 @@ class OpenAIAnswerGenerator(AnswerGenerator):
         input_tokens = usage.get("prompt_tokens", 0)
         output_tokens = usage.get("completion_tokens", 0)
         from app.observability.costs import estimate_openai_cost
+        content = body["choices"][0]["message"]["content"]
+        try:
+            research = StructuredResearch.model_validate(json.loads(content))
+        except (json.JSONDecodeError, ValueError):
+            research = None
         return GenerationResult(
-            answer=body["choices"][0]["message"]["content"],
+            answer=research_to_markdown(research) if research else content,
             model=self.model,
             input_tokens=input_tokens,
             output_tokens=output_tokens,
             estimated_cost_usd=estimate_openai_cost(input_tokens, output_tokens, self.input_rate, self.output_rate),
+            research=research,
         )
 
 

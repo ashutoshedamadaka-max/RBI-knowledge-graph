@@ -113,6 +113,7 @@ def monitoring_status(request: Request) -> dict[str, object]:
     return {
         "document_count": len(documents),
         "tracked_source_count": len(sources),
+        "topics": sorted({topic for source in sources for topic in source.regulatory_topics}),
         "last_checks": last_checks,
         "health": "attention" if unavailable else "healthy",
     }

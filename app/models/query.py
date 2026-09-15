@@ -2,6 +2,7 @@ from pydantic import BaseModel, Field
 
 from app.models.chunks import ChunkMetadata
 from app.models.retrieval import RetrievalRoute
+from app.models.research import StructuredResearch
 
 
 class QueryRequest(BaseModel):
@@ -27,3 +28,4 @@ class QueryResponse(BaseModel):
     latency_ms: float
     estimated_cost_usd: float
     citation_valid: bool
+    research: StructuredResearch | None = None
