@@ -40,7 +40,7 @@ class DocumentManifest:
         documents.append(document)
         self.path.write_text(json.dumps([item.model_dump(mode="json") for item in documents], indent=2))
 
-    def update_lifecycle(self, document_id: str, lifecycle, evidence_url: str, excerpt: str, checked_at) -> DocumentMetadata | None:
+    def update_lifecycle(self, document_id: str, lifecycle, evidence_url: str, excerpt: str, checked_at, resolution_method: str = "AUTOMATED") -> DocumentMetadata | None:
         documents = self._read()
         updated = None
         for index, document in enumerate(documents):
@@ -50,6 +50,7 @@ class DocumentManifest:
                     "status_evidence_url": evidence_url,
                     "status_evidence_excerpt": excerpt,
                     "status_checked_at": checked_at,
+                    "status_resolution_method": resolution_method,
                 })
                 documents[index] = updated
                 break

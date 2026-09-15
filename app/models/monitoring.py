@@ -45,6 +45,8 @@ class RegulatorySource(BaseModel):
     enabled: bool = True
     polling_frequency: str = "daily"
     parser_strategy: str = "rbi_listing"
+    approved_lifecycle: DocumentLifecycle | None = None
+    approval_evidence_excerpt: str | None = None
 
 
 class DiscoveredDocument(BaseModel):

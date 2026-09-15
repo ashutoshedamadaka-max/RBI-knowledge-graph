@@ -12,6 +12,7 @@ from app.models.monitoring import (
 from app.monitoring.alerts import LogAlertSender, RegulatoryAlertSender
 from app.monitoring.diff import deterministic_diff, normalize_regulatory_text
 from app.monitoring.fetcher import SourceFetcher
+from app.monitoring.lifecycle import LifecycleResolution
 from app.monitoring.store import MonitoringStore
 from app.monitoring.interpretation import DeterministicChangeInterpreter
 
@@ -45,6 +46,22 @@ class RegulatoryMonitor:
                 previous = self.store.current_version(document.canonical_url)
                 text = self.fetcher.download_text(document)
                 resolution = self.fetcher.lifecycle_resolution(document)
+                if (
+                    source.approved_lifecycle in {DocumentLifecycle.ACTIVE, DocumentLifecycle.AMENDED}
+                    and (resolution is None or resolution.lifecycle in {
+                        DocumentLifecycle.REVIEW_REQUIRED,
+                        DocumentLifecycle.UNKNOWN,
+                    })
+                ):
+                    # A curated approval can resolve an absence of a positive RBI
+                    # lifecycle signal, but can never overwrite an explicit
+                    # withdrawal, repeal, or supersession detected on the source.
+                    resolution = LifecycleResolution(
+                        source.approved_lifecycle,
+                        source.approval_evidence_excerpt or "Curated official RBI source approved for current-guidance intake.",
+                        datetime.now(UTC),
+                        "CURATED_APPROVAL",
+                    )
                 lifecycle = resolution.lifecycle if resolution else DocumentLifecycle.REVIEW_REQUIRED
                 normalized_text = normalize_regulatory_text(text)
                 content_hash = hashlib.sha256(normalized_text.encode()).hexdigest()

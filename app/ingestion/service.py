@@ -117,11 +117,11 @@ class IngestionService:
                 newest[key] = document
         return sorted(newest.values(), key=lambda item: item.ingested_at, reverse=True)
 
-    def apply_lifecycle(self, source_url: str, lifecycle, evidence_excerpt: str, checked_at: datetime) -> DocumentMetadata | None:
+    def apply_lifecycle(self, source_url: str, lifecycle, evidence_excerpt: str, checked_at: datetime, resolution_method: str = "AUTOMATED") -> DocumentMetadata | None:
         document = self.manifest.get_by_source_url(source_url)
         if not document:
             return None
-        updated = self.manifest.update_lifecycle(document.document_id, lifecycle, source_url, evidence_excerpt, checked_at)
+        updated = self.manifest.update_lifecycle(document.document_id, lifecycle, source_url, evidence_excerpt, checked_at, resolution_method)
         if updated:
             self.vector_store.apply_lifecycle(updated.document_id, updated.lifecycle.value)
             self.graph_service.apply_document_lifecycle(updated)

@@ -17,6 +17,7 @@ class LifecycleResolution:
     lifecycle: DocumentLifecycle
     excerpt: str
     checked_at: datetime
+    resolution_method: str = "AUTOMATED"
 
 
 def resolve_lifecycle(text: str) -> LifecycleResolution:

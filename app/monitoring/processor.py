@@ -36,7 +36,7 @@ class MonitoringDocumentProcessor:
         resolution = resolution or resolve_lifecycle(text)
         facts = extract_rbi_document_facts(text)
         self.ingestion.apply_lifecycle(
-            document.canonical_url, resolution.lifecycle, resolution.excerpt, resolution.checked_at,
+            document.canonical_url, resolution.lifecycle, resolution.excerpt, resolution.checked_at, resolution.resolution_method,
         )
         self.ingestion.apply_monitoring_metadata(
             document.canonical_url, facts.document_identifier, facts.effective_date, resolution.checked_at,

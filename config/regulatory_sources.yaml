@@ -91,3 +91,71 @@ sources:
     enabled: true
     polling_frequency: daily
     parser_strategy: rbi_document
+  # Curated official sources approved for current-guidance intake on 15 Sep 2026.
+  # RBI's document-level withdrawn marker always overrides this baseline.
+  - source_id: rbi_psl_amendment_2026
+    authority: Reserve Bank of India
+    source_name: RBI Priority Sector Lending Amendment Directions, 2026
+    url: https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0
+    source_type: document
+    regulatory_topics: [priority sector lending, lending norms, housing loans, MSME]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_document
+    approved_lifecycle: ACTIVE
+    approval_evidence_excerpt: "Official RBI amendment directions, approved as a current lending source after page-level withdrawn-marker validation."
+  - source_id: rbi_psl_third_amendment_2026
+    authority: Reserve Bank of India
+    source_name: RBI Priority Sector Lending Third Amendment Directions, 2026
+    url: https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0
+    source_type: document
+    regulatory_topics: [priority sector lending, lending norms, MSME]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_document
+    approved_lifecycle: ACTIVE
+    approval_evidence_excerpt: "Official RBI amendment directions, approved as a current lending source after page-level withdrawn-marker validation."
+  - source_id: rbi_psl_second_amendment_2026
+    authority: Reserve Bank of India
+    source_name: RBI Priority Sector Lending Second Amendment Directions, 2026
+    url: https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13674&Mode=0
+    source_type: document
+    regulatory_topics: [priority sector lending, lending norms, MSME]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_document
+    approved_lifecycle: ACTIVE
+    approval_evidence_excerpt: "Official RBI amendment directions, approved as a current lending source after page-level withdrawn-marker validation."
+  - source_id: rbi_fema_borrowing_lending_first_amendment_a
+    authority: Reserve Bank of India
+    source_name: RBI FEMA Borrowing and Lending First Amendment Regulations, 2026 (ID 13306)
+    url: https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0
+    source_type: document
+    regulatory_topics: [borrowing, lending, foreign exchange]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_document
+    approved_lifecycle: ACTIVE
+    approval_evidence_excerpt: "Official RBI amendment regulations, approved as a current lending source after page-level withdrawn-marker validation."
+  - source_id: rbi_fema_borrowing_lending_first_amendment_b
+    authority: Reserve Bank of India
+    source_name: RBI FEMA Borrowing and Lending First Amendment Regulations, 2026 (ID 13305)
+    url: https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13305&Mode=0
+    source_type: document
+    regulatory_topics: [borrowing, lending, foreign exchange]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_document
+    approved_lifecycle: ACTIVE
+    approval_evidence_excerpt: "Official RBI amendment regulations, approved as a current lending source after page-level withdrawn-marker validation."
+  - source_id: rbi_msme_amendment_2026
+    authority: Reserve Bank of India
+    source_name: RBI MSME Lending Amendment Directions, 2026
+    url: https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0
+    source_type: document
+    regulatory_topics: [MSME, lending norms, borrower disclosure]
+    enabled: true
+    polling_frequency: daily
+    parser_strategy: rbi_document
+    approved_lifecycle: ACTIVE
+    approval_evidence_excerpt: "Official RBI amendment directions, approved as a current lending source after page-level withdrawn-marker validation."
