@@ -1,4 +1,5 @@
 import json
+import re
 from pathlib import Path
 
 from app.embeddings.hashing import HashingEmbedder
@@ -25,18 +26,45 @@ class LocalVectorStore:
             }
         self.path.write_text(json.dumps(list(indexed.values()), indent=2))
 
+    @staticmethod
+    def _keywords(value: str) -> set[str]:
+        """Return meaningful terms for a small, explainable lexical relevance signal."""
+        stop_words = {
+            "about", "after", "against", "among", "and", "are", "can", "does", "for",
+            "from", "how", "into", "must", "of", "on", "or", "rbi", "the", "to",
+            "under", "what", "when", "which", "with", "would",
+        }
+        return {
+            word
+            for word in re.findall(r"[a-z0-9]{3,}", value.lower())
+            if word not in stop_words
+        }
+
+    @classmethod
+    def _lexical_score(cls, query_terms: set[str], text: str, title: str) -> float:
+        """Reward direct term matches, especially when the official document title matches."""
+        if not query_terms:
+            return 0.0
+        text_overlap = len(query_terms & cls._keywords(text)) / len(query_terms)
+        title_overlap = len(query_terms & cls._keywords(title)) / len(query_terms)
+        return (0.55 * text_overlap) + (0.45 * title_overlap)
+
     def search(self, query: str, top_k: int = 5, current_only: bool = True) -> list[VectorSearchResult]:
         if not query.strip():
             return []
         query_embedding = self.embedder.embed(query)
-        matches = [
-            VectorSearchResult(
-                **row["chunk"],
-                similarity_score=round(self.embedder.similarity(query_embedding, row["embedding"]), 6),
-            )
-            for row in self._read()
-            if not current_only or row["chunk"].get("is_current", True)
-        ]
+        query_terms = self._keywords(query)
+        matches = []
+        for row in self._read():
+            chunk = row["chunk"]
+            if current_only and not chunk.get("is_current", True):
+                continue
+            vector_score = max(0.0, self.embedder.similarity(query_embedding, row["embedding"]))
+            lexical_score = self._lexical_score(query_terms, chunk["text"], chunk["document_title"])
+            # Semantic similarity remains the primary signal, while exact lending-topic and
+            # official-document-title matches prevent unrelated boilerplate from winning.
+            relevance_score = (0.55 * vector_score) + (0.45 * lexical_score)
+            matches.append(VectorSearchResult(**chunk, similarity_score=round(relevance_score, 6)))
         return sorted(matches, key=lambda result: result.similarity_score, reverse=True)[:top_k]
 
     def get_by_ids(self, chunk_ids: list[str]) -> list[ChunkMetadata]:

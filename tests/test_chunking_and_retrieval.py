@@ -4,7 +4,9 @@ from pathlib import Path
 from app.config.settings import Settings
 from app.ingestion.chunking import chunk_pages
 from app.models.documents import DocumentMetadata
+from app.models.chunks import ChunkMetadata
 from app.retrieval.service import VectorRetrievalService
+from app.retrieval.vector_store import LocalVectorStore
 
 
 def document() -> DocumentMetadata:
@@ -40,3 +42,29 @@ def test_vector_retrieval_returns_relevant_chunk(tmp_path: Path) -> None:
     assert results[0].chunk_id == chunks[0].chunk_id
     assert results[0].page_number == 1
 
+
+def test_title_and_keyword_matches_outrank_unrelated_document_boilerplate(tmp_path: Path) -> None:
+    store = LocalVectorStore(tmp_path / "vectors.json")
+    chunks = [
+        ChunkMetadata(
+            chunk_id="digital-consent",
+            document_id="digital-directions",
+            document_title="RBI Digital Lending Directions, 2025",
+            page_number=1,
+            chunk_index=0,
+            text="A Regulated Entity must obtain explicit consent before collecting borrower data.",
+        ),
+        ChunkMetadata(
+            chunk_id="irac-consent",
+            document_id="irac",
+            document_title="Prudential Norms on Income Recognition, Asset Classification and Provisioning",
+            page_number=1,
+            chunk_index=0,
+            text="The borrower consent and related documentation should be retained by the regulated entity.",
+        ),
+    ]
+    store.upsert(chunks)
+
+    results = store.search("What consent is required in digital lending?", top_k=2)
+
+    assert results[0].chunk_id == "digital-consent"
