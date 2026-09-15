@@ -128,4 +128,7 @@ def test_query_progress_reports_only_entered_backend_stages(tmp_path: Path) -> N
 
     RegulatoryQueryService(settings).query("What must lenders disclose about penal charges?", progress=stages.append)
 
-    assert stages == ["understanding_question", "searching_regulatory_relationships", "retrieving_official_evidence", "building_grounded_answer"]
+    assert stages == [
+        "understanding_question", "searching_regulatory_relationships", "retrieving_official_evidence",
+        "checking_regulatory_validity", "selecting_authoritative_evidence", "building_grounded_answer",
+    ]

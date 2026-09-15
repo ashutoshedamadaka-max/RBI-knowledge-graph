@@ -9,7 +9,7 @@ from app.llm.citations import validate_structured_citations
 from app.llm.generation import DeterministicAnswerGenerator, get_answer_generator, research_to_markdown
 from app.models.chunks import ChunkMetadata
 from app.models.documents import DocumentLifecycle
-from app.models.query import Citation, QueryResponse
+from app.models.query import Citation, QueryPipelineSummary, QueryResponse
 from app.models.research import ResearchClaim, ResearchGraphContext, ResearchStatus, StructuredResearch
 from app.models.retrieval import RetrievalRoute
 from app.observability.costs import CostEvent, CostTracker
@@ -61,9 +61,16 @@ class RegulatoryQueryService:
 
         # Graph retrieval is semantic discovery, not a validity exception. Apply
         # regulatory authority resolution after every candidate source is merged.
-        if not self._is_historical_query(user_query):
+        historical = self._is_historical_query(user_query)
+        candidate_evidence_count = len(evidence)
+        if progress:
+            progress("checking_regulatory_validity")
+        if not historical:
             evidence = [chunk for chunk in evidence if chunk.lifecycle in {DocumentLifecycle.ACTIVE, DocumentLifecycle.AMENDED}]
+        excluded_after_validity_check = candidate_evidence_count - len(evidence)
         merged = list({chunk.chunk_id: chunk for chunk in evidence}.values())[: top_k or self.settings.vector_top_k]
+        if progress:
+            progress("selecting_authoritative_evidence")
         if progress:
             progress("building_grounded_answer")
         generation = self.generator.generate(user_query, merged)
@@ -118,6 +125,12 @@ class RegulatoryQueryService:
             request_id=request_id, answer=answer, citations=citations, route=decision.route, in_scope=True,
             retrieved_evidence=merged, latency_ms=latency_ms, estimated_cost_usd=generation.estimated_cost_usd,
             citation_valid=citation_valid, research=research,
+            pipeline=QueryPipelineSummary(
+                graph_node_count=len(graph_result.nodes), graph_edge_count=len(graph_result.edges),
+                candidate_evidence_count=candidate_evidence_count,
+                excluded_after_validity_check=excluded_after_validity_check,
+                selected_evidence_count=len(merged), historical_query=historical,
+            ),
         )
 
     @staticmethod

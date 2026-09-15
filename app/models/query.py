@@ -18,6 +18,17 @@ class Citation(BaseModel):
     source_url: str | None = None
 
 
+class QueryPipelineSummary(BaseModel):
+    """Inspectable facts from a completed research turn, not model reasoning."""
+
+    graph_node_count: int = 0
+    graph_edge_count: int = 0
+    candidate_evidence_count: int = 0
+    excluded_after_validity_check: int = 0
+    selected_evidence_count: int = 0
+    historical_query: bool = False
+
+
 class QueryResponse(BaseModel):
     request_id: str
     answer: str
@@ -29,3 +40,4 @@ class QueryResponse(BaseModel):
     estimated_cost_usd: float
     citation_valid: bool
     research: StructuredResearch | None = None
+    pipeline: QueryPipelineSummary = Field(default_factory=QueryPipelineSummary)

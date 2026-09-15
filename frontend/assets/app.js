@@ -200,10 +200,13 @@ function renderAnswer(data) {
   $('#research-trace').innerHTML = trace.map((item) => `<span>✓ ${escapeHtml(item)}</span>`).join('');
   const route = String(data.route || 'RETRIEVAL').toLowerCase();
   $('#behind-route').textContent = `${route} retrieval`;
+  const pipeline = data.pipeline || {};
+  const validity = pipeline.historical_query ? 'Historical research keeps prior material available' : `${pipeline.excluded_after_validity_check || 0} candidate${pipeline.excluded_after_validity_check === 1 ? '' : 's'} excluded after validity check`;
   $('#behind-summary').innerHTML = `<dl>
     <div><dt>Question</dt><dd>RBI lending scope checked</dd></div>
     <div><dt>Relationships</dt><dd>${graph?.edges?.length ? `${graph.edges.length} relevant relationship${graph.edges.length === 1 ? '' : 's'} retrieved` : 'No query-relevant relationship retrieved'}</dd></div>
-    <div><dt>Evidence</dt><dd>${citations.length ? `${citations.length} official source${citations.length === 1 ? '' : 's'} selected` : 'No citable source selected'}</dd></div>
+    <div><dt>Validity</dt><dd>${escapeHtml(validity)}</dd></div>
+    <div><dt>Evidence</dt><dd>${pipeline.selected_evidence_count ?? citations.length} eligible passage${(pipeline.selected_evidence_count ?? citations.length) === 1 ? '' : 's'} selected</dd></div>
     <div><dt>Citations</dt><dd>${citations.length ? (data.citation_valid ? 'Mapped to retrieved evidence' : 'No verified citation mapping') : 'No citations for this response'}</dd></div>
   </dl><p class="behind-note">This summary uses artifacts returned by this research turn.</p>`;
   bindCitationInteractions(); bindGraphInteractions();
@@ -211,7 +214,7 @@ function renderAnswer(data) {
 }
 
 function setProgress(stage) {
-  const stages = ['understanding_question','searching_regulatory_relationships','retrieving_official_evidence','building_grounded_answer']; const index = stages.indexOf(stage);
+  const stages = ['understanding_question','searching_regulatory_relationships','retrieving_official_evidence','checking_regulatory_validity','selecting_authoritative_evidence','building_grounded_answer']; const index = stages.indexOf(stage);
   $$('#research-progress li').forEach((item, itemIndex) => { item.classList.toggle('active', itemIndex === index); item.classList.toggle('complete', itemIndex < index); });
 }
 
