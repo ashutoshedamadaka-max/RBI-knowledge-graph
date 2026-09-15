@@ -21,3 +21,22 @@ def test_long_structured_research_keeps_claims_separate_and_cited() -> None:
     assert validate_structured_citations(research, evidence)
     assert rendered.count("- Requirement explanation") == 8
     assert len(rendered) > 1000
+
+
+def test_structured_research_supports_scannable_display_metadata() -> None:
+    evidence = [ChunkMetadata(
+        chunk_id="chunk_00000000000000000001", document_id="doc_example", document_title="RBI Directions",
+        page_number=1, chunk_index=0, text="Supporting evidence.",
+    )]
+    research = StructuredResearch(
+        status=ResearchStatus.GROUNDED,
+        display_title="Digital lending consent requirements",
+        direct_answer=ResearchClaim(text="Prior consent is required.", citation_ids=[evidence[0].chunk_id]),
+        sections=[ResearchSection(id="key-requirements", title="Key requirements", claims=[ResearchClaim(
+            title="Borrowers control consent", text="Borrowers may revoke consent.", citation_ids=[evidence[0].chunk_id],
+        )])],
+    )
+
+    assert research.display_title == "Digital lending consent requirements"
+    assert research.sections[0].claims[0].title == "Borrowers control consent"
+    assert validate_structured_citations(research, evidence)

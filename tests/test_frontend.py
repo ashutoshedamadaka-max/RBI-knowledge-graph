@@ -1,4 +1,5 @@
 from fastapi.testclient import TestClient
+from pathlib import Path
 
 from app.main import create_app
 
@@ -17,3 +18,14 @@ def test_frontend_and_metrics_are_available() -> None:
     assert metrics.status_code == 200
     assert monitoring.status_code == 200
     assert {"document_count", "tracked_source_count", "health"}.issubset(monitoring.json())
+
+
+def test_vercel_frontend_uses_truthful_evidence_language_and_real_progress_stream() -> None:
+    root = Path(__file__).resolve().parents[1]
+    script = (root / "frontend" / "assets" / "app.js").read_text(encoding="utf-8")
+    page = (root / "frontend" / "index.html").read_text(encoding="utf-8")
+
+    assert "/query/stream" in script
+    assert "Answer linked to source evidence" in script
+    assert "Citations verified" not in script
+    assert "retrieving_official_evidence" in page

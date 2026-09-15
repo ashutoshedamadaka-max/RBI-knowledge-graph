@@ -1,5 +1,6 @@
 from datetime import UTC, datetime
 from time import perf_counter
+from collections.abc import Callable
 from uuid import uuid4
 
 from app.config.settings import Settings
@@ -26,17 +27,29 @@ class RegulatoryQueryService:
         self.generator = get_answer_generator(settings)
         self.cost_tracker = CostTracker(settings.runtime_dir / "cost_events.json")
 
-    def query(self, user_query: str, top_k: int | None = None, request_id: str | None = None) -> QueryResponse:
+    def query(
+        self,
+        user_query: str,
+        top_k: int | None = None,
+        request_id: str | None = None,
+        progress: Callable[[str], None] | None = None,
+    ) -> QueryResponse:
         started = perf_counter()
         request_id = request_id or f"req_{uuid4().hex}"
+        if progress:
+            progress("understanding_question")
         decision = self.router.route(user_query)
         in_scope = is_rbi_lending_question(user_query)
         if not in_scope:
             return self._out_of_scope_response(user_query, decision.route, request_id, started)
 
         evidence: list[ChunkMetadata] = []
+        if progress:
+            progress("searching_regulatory_relationships")
         graph_result = self.graph.retrieve_graph(user_query)
         if decision.route in {RetrievalRoute.VECTOR, RetrievalRoute.HYBRID}:
+            if progress:
+                progress("retrieving_official_evidence")
             historical = any(term in user_query.lower() for term in ("before", "previous", "historical", "what changed"))
             evidence.extend(self.vector.retrieve_vector(user_query, top_k, current_only=not historical))
         if decision.route in {RetrievalRoute.GRAPH, RetrievalRoute.HYBRID}:
@@ -46,6 +59,8 @@ class RegulatoryQueryService:
                 evidence.extend(self.vector.retrieve_vector(user_query, top_k))
 
         merged = list({chunk.chunk_id: chunk for chunk in evidence}.values())[: top_k or self.settings.vector_top_k]
+        if progress:
+            progress("building_grounded_answer")
         generation = self.generator.generate(user_query, merged)
         research = generation.research
         fallback_used = False

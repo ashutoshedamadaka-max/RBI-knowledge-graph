@@ -1,12 +1,77 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="description" content="Evidence-first RBI lending regulatory intelligence."><title>RBI Lending Intelligence</title><link rel="stylesheet" href="./assets/styles.css"></head>
-<body><main class="app-shell" id="app-shell">
-<header class="topbar"><a class="brand" href="/" aria-label="RBI Lending Intelligence home"><b>R</b><span>RBI Lending <em>Intelligence</em><small>Regulations. Relationships. Real answers.</small></span></a><nav aria-label="Primary navigation"><a class="active" href="#research">Research</a><button id="updates-toggle" type="button">Regulatory updates <i></i></button><button id="source-catalog-toggle" type="button">Knowledge base</button><a href="#about">About</a></nav><div class="source-live"><i></i><span>Official RBI sources monitored<small id="header-last-check">Checking status…</small></span></div></header>
-<section class="discovery" id="research"><div class="hero-copy"><p class="eyebrow">Evidence-first regulatory research</p><h1>Clear lending guidance,<br><i>with the source attached.</i></h1><p>Research RBI lending regulations with answers grounded in official circulars, directions and master directions—powered by regulatory relationships and retrieved evidence.</p><div class="trust-row"><article><b>▤</b><span><strong>Real RBI sources</strong><small>Official circulars, directions and master directions</small></span></article><article><b>⌘</b><span><strong>Regulatory relationships</strong><small>Understand how rules connect across documents</small></span></article><article><b>✓</b><span><strong>Answers you can verify</strong><small>Every claim linked to its supporting evidence</small></span></article></div></div>
-<form id="query-form" class="research-composer"><div class="composer-heading"><label for="question">Ask a regulatory question</label><span>RBI lending scope</span></div><div class="input-shell"><textarea id="question" rows="2" placeholder="Ask about an RBI lending requirement…" required></textarea><button id="submit" type="submit" aria-label="Research with RBI sources">→</button></div><div class="example-grid"><button type="button" data-question="What must lenders disclose about penal charges?"><strong>Penal charges</strong><span>What must lenders disclose about penal charges?</span><i>→</i></button><button type="button" data-question="What consent is required in digital lending?"><strong>Digital lending</strong><span>What consent is required in digital lending?</span><i>→</i></button><button type="button" data-question="When should a lender release property documents after loan repayment?"><strong>Property documents</strong><span>When should a lender release property documents?</span><i>→</i></button></div></form></section>
-<section id="knowledge-status" class="knowledge-status" aria-live="polite"><div class="kb-label"><b>▤</b><strong>Knowledge base</strong></div><div><strong id="document-count">Checking documents…</strong><span id="source-count">Loading source coverage…</span></div><div class="topic-labels" id="topic-labels" aria-label="Covered topics"></div><div class="kb-check"><span id="knowledge-summary">Checking status…</span><b id="knowledge-health">Checking</b></div><button id="view-all-sources" type="button">View all sources <i>→</i></button></section>
-<section id="analysis-state" class="analysis-state hidden" aria-live="polite"><div class="research-bar"><span>⌕</span><strong id="loading-query"></strong></div><div class="loading-copy"><p class="eyebrow">Researching RBI guidance</p><h2>Preparing a grounded response</h2><p>Searching the indexed RBI lending material and checking any supporting citations.</p></div><div class="research-skeleton"><div></div><div></div><div></div><div></div></div></section>
-<section id="empty-state" class="empty-state"><p class="eyebrow">Built for serious research</p><h2>Understand the answer quickly.<br>Verify it deeply.</h2><p>Start with an example question to explore the current RBI lending knowledge base.</p></section>
-<section id="updates-view" class="updates-view hidden" aria-live="polite"><div class="section-title"><div><p class="eyebrow">Source monitoring</p><h2>Regulatory updates</h2></div><span id="monitoring-health"></span></div><div id="updates-list"></div></section>
-<section id="result" class="research-workspace hidden" aria-live="polite"><div class="research-bar"><span>⌕</span><strong id="workspace-query"></strong><button id="new-research" type="button">New research</button></div><div id="research-trace" class="research-trace"></div><div id="research-error" class="error-state hidden"></div><div class="workspace-grid"><article class="answer-panel"><div class="answer-heading"><div><p class="eyebrow">Answer</p><h2 id="answer-title">Grounded answer</h2></div><span id="evidence-badge"></span></div><div id="structured-answer"></div><section id="related-questions" class="related-questions hidden"><p class="eyebrow">Continue research</p><div id="related-question-list"></div></section></article><aside class="evidence-panel"><div class="evidence-tabs" role="tablist"><button class="active" data-tab="sources" role="tab">Sources <span id="source-tab-count"></span></button><button data-tab="relationships" role="tab">Regulatory relationships <span id="graph-tab-count"></span></button></div><div id="sources-tab" class="tab-content"></div><div id="relationships-tab" class="tab-content hidden"></div></aside></div></section>
-<section id="about" class="about"><p class="eyebrow">About this project</p><p>RBI Lending Intelligence combines official-source retrieval with regulatory relationships so lending guidance can be researched and traced to evidence.</p></section>
-</main><dialog id="source-catalog"><div class="drawer-head"><div><p class="eyebrow">Indexed material</p><h2>RBI lending sources</h2></div><button id="close-source-catalog" type="button" aria-label="Close sources">×</button></div><div id="catalog-content"></div></dialog><script src="./api-config.js"></script><script src="./assets/app.js"></script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="description" content="Evidence-first RBI lending regulatory intelligence.">
+  <title>RBI Lending Intelligence</title>
+  <link rel="stylesheet" href="./assets/styles.css">
+</head>
+<body>
+  <main class="app-shell" id="app-shell">
+    <header class="topbar">
+      <a class="brand" href="#research" aria-label="RBI Lending Intelligence home"><b>R</b><span>RBI Lending <em>Intelligence</em><small>Regulations. Relationships. Real answers.</small></span></a>
+      <nav aria-label="Primary navigation"><a class="active" href="#research">Research</a><button id="updates-toggle" type="button" aria-expanded="false">Regulatory updates</button><button id="source-catalog-toggle" type="button">Knowledge base</button><a href="#about">About</a></nav>
+      <div class="source-live" id="source-live"><i aria-hidden="true"></i><span>Official RBI sources monitored<small id="header-last-check">Checking status…</small></span></div>
+    </header>
+
+    <section class="discovery" id="research">
+      <div class="hero-copy">
+        <p class="eyebrow">Evidence-first regulatory research</p>
+        <h1>Clear lending guidance,<br><i>with the source attached.</i></h1>
+        <p>Research RBI lending regulations with answers grounded in official circulars, directions and master directions—powered by regulatory relationships and retrieved evidence.</p>
+        <div class="trust-row" aria-label="Product benefits">
+          <article><b aria-hidden="true">▤</b><span><strong>Real RBI sources</strong><small>Official circulars, directions and master directions</small></span></article>
+          <article><b aria-hidden="true">⌘</b><span><strong>Regulatory relationships</strong><small>Understand how rules connect across documents</small></span></article>
+          <article><b aria-hidden="true">✓</b><span><strong>Answers you can trace</strong><small>Follow every claim back to source evidence</small></span></article>
+        </div>
+      </div>
+
+      <form id="query-form" class="research-composer">
+        <div class="composer-heading"><label for="question">Ask a regulatory question</label><span>RBI lending scope</span></div>
+        <div class="input-shell"><textarea id="question" rows="2" placeholder="e.g. What must lenders disclose about penal charges?" required></textarea></div>
+        <div class="composer-actions"><button id="submit" class="primary-action" type="submit"><span class="submit-label">Research with RBI sources</span><span aria-hidden="true">→</span></button><button id="new-research" class="quiet-action hidden" type="button">Return to overview</button></div>
+        <div class="example-grid" aria-label="Example questions">
+          <button type="button" data-question="What must lenders disclose about penal charges?"><strong>Penal charges</strong><span>What must lenders disclose about penal charges?</span><i aria-hidden="true">→</i></button>
+          <button type="button" data-question="What consent is required in digital lending?"><strong>Digital lending</strong><span>What consent is required in digital lending?</span><i aria-hidden="true">→</i></button>
+          <button type="button" data-question="When should a lender release property documents after loan repayment?"><strong>Property documents</strong><span>When should a lender release property documents?</span><i aria-hidden="true">→</i></button>
+        </div>
+      </form>
+    </section>
+
+    <section id="knowledge-status" class="knowledge-status" aria-live="polite">
+      <div class="kb-label"><b aria-hidden="true">▤</b><strong>Knowledge base</strong></div>
+      <p><strong id="document-count">Checking documents…</strong><span> · </span><span id="source-count">Loading source coverage…</span></p>
+      <div class="topic-labels" id="topic-labels" aria-label="Covered topics"></div><span class="topic-overflow hidden" id="topic-overflow"></span>
+      <p class="kb-check"><b id="knowledge-health">Checking</b><span id="knowledge-summary"></span></p>
+      <button id="view-all-sources" type="button">View sources <i aria-hidden="true">→</i></button>
+    </section>
+
+    <section id="analysis-state" class="analysis-state hidden" aria-live="polite" aria-busy="true">
+      <div class="loading-heading"><div><p class="eyebrow">Research in progress</p><h2>Working from indexed RBI guidance</h2></div><span id="loading-time">Preparing…</span></div>
+      <ol class="research-progress" id="research-progress">
+        <li data-stage="understanding_question"><b>1</b><span><strong>Understanding your question</strong><small>Identifying the RBI lending topic</small></span></li>
+        <li data-stage="searching_regulatory_relationships"><b>2</b><span><strong>Searching regulatory relationships</strong><small>Checking the evidence graph when relevant</small></span></li>
+        <li data-stage="retrieving_official_evidence"><b>3</b><span><strong>Retrieving official RBI evidence</strong><small>Finding the most relevant indexed material</small></span></li>
+        <li data-stage="building_grounded_answer"><b>4</b><span><strong>Building the answer</strong><small>Linking the response to retrieved evidence</small></span></li>
+      </ol>
+      <div class="research-skeleton" aria-hidden="true"><div></div><div></div><div></div></div>
+    </section>
+
+    <section id="updates-view" class="updates-view hidden" aria-live="polite"><div class="section-title"><div><p class="eyebrow">Source monitoring</p><h2>Regulatory updates</h2></div><span id="monitoring-health"></span></div><div id="updates-list"></div></section>
+
+    <section id="result" class="research-workspace hidden" aria-live="polite">
+      <div id="research-trace" class="research-trace"></div><div id="research-error" class="error-state hidden"></div>
+      <div class="workspace-grid" id="workspace-grid">
+        <article class="answer-panel"><div class="answer-heading"><div><p class="eyebrow">Answer</p><h2 id="answer-title">RBI lending guidance</h2></div><span id="evidence-badge"></span></div><div id="structured-answer"></div><section id="related-questions" class="related-questions hidden"><p class="eyebrow">Continue research</p><div id="related-question-list"></div></section></article>
+        <aside class="evidence-panel" id="evidence-panel"><div class="evidence-tabs" role="tablist" aria-label="Evidence views"><button class="active" data-tab="sources" role="tab" aria-selected="true" aria-controls="sources-tab">Sources <span id="source-tab-count"></span></button><button data-tab="relationships" role="tab" aria-selected="false" aria-controls="relationships-tab">Regulatory relationships <span id="graph-tab-count"></span></button></div><div id="sources-tab" class="tab-content" role="tabpanel"></div><div id="relationships-tab" class="tab-content hidden" role="tabpanel"></div></aside>
+      </div>
+    </section>
+
+    <section id="about" class="about"><p class="eyebrow">About this project</p><p>RBI Lending Intelligence combines official-source retrieval with regulatory relationships so lending guidance can be researched and traced to evidence.</p></section>
+  </main>
+  <div id="citation-popover" class="citation-popover hidden" role="tooltip"></div>
+  <dialog id="source-catalog"><div class="drawer-head"><div><p class="eyebrow">Indexed material</p><h2>RBI lending sources</h2></div><button id="close-source-catalog" type="button" aria-label="Close sources">×</button></div><div id="catalog-content"></div></dialog>
+  <script src="./api-config.js"></script><script src="./assets/app.js"></script>
+</body>
+</html>

@@ -89,3 +89,15 @@ def test_deterministic_research_selects_the_consent_provision_not_page_chrome() 
     assert research.direct_answer is not None
     assert "prior and explicit consent" in research.direct_answer.text
     assert "Notifications |" not in research.direct_answer.text
+
+
+def test_query_progress_reports_only_entered_backend_stages(tmp_path: Path) -> None:
+    source = tmp_path / "rbi.txt"
+    source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")
+    settings = Settings(data_dir=tmp_path / "data")
+    IngestionService(settings).ingest(IngestRequest(local_path=str(source), title="RBI Penal Charges Direction"))
+    stages: list[str] = []
+
+    RegulatoryQueryService(settings).query("What must lenders disclose about penal charges?", progress=stages.append)
+
+    assert stages == ["understanding_question", "searching_regulatory_relationships", "retrieving_official_evidence", "building_grounded_answer"]

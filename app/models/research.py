@@ -12,6 +12,7 @@ class ResearchStatus(str, Enum):
 
 
 class ResearchClaim(BaseModel):
+    title: str | None = Field(default=None, max_length=120)
     text: str = Field(min_length=1, max_length=1800)
     citation_ids: list[str] = Field(default_factory=list)
 
@@ -29,6 +30,7 @@ class ResearchGraphContext(BaseModel):
 
 class StructuredResearch(BaseModel):
     status: ResearchStatus
+    display_title: str | None = Field(default=None, max_length=140)
     direct_answer: ResearchClaim | None = None
     sections: list[ResearchSection] = Field(default_factory=list, max_length=6)
     related_questions: list[str] = Field(default_factory=list, max_length=3)

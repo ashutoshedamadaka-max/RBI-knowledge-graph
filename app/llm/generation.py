@@ -148,8 +148,11 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             "Return JSON only. Answer using only the provided RBI evidence. Do not invent regulations, dates, "
             "or legal requirements. Use status 'insufficient_evidence' when the evidence cannot support a direct answer. "
             "For a grounded answer, direct_answer and every claim must include citation_ids containing only supplied chunk IDs. "
-            "Use only meaningful sections; do not create empty sections. related_questions is optional and must be RBI lending questions.\n"
-            "JSON shape: {status, direct_answer:{text,citation_ids}|null, sections:[{id,title,claims:[{text,citation_ids}]}], related_questions:[...]}.\n\n"
+            "display_title should be a concise, factual answer heading. direct_answer should be a plain-English summary "
+            "of the cited evidence. Each claim title should be scannable and factual. Use only meaningful sections; "
+            "do not create empty sections. related_questions is optional and must be RBI lending questions.\n"
+            "JSON shape: {status, display_title|null, direct_answer:{text,citation_ids}|null, "
+            "sections:[{id,title,claims:[{title|null,text,citation_ids}]}], related_questions:[...]}.\n\n"
             f"QUESTION: {query}\n\nEVIDENCE:\n{context}"
         )
         try:

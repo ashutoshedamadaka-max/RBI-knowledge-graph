@@ -1,4 +1,9 @@
+import asyncio
+import json
+
 from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi.concurrency import run_in_threadpool
+from fastapi.responses import StreamingResponse
 
 from app.ingestion.exceptions import IngestionError
 from app.models.documents import DocumentListResponse, IngestRequest, IngestResponse
@@ -72,6 +77,38 @@ def query(request: Request, payload: QueryRequest) -> QueryResponse:
         return RegulatoryQueryService(request.app.state.settings).query(payload.query, payload.top_k, request_id)
     except AnswerGenerationError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
+
+
+@router.post("/query/stream")
+async def query_stream(request: Request, payload: QueryRequest) -> StreamingResponse:
+    """Emit only lifecycle states the query service actually enters, followed by its result."""
+    loop = asyncio.get_running_loop()
+    events: asyncio.Queue[tuple[str, object]] = asyncio.Queue()
+    service = RegulatoryQueryService(request.app.state.settings)
+    request_id = request.headers.get("X-Request-ID")
+
+    def progress(stage: str) -> None:
+        loop.call_soon_threadsafe(events.put_nowait, ("progress", {"stage": stage}))
+
+    async def stream():
+        task = asyncio.create_task(
+            run_in_threadpool(service.query, payload.query, payload.top_k, request_id, progress)
+        )
+        while not task.done() or not events.empty():
+            try:
+                kind, body = await asyncio.wait_for(events.get(), timeout=0.1)
+                yield f"event: {kind}\ndata: {json.dumps(body)}\n\n"
+            except TimeoutError:
+                continue
+        try:
+            result = await task
+            yield f"event: result\ndata: {result.model_dump_json()}\n\n"
+        except AnswerGenerationError as exc:
+            yield f"event: error\ndata: {json.dumps({'detail': str(exc)})}\n\n"
+        except Exception:
+            yield "event: error\ndata: {\"detail\": \"The RBI research service is temporarily unavailable.\"}\n\n"
+
+    return StreamingResponse(stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"})
 
 
 @router.get("/metrics")
