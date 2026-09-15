@@ -11,5 +11,5 @@ class GraphIngestionService:
 
     def index_chunks(self, chunks: list[ChunkMetadata]) -> None:
         for chunk in chunks:
-            self.store.add_extraction(chunk, self.extractor.extract(chunk))
-
+            self.store.add_extraction(chunk, self.extractor.extract(chunk), persist=False)
+        self.store.persist()

@@ -28,7 +28,7 @@ def bootstrap_curated_corpus(settings) -> int:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate vector-only retrieval against routed Graph RAG.")
-    parser.add_argument("--dataset", type=Path, default=Path("data/evaluation/questions.json"))
+    parser.add_argument("--dataset", type=Path, default=Path("data/evaluation/rbi-lending-questions.json"))
     parser.add_argument("--output", type=Path, default=Path("data/evaluation/latest-results.json"))
     parser.add_argument("--data-dir", type=Path, default=Path("data/evaluation/corpus"))
     parser.add_argument("--bootstrap-curated", action="store_true", help="Download the curated RBI lending pages before evaluation.")

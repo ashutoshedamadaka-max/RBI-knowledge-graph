@@ -11,6 +11,7 @@ from app.models.query import Citation, QueryResponse
 from app.models.retrieval import RetrievalRoute
 from app.retrieval.router import QueryRouter
 from app.retrieval.service import VectorRetrievalService
+from app.retrieval.scope import is_rbi_lending_question
 from app.observability.costs import CostEvent, CostTracker
 from app.observability.events import QueryEvent, log_query_event
 
@@ -31,15 +32,19 @@ class RegulatoryQueryService:
         evidence: list[ChunkMetadata] = []
         graph_node_count = 0
         graph_edge_count = 0
+        in_scope = is_rbi_lending_question(user_query)
 
-        if decision.route in {RetrievalRoute.VECTOR, RetrievalRoute.HYBRID}:
+        if in_scope and decision.route in {RetrievalRoute.VECTOR, RetrievalRoute.HYBRID}:
             historical = any(term in user_query.lower() for term in ("before", "previous", "historical", "what changed"))
             evidence.extend(self.vector.retrieve_vector(user_query, top_k, current_only=not historical))
-        if decision.route in {RetrievalRoute.GRAPH, RetrievalRoute.HYBRID}:
+        if in_scope and decision.route in {RetrievalRoute.GRAPH, RetrievalRoute.HYBRID}:
             graph_result = self.graph.retrieve_graph(user_query)
             graph_node_count = len(graph_result.nodes)
             graph_edge_count = len(graph_result.edges)
-            evidence.extend(self.vector.store.get_by_ids(graph_result.chunk_ids))
+            graph_evidence = self.vector.store.get_by_ids(graph_result.chunk_ids)
+            evidence.extend(graph_evidence)
+            if decision.route == RetrievalRoute.GRAPH and not graph_evidence:
+                evidence.extend(self.vector.retrieve_vector(user_query, top_k))
 
         unique = {chunk.chunk_id: chunk for chunk in evidence}
         merged = list(unique.values())[: top_k or self.settings.vector_top_k]

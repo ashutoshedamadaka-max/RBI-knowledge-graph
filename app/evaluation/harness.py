@@ -26,7 +26,7 @@ class EvaluationHarness:
     @staticmethod
     def _recall(evidence: list[ChunkMetadata], expected_urls: list[str]) -> float:
         if not expected_urls:
-            return 1.0 if not evidence else 0.0
+            return 0.0
         found = {item.source_url for item in evidence if item.source_url}
         return len(found & set(expected_urls)) / len(expected_urls)
 
@@ -45,6 +45,7 @@ class EvaluationHarness:
                 vector_recall=self._recall(vector_evidence, case.expected_source_urls),
                 proposed_recall=self._recall(response.retrieved_evidence, case.expected_source_urls),
                 citation_valid=validate_citations(response.answer, response.retrieved_evidence) if response.retrieved_evidence else True,
+                abstention_correct=(not response.retrieved_evidence) if not case.expected_answerable else None,
                 latency_ms=response.latency_ms,
                 estimated_cost_usd=response.estimated_cost_usd,
             ))
@@ -60,10 +61,15 @@ class EvaluationHarness:
             }
             for hop, rows in grouped.items()
         }
+        answerable_results = [row for row, case in zip(results, cases) if case.expected_answerable]
+        abstention_results = [row for row, case in zip(results, cases) if not case.expected_answerable]
         return EvaluationReport(
             total_cases=len(results),
-            retrieval_recall_at_k=sum(row.proposed_recall for row in results) / len(results) if results else 0,
+            retrieval_recall_at_k=(sum(row.proposed_recall for row in answerable_results) / len(answerable_results)
+                                   if answerable_results else 0),
             citation_validity=sum(row.citation_valid for row in results) / len(results) if results else 0,
+            abstention_accuracy=(sum(bool(row.abstention_correct) for row in abstention_results) / len(abstention_results)
+                                  if abstention_results else None),
             routing_accuracy=sum(row.route_correct for row in results) / len(results) if results else 0,
             median_latency_ms=statistics.median(row.latency_ms for row in results) if results else 0,
             estimated_cost_usd=sum(row.estimated_cost_usd for row in results),

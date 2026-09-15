@@ -6,6 +6,7 @@ from app.evaluation.models import EvaluationCase, QuestionCategory
 from app.ingestion.service import IngestionService
 from app.models.documents import IngestRequest
 from app.models.retrieval import RetrievalRoute
+from app.retrieval.scope import is_rbi_lending_question
 from scripts.run_evaluation import bootstrap_curated_corpus
 
 
@@ -51,3 +52,8 @@ def test_bootstrap_uses_only_individually_curated_sources(tmp_path: Path, monkey
     assert count >= 7
     assert len(calls) == count
     assert all(item.source_url for item in calls)
+
+
+def test_lending_scope_guard_rejects_unrelated_questions() -> None:
+    assert is_rbi_lending_question("What does RBI say about penal charges in loan accounts?")
+    assert not is_rbi_lending_question("What is the weather in Mumbai today?")

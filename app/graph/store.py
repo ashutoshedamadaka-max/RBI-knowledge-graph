@@ -1,5 +1,6 @@
 import json
 from pathlib import Path
+import time
 
 import networkx as nx
 from networkx.readwrite import json_graph
@@ -22,7 +23,23 @@ class ProvenanceGraph:
             json.loads(self.path.read_text()), directed=True, multigraph=True, edges="edges"
         )
 
-    def add_extraction(self, chunk: ChunkMetadata, extraction: ExtractionResult) -> None:
+    def _persist(self) -> None:
+        """Replace the graph snapshot atomically to avoid partial or locked writes on Windows."""
+        temporary_path = self.path.with_name(f"{self.path.name}.tmp")
+        temporary_path.write_text(json.dumps(json_graph.node_link_data(self.graph, edges="edges"), indent=2))
+        for attempt in range(5):
+            try:
+                temporary_path.replace(self.path)
+                return
+            except PermissionError:
+                if attempt == 4:
+                    raise
+                time.sleep(0.2)
+
+    def persist(self) -> None:
+        self._persist()
+
+    def add_extraction(self, chunk: ChunkMetadata, extraction: ExtractionResult, persist: bool = True) -> None:
         for entity in extraction.entities:
             node_id = entity_id(entity.name, entity.entity_type)
             self.graph.add_node(
@@ -44,7 +61,8 @@ class ProvenanceGraph:
                 confidence=relationship.confidence,
                 extraction_method=relationship.extraction_method,
             )
-        self.path.write_text(json.dumps(json_graph.node_link_data(self.graph, edges="edges"), indent=2))
+        if persist:
+            self._persist()
 
     def remove_document_ids(self, document_ids: set[str]) -> None:
         if not document_ids:
@@ -56,4 +74,4 @@ class ProvenanceGraph:
         ]
         self.graph.remove_edges_from(stale_edges)
         self.graph.remove_nodes_from(list(nx.isolates(self.graph)))
-        self.path.write_text(json.dumps(json_graph.node_link_data(self.graph, edges="edges"), indent=2))
+        self._persist()

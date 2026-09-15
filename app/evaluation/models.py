@@ -21,6 +21,7 @@ class EvaluationCase(BaseModel):
     hop_count: int = Field(ge=0, le=5)
     expected_route: RetrievalRoute
     expected_source_urls: list[str] = Field(default_factory=list)
+    expected_answerable: bool = True
 
 
 class CaseResult(BaseModel):
@@ -31,6 +32,7 @@ class CaseResult(BaseModel):
     vector_recall: float
     proposed_recall: float
     citation_valid: bool
+    abstention_correct: bool | None = None
     latency_ms: float
     estimated_cost_usd: float
 
@@ -39,9 +41,9 @@ class EvaluationReport(BaseModel):
     total_cases: int
     retrieval_recall_at_k: float
     citation_validity: float
+    abstention_accuracy: float | None = None
     routing_accuracy: float
     median_latency_ms: float
     estimated_cost_usd: float
     by_hop_count: dict[str, dict[str, float]]
     results: list[CaseResult]
-
