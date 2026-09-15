@@ -45,7 +45,7 @@ def research_to_markdown(research: StructuredResearch) -> str:
 
 
 def _query_terms(query: str) -> set[str]:
-    ignored = {"about", "and", "are", "can", "does", "for", "from", "how", "must", "of", "on", "or", "rbi", "the", "to", "under", "what", "when", "which", "with"}
+    ignored = {"about", "and", "are", "can", "does", "for", "from", "how", "must", "of", "on", "or", "rbi", "require", "required", "requirement", "requirements", "the", "to", "under", "what", "when", "which", "with"}
     return {term for term in re.findall(r"[a-z0-9]{3,}", query.lower()) if term not in ignored}
 
 
@@ -59,6 +59,14 @@ def _clean_sentence(sentence: str) -> str:
 def _relevant_sentences(query: str, evidence: list[ChunkMetadata]) -> list[tuple[ChunkMetadata, str]]:
     """Select concise source sentences when an LLM response cannot be used safely."""
     terms = _query_terms(query)
+    # If every retrieved result has the same topic in its title, that topic helped retrieval
+    # but should not overpower the question's remaining, more specific concept.
+    if evidence:
+        title_sets = [set(re.findall(r"[a-z0-9]{3,}", chunk.document_title.lower())) for chunk in evidence]
+        common_title_terms = set.intersection(*title_sets)
+        focused_terms = terms - common_title_terms
+        if focused_terms:
+            terms = focused_terms
     candidates: list[tuple[float, int, ChunkMetadata, str]] = []
     for evidence_order, chunk in enumerate(evidence):
         title_terms = set(re.findall(r"[a-z0-9]{3,}", chunk.document_title.lower()))
