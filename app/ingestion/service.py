@@ -136,6 +136,13 @@ class IngestionService:
     def mark_document_not_current(self, document_id: str, valid_to: str) -> DocumentMetadata | None:
         return self.manifest.mark_not_current(document_id, valid_to)
 
+    def approve_lifecycle(self, document_id: str, lifecycle, evidence_url: str, excerpt: str, reviewed_at: datetime) -> DocumentMetadata | None:
+        updated = self.manifest.approve_lifecycle(document_id, lifecycle, evidence_url, excerpt, reviewed_at)
+        if updated:
+            self.vector_store.apply_lifecycle(updated.document_id, updated.lifecycle.value)
+            self.graph_service.apply_document_lifecycle(updated)
+        return updated
+
     def cleanup_duplicate_sources(self) -> int:
         """Retain the newest copy of each RBI page and remove stale retrieval evidence."""
         by_source: dict[str, list[DocumentMetadata]] = {}

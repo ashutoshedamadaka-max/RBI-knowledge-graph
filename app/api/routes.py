@@ -1,4 +1,5 @@
 import asyncio
+from datetime import UTC, datetime
 import json
 
 from fastapi import APIRouter, Header, HTTPException, Request
@@ -6,7 +7,7 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
 
 from app.ingestion.exceptions import IngestionError
-from app.models.documents import DocumentListResponse, IngestRequest, IngestResponse
+from app.models.documents import DocumentLifecycle, DocumentListResponse, IngestRequest, IngestResponse, LifecycleReviewRequest
 from app.models.chunks import VectorSearchResult
 from app.models.query import QueryRequest, QueryResponse
 from app.retrieval.query_service import RegulatoryQueryService
@@ -63,6 +64,34 @@ def run_monitor(
 def documents(request: Request) -> DocumentListResponse:
     results = request.app.state.ingestion_service.list_documents()
     return DocumentListResponse(documents=results, count=len(results))
+
+
+@router.get("/admin/review-queue", response_model=DocumentListResponse)
+def review_queue(request: Request, x_admin_key: str | None = Header(default=None)) -> DocumentListResponse:
+    settings = request.app.state.settings
+    _require_secret(x_admin_key, settings.admin_api_key, "ADMIN_API_KEY")
+    results = [
+        item for item in request.app.state.ingestion_service.list_documents()
+        if item.lifecycle in {DocumentLifecycle.UNKNOWN, DocumentLifecycle.REVIEW_REQUIRED}
+    ]
+    return DocumentListResponse(documents=results, count=len(results))
+
+
+@router.post("/admin/documents/{document_id}/lifecycle-review", response_model=IngestResponse)
+def approve_lifecycle(
+    request: Request,
+    document_id: str,
+    payload: LifecycleReviewRequest,
+    x_admin_key: str | None = Header(default=None),
+) -> IngestResponse:
+    settings = request.app.state.settings
+    _require_secret(x_admin_key, settings.admin_api_key, "ADMIN_API_KEY")
+    document = request.app.state.ingestion_service.approve_lifecycle(
+        document_id, payload.lifecycle, str(payload.evidence_url), payload.evidence_excerpt, datetime.now(UTC),
+    )
+    if not document:
+        raise HTTPException(status_code=404, detail="Indexed document not found.")
+    return IngestResponse(status="ingested", document=document, message="Lifecycle approval recorded with official RBI evidence.")
 
 
 @router.get("/search", response_model=list[VectorSearchResult])

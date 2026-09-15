@@ -35,6 +35,8 @@ class DocumentMetadata(BaseModel):
     status_evidence_excerpt: str | None = None
     status_checked_at: datetime | None = None
     last_checked_at: datetime | None = None
+    status_resolution_method: str = "AUTOMATED"
+    status_reviewed_at: datetime | None = None
     document_identifier: str | None = None
     effective_date: date | None = None
     document_type: str | None = None
@@ -70,3 +72,15 @@ class IngestResponse(BaseModel):
 class DocumentListResponse(BaseModel):
     documents: list[DocumentMetadata]
     count: int
+
+
+class LifecycleReviewRequest(BaseModel):
+    lifecycle: DocumentLifecycle
+    evidence_url: HttpUrl
+    evidence_excerpt: str = Field(min_length=20, max_length=1200)
+
+    @model_validator(mode="after")
+    def approval_must_be_operative(self) -> "LifecycleReviewRequest":
+        if self.lifecycle not in {DocumentLifecycle.ACTIVE, DocumentLifecycle.AMENDED}:
+            raise ValueError("Manual approval may set only ACTIVE or AMENDED. Non-current states are automation-only.")
+        return self

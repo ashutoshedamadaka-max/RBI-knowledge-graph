@@ -85,6 +85,25 @@ class DocumentManifest:
             self.path.write_text(json.dumps([item.model_dump(mode="json") for item in documents], indent=2))
         return updated
 
+    def approve_lifecycle(self, document_id: str, lifecycle, evidence_url: str, excerpt: str, reviewed_at) -> DocumentMetadata | None:
+        documents = self._read()
+        updated = None
+        for index, document in enumerate(documents):
+            if document.document_id == document_id:
+                updated = document.model_copy(update={
+                    "lifecycle": lifecycle,
+                    "status_evidence_url": evidence_url,
+                    "status_evidence_excerpt": excerpt,
+                    "status_checked_at": reviewed_at,
+                    "status_reviewed_at": reviewed_at,
+                    "status_resolution_method": "ADMIN_REVIEW",
+                })
+                documents[index] = updated
+                break
+        if updated:
+            self.path.write_text(json.dumps([item.model_dump(mode="json") for item in documents], indent=2))
+        return updated
+
     def remove_document_ids(self, document_ids: set[str]) -> None:
         if not document_ids:
             return
