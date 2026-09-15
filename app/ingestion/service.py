@@ -105,7 +105,17 @@ class IngestionService:
         return IngestResponse(status=IngestStatus.INGESTED, document=metadata, message="Document parsed and cached for chunking.")
 
     def list_documents(self) -> list[DocumentMetadata]:
-        return sorted(self.manifest.all(), key=lambda item: item.ingested_at, reverse=True)
+        # Present the latest captured version per RBI page; historical versions
+        # remain stored for historical research rather than cluttering the catalogue.
+        newest: dict[str, DocumentMetadata] = {}
+        for document in self.manifest.all():
+            key = self.manifest._canonical_url(document.source_url) if document.source_url else document.document_id
+            candidate_key = (document.status_checked_at or document.ingested_at, document.document_version, document.ingested_at)
+            existing = newest.get(key)
+            existing_key = (existing.status_checked_at or existing.ingested_at, existing.document_version, existing.ingested_at) if existing else None
+            if existing is None or candidate_key > existing_key:
+                newest[key] = document
+        return sorted(newest.values(), key=lambda item: item.ingested_at, reverse=True)
 
     def apply_lifecycle(self, source_url: str, lifecycle, evidence_excerpt: str, checked_at: datetime) -> DocumentMetadata | None:
         document = self.manifest.get_by_source_url(source_url)
@@ -122,6 +132,9 @@ class IngestionService:
         if not document:
             return None
         return self.manifest.update_monitoring_metadata(document.document_id, document_identifier, effective_date, checked_at)
+
+    def mark_document_not_current(self, document_id: str, valid_to: str) -> DocumentMetadata | None:
+        return self.manifest.mark_not_current(document_id, valid_to)
 
     def cleanup_duplicate_sources(self) -> int:
         """Retain the newest copy of each RBI page and remove stale retrieval evidence."""

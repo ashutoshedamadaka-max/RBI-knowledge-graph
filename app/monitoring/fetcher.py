@@ -8,6 +8,7 @@ import httpx
 
 from app.models.monitoring import DiscoveredDocument, RegulatorySource
 from app.ingestion.parser import extract_html_text
+from app.monitoring.lifecycle import LifecycleResolution, resolve_rbi_html_lifecycle
 
 
 class SourceFetcher(ABC):
@@ -19,9 +20,15 @@ class SourceFetcher(ABC):
     def download_text(self, document: DiscoveredDocument) -> str:
         raise NotImplementedError
 
+    def lifecycle_resolution(self, document: DiscoveredDocument) -> LifecycleResolution | None:
+        return None
+
 
 class RbiHttpFetcher(SourceFetcher):
     """Minimal RBI listing reader; exact parsers remain source-strategy specific."""
+
+    def __init__(self) -> None:
+        self._raw_pages: dict[str, str] = {}
 
     def discover(self, source: RegulatorySource) -> list[DiscoveredDocument]:
         if source.parser_strategy == "rbi_document":
@@ -46,4 +53,14 @@ class RbiHttpFetcher(SourceFetcher):
     def download_text(self, document: DiscoveredDocument) -> str:
         response = httpx.get(document.canonical_url, follow_redirects=True, timeout=45)
         response.raise_for_status()
+        self._raw_pages[document.canonical_url] = response.text
         return extract_html_text(response.text)
+
+    def lifecycle_resolution(self, document: DiscoveredDocument) -> LifecycleResolution | None:
+        raw = self._raw_pages.get(document.canonical_url)
+        if raw is None:
+            response = httpx.get(document.canonical_url, follow_redirects=True, timeout=45)
+            response.raise_for_status()
+            raw = response.text
+            self._raw_pages[document.canonical_url] = raw
+        return resolve_rbi_html_lifecycle(raw)

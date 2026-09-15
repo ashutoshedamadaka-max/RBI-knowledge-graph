@@ -46,7 +46,9 @@ class RegulatoryMonitor:
                 text = self.fetcher.download_text(document)
                 lifecycle = DocumentLifecycle.REVIEW_REQUIRED
                 if hasattr(self.processor, "assess_lifecycle"):
-                    lifecycle = self.processor.assess_lifecycle(document, text).lifecycle
+                    lifecycle = self.processor.assess_lifecycle(
+                        document, text, self.fetcher.lifecycle_resolution(document),
+                    ).lifecycle
                 normalized_text = normalize_regulatory_text(text)
                 content_hash = hashlib.sha256(normalized_text.encode()).hexdigest()
                 if previous and previous.normalized_text_hash == content_hash:

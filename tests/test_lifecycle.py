@@ -1,5 +1,5 @@
 from app.models.documents import DocumentLifecycle
-from app.monitoring.lifecycle import resolve_lifecycle
+from app.monitoring.lifecycle import resolve_lifecycle, resolve_rbi_html_lifecycle
 from app.monitoring.metadata import extract_rbi_document_facts
 
 
@@ -23,3 +23,15 @@ def test_rbi_metadata_is_extracted_only_when_published_in_the_source_text() -> N
 
     assert facts.document_identifier == "RBI/2025-26/36"
     assert str(facts.effective_date) == "2025-11-01"
+
+
+def test_rbi_withdrawn_css_watermark_is_status_evidence() -> None:
+    result = resolve_rbi_html_lifecycle('<table style="background: url(https://rbi.org.in/images/Withdrawn04122025.jpg)">')
+
+    assert result.lifecycle is DocumentLifecycle.WITHDRAWN
+
+
+def test_navigation_link_is_not_mistaken_for_a_withdrawn_status() -> None:
+    result = resolve_rbi_html_lifecycle('<a href="NotificationUserWithdrawnCircular.aspx">Circulars Withdrawn</a>')
+
+    assert result.lifecycle is DocumentLifecycle.REVIEW_REQUIRED

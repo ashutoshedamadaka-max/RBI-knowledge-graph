@@ -28,10 +28,12 @@ class DocumentManifest:
         if not source_url:
             return None
         expected = self._canonical_url(source_url)
-        return next(
-            (item for item in self._read() if item.source_url and self._canonical_url(item.source_url) == expected),
-            None,
-        )
+        matches = [item for item in self._read() if item.source_url and self._canonical_url(item.source_url) == expected]
+        if not matches:
+            return None
+        # A URL can retain historical fetched versions. Monitoring must update
+        # the most recently assessed version, not whichever JSON row came first.
+        return max(matches, key=lambda item: (item.status_checked_at or item.ingested_at, item.document_version, item.ingested_at))
 
     def save(self, document: DocumentMetadata) -> None:
         documents = [item for item in self._read() if item.document_id != document.document_id]
@@ -65,6 +67,18 @@ class DocumentManifest:
                     "effective_date": effective_date or document.effective_date,
                     "last_checked_at": checked_at,
                 })
+                documents[index] = updated
+                break
+        if updated:
+            self.path.write_text(json.dumps([item.model_dump(mode="json") for item in documents], indent=2))
+        return updated
+
+    def mark_not_current(self, document_id: str, valid_to) -> DocumentMetadata | None:
+        documents = self._read()
+        updated = None
+        for index, document in enumerate(documents):
+            if document.document_id == document_id:
+                updated = document.model_copy(update={"is_current": False, "valid_to": valid_to})
                 documents[index] = updated
                 break
         if updated:

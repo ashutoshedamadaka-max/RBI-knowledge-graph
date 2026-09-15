@@ -36,3 +36,20 @@ def resolve_lifecycle(text: str) -> LifecycleResolution:
         "No explicit RBI lifecycle statement was detected automatically; current authority has not been established.",
         checked_at,
     )
+
+
+def resolve_rbi_html_lifecycle(html: str) -> LifecycleResolution:
+    """Read RBI's document-level status watermark, not navigation text."""
+    checked_at = datetime.now(UTC)
+    watermark = re.search(r"background\s*:\s*url\([^)]*withdrawn[^)]*\)", html, flags=re.IGNORECASE)
+    if watermark:
+        return LifecycleResolution(
+            DocumentLifecycle.WITHDRAWN,
+            "RBI marks this document with its official Withdrawn watermark.",
+            checked_at,
+        )
+    return LifecycleResolution(
+        DocumentLifecycle.REVIEW_REQUIRED,
+        "No document-level RBI lifecycle watermark or explicit status statement was detected automatically.",
+        checked_at,
+    )

@@ -3,6 +3,7 @@ from pathlib import Path
 
 from app.config.settings import Settings
 from app.ingestion.chunking import chunk_pages
+from app.ingestion.manifest import DocumentManifest
 from app.models.documents import DocumentLifecycle, DocumentMetadata
 from app.models.chunks import ChunkMetadata
 from app.retrieval.service import VectorRetrievalService
@@ -89,3 +90,13 @@ def test_current_retrieval_excludes_withdrawn_and_unknown_sources(tmp_path: Path
 
     assert [item.chunk_id for item in store.search("penal charges", top_k=3)] == ["current"]
     assert {item.chunk_id for item in store.search("penal charges", top_k=3, current_only=False)} == {"old", "uncertain", "current"}
+
+
+def test_manifest_selects_latest_version_for_one_rbi_source(tmp_path: Path) -> None:
+    manifest = DocumentManifest(tmp_path / "documents.json")
+    older = document().model_copy(update={"document_id": "doc_old", "source_url": "https://rbi.org.in/a", "document_version": 1})
+    newer = document().model_copy(update={"document_id": "doc_new", "source_url": "https://rbi.org.in/a", "document_version": 2})
+    manifest.save(older)
+    manifest.save(newer)
+
+    assert manifest.get_by_source_url("https://rbi.org.in/a").document_id == "doc_new"
