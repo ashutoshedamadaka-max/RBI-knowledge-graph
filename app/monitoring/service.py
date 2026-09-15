@@ -44,19 +44,23 @@ class RegulatoryMonitor:
                     continue
                 previous = self.store.current_version(document.canonical_url)
                 text = self.fetcher.download_text(document)
-                lifecycle = DocumentLifecycle.REVIEW_REQUIRED
-                if hasattr(self.processor, "assess_lifecycle"):
-                    lifecycle = self.processor.assess_lifecycle(
-                        document, text, self.fetcher.lifecycle_resolution(document),
-                    ).lifecycle
+                resolution = self.fetcher.lifecycle_resolution(document)
+                lifecycle = resolution.lifecycle if resolution else DocumentLifecycle.REVIEW_REQUIRED
                 normalized_text = normalize_regulatory_text(text)
                 content_hash = hashlib.sha256(normalized_text.encode()).hexdigest()
                 if previous and previous.normalized_text_hash == content_hash:
+                    if hasattr(self.processor, "assess_lifecycle"):
+                        lifecycle = self.processor.assess_lifecycle(document, text, resolution).lifecycle
                     self.store.update_current_lifecycle(document.canonical_url, lifecycle.value)
                     continue
                 status = DiscoveryStatus.NEW if previous is None else DiscoveryStatus.MODIFIED
                 version_number = 1 if previous is None else previous.version + 1
                 document_id, chunk_ids = self.processor(document, text, version_number) if self.processor else (None, [])
+                # Apply the observed lifecycle after processing. A changed RBI page
+                # can create a new document record, and that latest record—not the
+                # prior snapshot—must receive the current status evidence.
+                if hasattr(self.processor, "assess_lifecycle"):
+                    lifecycle = self.processor.assess_lifecycle(document, text, resolution).lifecycle
                 version = DocumentVersion(
                     version_id=f"version_{hashlib.sha256((document.canonical_url + content_hash).encode()).hexdigest()[:20]}",
                     source_id=source.source_id, canonical_url=document.canonical_url, title=document.title,
