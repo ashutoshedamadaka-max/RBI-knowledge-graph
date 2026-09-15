@@ -29,3 +29,14 @@ def test_vercel_frontend_uses_truthful_evidence_language_and_real_progress_strea
     assert "Answer linked to source evidence" in script
     assert "Citations verified" not in script
     assert "retrieving_official_evidence" in page
+
+
+def test_primary_navigation_uses_real_updates_and_no_knowledge_base_tab() -> None:
+    root = Path(__file__).resolve().parents[1]
+    script = (root / "frontend" / "assets" / "app.js").read_text(encoding="utf-8")
+    page = (root / "frontend" / "index.html").read_text(encoding="utf-8")
+
+    assert all(label in page for label in ("Research", "Regulatory updates", "How I built this", "Evals"))
+    assert 'id="update-badge"' in page
+    assert 'source-catalog-toggle' not in page
+    assert "rbi-updates-last-seen-at" in script

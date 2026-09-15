@@ -9,6 +9,32 @@ let latestDocuments = [];
 let latestAnswer = null;
 let loadingStartedAt = 0;
 let loadingTimer = null;
+let regulatoryUpdates = [];
+
+function setActiveView(view) {
+  $$('.nav-item').forEach((item) => {
+    const active = item.dataset.productView === view;
+    item.classList.toggle('active', active);
+    if (active) item.setAttribute('aria-current', 'page');
+    else item.removeAttribute('aria-current');
+  });
+}
+
+function updateUnreadBadge(updates) {
+  regulatoryUpdates = updates;
+  const seenAt = new Date(localStorage.getItem('rbi-updates-last-seen-at') || 0).getTime();
+  const unread = updates.filter((update) => new Date(update.detected_at).getTime() > seenAt).length;
+  const badge = $('#update-badge');
+  badge.textContent = unread > 99 ? '99+' : String(unread);
+  badge.classList.toggle('hidden', unread === 0);
+  badge.setAttribute('aria-label', `${unread} unread regulatory update${unread === 1 ? '' : 's'}`);
+}
+
+function markUpdatesSeen() {
+  const newest = regulatoryUpdates.reduce((latest, update) => Math.max(latest, new Date(update.detected_at).getTime()), 0);
+  if (newest) localStorage.setItem('rbi-updates-last-seen-at', new Date(newest).toISOString());
+  updateUnreadBadge(regulatoryUpdates);
+}
 
 function relativeTime(value) {
   if (!value) return 'No successful check recorded';
@@ -210,9 +236,10 @@ async function requestResearch(query) {
 
 async function loadStatus() {
   try {
-    const [statusResponse, documentsResponse] = await Promise.all([fetch(api('/monitoring-status')), fetch(api('/documents'))]);
+    const [statusResponse, documentsResponse, updatesResponse] = await Promise.all([fetch(api('/monitoring-status')), fetch(api('/documents')), fetch(api('/regulatory-updates'))]);
     if (!statusResponse.ok || !documentsResponse.ok) throw new Error();
     const status = await statusResponse.json(); const documentList = await documentsResponse.json(); latestDocuments = documentList.documents || [];
+    if (updatesResponse.ok) updateUnreadBadge(await updatesResponse.json());
     const checks = status.last_checks || []; const latest = checks[0]?.checked_at;
     $('#document-count').textContent = `${status.document_count} RBI documents`; $('#source-count').textContent = `${status.tracked_source_count} official sources`;
     const topics = status.topics || []; $('#topic-labels').innerHTML = topics.slice(0, 4).map((topic) => `<span>${escapeHtml(topic)}</span>`).join(''); $('#topic-overflow').textContent = topics.length > 4 ? `+${topics.length - 4}` : ''; $('#topic-overflow').classList.toggle('hidden', topics.length <= 4);
@@ -236,8 +263,10 @@ $$('[data-question]').forEach((button) => button.addEventListener('click', () =>
 $('#new-research').addEventListener('click', () => { $('#app-shell').classList.remove('research-mode'); $('#result').classList.add('hidden'); $('#analysis-state').classList.add('hidden'); $('#new-research').classList.add('hidden'); $('#question').value = ''; $('#question').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 $$('.evidence-tabs button').forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.tab)));
 $('#updates-toggle').addEventListener('click', async () => {
-  const view = $('#updates-view'); const open = view.classList.toggle('hidden'); $('#updates-toggle').setAttribute('aria-expanded', String(!open)); if (open) return;
-  try { const [updatesResponse, statusResponse] = await Promise.all([fetch(api('/regulatory-updates')), fetch(api('/monitoring-status'))]); const updates = await updatesResponse.json(); const status = await statusResponse.json(); $('#monitoring-health').textContent = relativeTime(status.last_checks?.[0]?.checked_at); $('#updates-list').innerHTML = updates.length ? updates.map((update) => `<article class="source-card"><h3>${escapeHtml(update.title)}</h3><small>${escapeHtml(update.change_type)}</small><blockquote>${escapeHtml(update.summary)}</blockquote>${update.source_url ? `<a href="${escapeHtml(update.source_url)}" target="_blank" rel="noreferrer">View original RBI source →</a>` : ''}</article>`).join('') : '<p class="relationship-empty">No material new or revised RBI lending documents were detected in the latest check.</p>'; } catch { $('#updates-list').innerHTML = '<p class="relationship-empty">Regulatory updates are temporarily unavailable.</p>'; }
+  const view = $('#updates-view'); const open = view.classList.toggle('hidden'); $('#updates-toggle').setAttribute('aria-expanded', String(!open));
+  setActiveView(open ? 'research' : 'updates');
+  if (open) return;
+  try { const [updatesResponse, statusResponse] = await Promise.all([fetch(api('/regulatory-updates')), fetch(api('/monitoring-status'))]); const updates = await updatesResponse.json(); const status = await statusResponse.json(); updateUnreadBadge(updates); markUpdatesSeen(); $('#monitoring-health').textContent = relativeTime(status.last_checks?.[0]?.checked_at); $('#updates-list').innerHTML = updates.length ? updates.map((update) => `<article class="source-card"><h3>${escapeHtml(update.title)}</h3><small>${escapeHtml(update.change_type)}</small><blockquote>${escapeHtml(update.summary)}</blockquote>${update.source_url ? `<a href="${escapeHtml(update.source_url)}" target="_blank" rel="noreferrer">View original RBI source →</a>` : ''}</article>`).join('') : '<p class="relationship-empty">No material new or revised RBI lending documents were detected in the latest check.</p>'; } catch { $('#updates-list').innerHTML = '<p class="relationship-empty">Regulatory updates are temporarily unavailable.</p>'; }
 });
 
 function openCatalog() { const dialog = $('#source-catalog'); $('#catalog-content').innerHTML = latestDocuments.length ? latestDocuments.map((document) => { const lifecycle = document.lifecycle || 'UNKNOWN'; const detail = document.status_evidence_excerpt ? `<p>${escapeHtml(document.status_evidence_excerpt)}</p>` : ''; const review = ['UNKNOWN', 'REVIEW_REQUIRED'].includes(lifecycle) ? `<button class="review-source" type="button" data-review-document="${escapeHtml(document.document_id)}">Review status</button>` : ''; return `<article class="catalog-card"><h3>${escapeHtml(document.title)} <span class="lifecycle-pill lifecycle-${escapeHtml(lifecycle)}">${escapeHtml(lifecycle.replaceAll('_', ' '))}</span></h3><p>${document.page_count ? `Pages ${escapeHtml(document.page_count)} · ` : ''}Indexed RBI material</p>${detail}${document.source_url ? `<a href="${escapeHtml(document.source_url)}" target="_blank" rel="noreferrer">Open original source →</a>` : ''}${review}</article>`; }).join('') : '<p class="relationship-empty">Document details are not available yet. Refresh after the knowledge base loads.</p>'; $$('[data-review-document]').forEach((button) => button.addEventListener('click', () => openReviewDialog(button.dataset.reviewDocument))); dialog.showModal(); }
@@ -245,6 +274,7 @@ function openCatalog() { const dialog = $('#source-catalog'); $('#catalog-conten
 function openReviewDialog(documentId) { const document = latestDocuments.find((item) => item.document_id === documentId); if (!document) return; $('#review-document-id').value = document.document_id; $('#review-document-title').textContent = document.title; $('#review-evidence-url').value = document.source_url || ''; $('#review-evidence-excerpt').value = ''; $('#review-admin-key').value = ''; $('#review-result').textContent = ''; $('#review-dialog').showModal(); }
 
 $('#review-form').addEventListener('submit', async (event) => { event.preventDefault(); const documentId = $('#review-document-id').value; const key = $('#review-admin-key').value; const result = $('#review-result'); result.textContent = 'Recording approval…'; try { const response = await fetch(api(`/admin/documents/${encodeURIComponent(documentId)}/lifecycle-review`), { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Key': key }, body: JSON.stringify({ lifecycle: $('#review-lifecycle').value, evidence_url: $('#review-evidence-url').value, evidence_excerpt: $('#review-evidence-excerpt').value }) }); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.detail || 'Approval could not be recorded.'); result.textContent = 'Approved status recorded.'; $('#review-admin-key').value = ''; await loadStatus(); setTimeout(() => { $('#review-dialog').close(); if ($('#source-catalog').open) openCatalog(); }, 550); } catch (error) { result.textContent = error.message; } });
-$('#view-all-sources').addEventListener('click', openCatalog); $('#source-catalog-toggle').addEventListener('click', openCatalog); $('#close-source-catalog').addEventListener('click', () => $('#source-catalog').close());
+$$('[data-product-view="research"]').forEach((button) => button.addEventListener('click', () => { setActiveView('research'); $('#updates-view').classList.add('hidden'); $('#updates-toggle').setAttribute('aria-expanded', 'false'); }));
+$('#view-all-sources').addEventListener('click', openCatalog); $('#close-source-catalog').addEventListener('click', () => $('#source-catalog').close());
 $('#close-review-dialog').addEventListener('click', () => $('#review-dialog').close());
 loadStatus();

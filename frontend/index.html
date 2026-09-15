@@ -11,7 +11,12 @@
   <main class="app-shell" id="app-shell">
     <header class="topbar">
       <a class="brand" href="#research" aria-label="RBI Lending Intelligence home"><b>R</b><span>RBI Lending <em>Intelligence</em><small>Regulations. Relationships. Real answers.</small></span></a>
-      <nav aria-label="Primary navigation"><a class="active" href="#research">Research</a><button id="updates-toggle" type="button" aria-expanded="false">Regulatory updates</button><button id="source-catalog-toggle" type="button">Knowledge base</button><a href="#about">About</a></nav>
+      <nav aria-label="Primary navigation">
+        <button class="nav-item active" type="button" data-product-view="research" aria-current="page">Research</button>
+        <button class="nav-item" id="updates-toggle" type="button" data-product-view="updates" aria-expanded="false">Regulatory updates <span class="update-badge hidden" id="update-badge" aria-label="Unread regulatory updates"></span></button>
+        <button class="nav-item" type="button" data-product-view="how-it-works">How I built this</button>
+        <button class="nav-item" type="button" data-product-view="evals">Evals</button>
+      </nav>
       <div class="source-live" id="source-live"><i aria-hidden="true"></i><span>Official RBI sources monitored<small id="header-last-check">Checking status…</small></span></div>
     </header>
 
