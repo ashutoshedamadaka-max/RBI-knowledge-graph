@@ -25,6 +25,7 @@ class MonitoringRunStatus(str, Enum):
 class DiscoveryStatus(str, Enum):
     NEW = "NEW"
     MODIFIED = "MODIFIED"
+    LIFECYCLE_CHANGED = "LIFECYCLE_CHANGED"
     UNCHANGED = "UNCHANGED"
     POSSIBLY_REMOVED = "POSSIBLY_REMOVED"
 
@@ -126,3 +127,19 @@ class RegulatoryUpdate(BaseModel):
     citation_valid: bool = False
     regulatory_fact: str = ""
     potential_operational_impact: str = ""
+
+
+class RegulatoryUpdateView(RegulatoryUpdate):
+    """An update event paired with the indexed document's current status.
+
+    Discovery events and lifecycle are deliberately separate: viewing an event
+    never resolves a source status, and a document can have a lifecycle change
+    even when its extracted text did not otherwise change.
+    """
+
+    current_lifecycle: DocumentLifecycle = DocumentLifecycle.REVIEW_REQUIRED
+    current_document_id: str | None = None
+    status_evidence_url: str | None = None
+    status_evidence_excerpt: str | None = None
+    status_checked_at: datetime | None = None
+    action_required: bool = True

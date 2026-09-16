@@ -29,7 +29,7 @@ def bootstrap_curated_corpus(settings) -> int:
 def main() -> None:
     parser = argparse.ArgumentParser(description="Evaluate vector-only retrieval against routed Graph RAG.")
     parser.add_argument("--dataset", type=Path, default=Path("data/evaluation/rbi-lending-questions.json"))
-    parser.add_argument("--output", type=Path, default=Path("data/evaluation/latest-results.json"))
+    parser.add_argument("--output", type=Path, default=Path("data/evaluation/portfolio-report.json"))
     parser.add_argument("--data-dir", type=Path, default=Path("data/evaluation/corpus"))
     parser.add_argument("--bootstrap-curated", action="store_true", help="Download the curated RBI lending pages before evaluation.")
     args = parser.parse_args()
@@ -43,10 +43,10 @@ def main() -> None:
     if args.bootstrap_curated:
         print(f"Bootstrapping {bootstrap_curated_corpus(settings)} curated RBI lending sources…")
     harness = EvaluationHarness(settings)
-    report = harness.run(harness.load_cases(args.dataset))
+    report = harness.run(harness.load_cases(args.dataset), benchmark_id=args.dataset.stem)
     args.output.parent.mkdir(parents=True, exist_ok=True)
-    args.output.write_text(json.dumps(report.model_dump(), indent=2))
-    print(json.dumps(report.model_dump(exclude={"results"}), indent=2))
+    args.output.write_text(json.dumps(report.model_dump(mode="json"), indent=2))
+    print(json.dumps(report.model_dump(mode="json", exclude={"results"}), indent=2))
 
 
 if __name__ == "__main__":

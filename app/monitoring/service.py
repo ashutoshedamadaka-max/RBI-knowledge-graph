@@ -68,7 +68,36 @@ class RegulatoryMonitor:
                 if previous and previous.normalized_text_hash == content_hash:
                     if hasattr(self.processor, "assess_lifecycle"):
                         lifecycle = self.processor.assess_lifecycle(document, text, resolution).lifecycle
-                    self.store.update_current_lifecycle(document.canonical_url, lifecycle.value)
+                    lifecycle_changed = self.store.update_current_lifecycle(document.canonical_url, lifecycle.value)
+                    if lifecycle_changed:
+                        update = RegulatoryUpdate(
+                            update_id=f"update_{hashlib.sha256((previous.version_id + lifecycle.value).encode()).hexdigest()[:20]}",
+                            source_id=source.source_id,
+                            title=document.title,
+                            publication_date=document.publication_date,
+                            detected_at=now,
+                            change_type=DiscoveryStatus.LIFECYCLE_CHANGED,
+                            summary=(
+                                f"The monitored RBI page changed lifecycle status from "
+                                f"{previous.lifecycle.value.replace('_', ' ').lower()} to "
+                                f"{lifecycle.value.replace('_', ' ').lower()}."
+                            ),
+                            previous_version_id=previous.version_id,
+                            new_version_id=previous.version_id,
+                            materiality=Materiality.HIGH if lifecycle in {
+                                DocumentLifecycle.WITHDRAWN,
+                                DocumentLifecycle.REPEALED,
+                                DocumentLifecycle.SUPERSEDED,
+                            } else Materiality.MEDIUM,
+                            source_url=document.canonical_url,
+                            citation_valid=False,
+                            regulatory_fact=resolution.excerpt if resolution else "",
+                            potential_operational_impact=(
+                                "Current-guidance eligibility changed; review affected research answers."
+                            ),
+                        )
+                        if self.store.add_update_once(update):
+                            updates.append(update)
                     continue
                 status = DiscoveryStatus.NEW if previous is None else DiscoveryStatus.MODIFIED
                 version_number = 1 if previous is None else previous.version + 1

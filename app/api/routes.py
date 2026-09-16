@@ -1,6 +1,8 @@
 import asyncio
 from datetime import UTC, datetime
 import json
+from pathlib import Path
+from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
@@ -10,12 +12,14 @@ from app.ingestion.exceptions import IngestionError
 from app.models.documents import DocumentLifecycle, DocumentListResponse, IngestRequest, IngestResponse, LifecycleReviewRequest
 from app.models.chunks import VectorSearchResult
 from app.models.query import QueryRequest, QueryResponse
+from app.models.retrieval import GraphRetrievalResult
+from app.graph.query_service import GraphRetrievalService
 from app.retrieval.query_service import RegulatoryQueryService
 from app.retrieval.service import VectorRetrievalService
 from app.observability.costs import CostTracker
 from app.observability.metrics import MetricsService
 from app.monitoring.store import MonitoringStore
-from app.models.monitoring import Materiality, RegulatoryUpdate
+from app.models.monitoring import Materiality, RegulatoryUpdate, RegulatoryUpdateView
 from app.llm.generation import AnswerGenerationError
 from app.monitoring.runner import run_due_monitoring
 from app.monitoring.registry import RegulatorySourceRegistry
@@ -26,6 +30,14 @@ def _require_secret(received: str | None, expected: str | None, label: str) -> N
         raise HTTPException(status_code=503, detail=f"{label} is not configured.")
     if received != expected:
         raise HTTPException(status_code=401, detail="Unauthorized.")
+
+
+def _source_key(value: str) -> str:
+    """Normalize RBI URL presentation without weakening document identity."""
+    parts = urlsplit(value)
+    host = parts.netloc.lower().removeprefix("www.")
+    query = urlencode(sorted(parse_qsl(parts.query, keep_blank_values=True)))
+    return urlunsplit((parts.scheme.lower() or "https", host, parts.path.lower(), query, ""))
 
 router = APIRouter()
 
@@ -145,22 +157,75 @@ def metrics(request: Request) -> dict[str, float | int]:
     return MetricsService(CostTracker(request.app.state.settings.runtime_dir / "cost_events.json")).snapshot()
 
 
-@router.get("/regulatory-updates", response_model=list[RegulatoryUpdate])
+@router.get("/evaluation-report")
+def evaluation_report() -> dict[str, object]:
+    """Return only a versioned, freshly generated benchmark report.
+
+    The UI must not convert an untracked developer artifact into a portfolio
+    metric. Until a report is intentionally generated and committed, callers
+    receive an honest unavailable state.
+    """
+    report_path = Path(__file__).resolve().parents[2] / "data" / "evaluation" / "portfolio-report.json"
+    if not report_path.exists():
+        return {
+            "available": False,
+            "reason": "No published benchmark report is available yet.",
+        }
+    try:
+        return {"available": True, "report": json.loads(report_path.read_text(encoding="utf-8"))}
+    except (json.JSONDecodeError, OSError):
+        return {
+            "available": False,
+            "reason": "The published benchmark report could not be read.",
+        }
+
+
+@router.get("/graph-snapshot", response_model=GraphRetrievalResult)
+def graph_snapshot(request: Request, query: str) -> GraphRetrievalResult:
+    """Expose query-relevant graph evidence without generating an answer.
+
+    The portfolio UI uses this only for an explicit, live example; it never
+    substitutes decorative or inferred relationships for graph evidence.
+    """
+    if len(query.strip()) < 3:
+        raise HTTPException(status_code=422, detail="A graph question must contain at least three characters.")
+    return GraphRetrievalService(request.app.state.settings).retrieve_graph(query)
+
+
+@router.get("/regulatory-updates", response_model=list[RegulatoryUpdateView])
 def regulatory_updates(
     request: Request, topic: str | None = None, materiality: Materiality | None = None,
-) -> list[RegulatoryUpdate]:
+) -> list[RegulatoryUpdateView]:
     updates = MonitoringStore(request.app.state.settings.runtime_dir / "monitoring.json").updates()
     if materiality:
         updates = [item for item in updates if item.materiality is materiality]
     if topic:
         updates = [item for item in updates if topic.lower() in (item.title + " " + item.summary).lower()]
-    return sorted(updates, key=lambda item: item.detected_at, reverse=True)
+    documents_by_url = {
+        _source_key(item.source_url): item
+        for item in request.app.state.ingestion_service.list_documents()
+        if item.source_url
+    }
+    response = []
+    for update in updates:
+        document = documents_by_url.get(_source_key(str(update.source_url)))
+        lifecycle = document.lifecycle if document else DocumentLifecycle.REVIEW_REQUIRED
+        response.append(RegulatoryUpdateView(
+            **update.model_dump(),
+            current_lifecycle=lifecycle,
+            current_document_id=document.document_id if document else None,
+            status_evidence_url=document.status_evidence_url if document else None,
+            status_evidence_excerpt=document.status_evidence_excerpt if document else None,
+            status_checked_at=document.status_checked_at if document else None,
+            action_required=lifecycle in {DocumentLifecycle.REVIEW_REQUIRED, DocumentLifecycle.UNKNOWN},
+        ))
+    return sorted(response, key=lambda item: item.detected_at, reverse=True)
 
 
-@router.get("/regulatory-updates/{update_id}", response_model=RegulatoryUpdate)
-def regulatory_update(request: Request, update_id: str) -> RegulatoryUpdate:
-    update = next((item for item in MonitoringStore(request.app.state.settings.runtime_dir / "monitoring.json").updates() if item.update_id == update_id), None)
-    if not update:
+@router.get("/regulatory-updates/{update_id}", response_model=RegulatoryUpdateView)
+def regulatory_update(request: Request, update_id: str) -> RegulatoryUpdateView:
+    update = next((item for item in regulatory_updates(request) if item.update_id == update_id), None)
+    if update is None:
         raise HTTPException(status_code=404, detail="Regulatory update not found.")
     return update
 

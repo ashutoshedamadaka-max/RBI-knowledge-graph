@@ -1,3 +1,4 @@
+from datetime import UTC, datetime
 from enum import Enum
 
 from pydantic import BaseModel, Field
@@ -26,18 +27,29 @@ class EvaluationCase(BaseModel):
 
 class CaseResult(BaseModel):
     case_id: str
+    question: str
     category: QuestionCategory
     hop_count: int
     route_correct: bool
     vector_recall: float
     proposed_recall: float
     citation_valid: bool
+    citation_evaluable: bool = False
     abstention_correct: bool | None = None
     latency_ms: float
     estimated_cost_usd: float
+    expected_source_urls: list[str] = Field(default_factory=list)
+    actual_source_urls: list[str] = Field(default_factory=list)
+    expected_behavior: str
+    actual_behavior: str
+    why_this_matters: str
+    passed: bool
 
 
 class EvaluationReport(BaseModel):
+    benchmark_id: str = "rbi-lending-questions"
+    generated_at: datetime = Field(default_factory=lambda: datetime.now(UTC))
+    answer_provider: str = "deterministic"
     total_cases: int
     retrieval_recall_at_k: float
     citation_validity: float
@@ -46,4 +58,10 @@ class EvaluationReport(BaseModel):
     median_latency_ms: float
     estimated_cost_usd: float
     by_hop_count: dict[str, dict[str, float]]
+    source_retrieval_pass_count: int = 0
+    source_retrieval_evaluable_count: int = 0
+    citation_traceability_pass_count: int = 0
+    citation_traceability_evaluable_count: int = 0
+    abstention_pass_count: int = 0
+    abstention_evaluable_count: int = 0
     results: list[CaseResult]

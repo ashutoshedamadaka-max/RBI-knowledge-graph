@@ -10,6 +10,21 @@ let latestAnswer = null;
 let loadingStartedAt = 0;
 let loadingTimer = null;
 let regulatoryUpdates = [];
+let latestMonitoringStatus = null;
+let evaluationReportLoaded = false;
+let researchIsLoading = false;
+
+const PRODUCT_VIEWS = new Set(['research', 'updates', 'how-it-works', 'evals']);
+const viewElement = (view) => ({
+  updates: '#updates-view',
+  'how-it-works': '#how-it-works-view',
+  evals: '#evals-view',
+}[view]);
+
+function routeView() {
+  const candidate = window.location.hash.replace(/^#/, '');
+  return PRODUCT_VIEWS.has(candidate) ? candidate : 'research';
+}
 
 function setActiveView(view) {
   $$('.nav-item').forEach((item) => {
@@ -19,15 +34,36 @@ function setActiveView(view) {
     else item.removeAttribute('aria-current');
   });
 }
-function showView(view) {
+function showView(view, { focus = false } = {}) {
+  const selected = PRODUCT_VIEWS.has(view) ? view : 'research';
   ['updates-view', 'how-it-works-view', 'evals-view'].forEach((id) => $(`#${id}`).classList.add('hidden'));
-  const research = view === 'research';
-  $('#research').classList.toggle('hidden', !research); $('#knowledge-status').classList.toggle('hidden', !research);
-  if (!research) $('#result').classList.add('hidden');
-  if (view === 'updates') $('#updates-toggle').click();
-  if (view === 'how-it-works') $('#how-it-works-view').classList.remove('hidden');
-  if (view === 'evals') $('#evals-view').classList.remove('hidden');
-  setActiveView(view);
+  const research = selected === 'research';
+  $('#research').classList.toggle('hidden', !research);
+  $('#knowledge-status').classList.toggle('hidden', !research);
+  $('#analysis-state').classList.toggle('hidden', !research || !researchIsLoading);
+  $('#result').classList.toggle('hidden', !research || !latestAnswer);
+  $('#about').classList.toggle('hidden', !research);
+  const target = viewElement(selected);
+  if (target) $(target).classList.remove('hidden');
+  setActiveView(selected);
+  if (selected === 'updates') loadUpdatesView();
+  if (selected === 'evals') loadEvaluationReport();
+  if (selected === 'how-it-works') renderLifecycleLiveSummary(latestMonitoringStatus);
+  window.requestAnimationFrame(() => revealPortfolioContent(selected));
+  if (focus) {
+    const focusTarget = target ? $(target) : $('#research');
+    window.scrollTo({ top: 0, behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth' });
+    focusTarget?.focus({ preventScroll: true });
+  }
+}
+
+function navigateTo(view, { replace = false, focus = true } = {}) {
+  const selected = PRODUCT_VIEWS.has(view) ? view : 'research';
+  const hash = `#${selected}`;
+  if (window.location.hash !== hash) {
+    window.history[replace ? 'replaceState' : 'pushState']({ view: selected }, '', hash);
+  }
+  showView(selected, { focus });
 }
 
 function updateUnreadBadge(updates) {
@@ -55,6 +91,181 @@ function relativeTime(value) {
   const hours = Math.round(minutes / 60);
   if (hours < 24) return `Checked ${hours} hr ago`;
   return `Checked ${Math.round(hours / 24)} days ago`;
+}
+
+function formatDateTime(value) {
+  if (!value || Number.isNaN(new Date(value).getTime())) return 'Not recorded';
+  return new Intl.DateTimeFormat('en-IN', { day: 'numeric', month: 'short', year: 'numeric', hour: 'numeric', minute: '2-digit' }).format(new Date(value));
+}
+
+function readableStatus(value) {
+  return String(value || 'REVIEW_REQUIRED').replaceAll('_', ' ').toLowerCase().replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function updateLabel(update) {
+  if (update.change_type === 'LIFECYCLE_CHANGED') return 'Status changed';
+  return readableStatus(update.change_type);
+}
+
+function updateAction(update) {
+  if (update.action_required) return 'Review required before this source can support current guidance.';
+  if (['WITHDRAWN', 'REPEALED', 'SUPERSEDED'].includes(update.current_lifecycle)) return 'Excluded from current-guidance retrieval; retained for historical research.';
+  return 'No user action is required. Current status is recorded in the knowledge base.';
+}
+
+function renderLifecycleLiveSummary(status) {
+  const target = $('#lifecycle-live-summary');
+  if (!target) return;
+  if (!status) { target.textContent = 'Live monitoring status is temporarily unavailable.'; return; }
+  const lifecycle = status.lifecycle_counts || {};
+  const nonCurrent = (lifecycle.WITHDRAWN || 0) + (lifecycle.REPEALED || 0) + (lifecycle.SUPERSEDED || 0);
+  const review = (lifecycle.REVIEW_REQUIRED || 0) + (lifecycle.UNKNOWN || 0);
+  target.innerHTML = `<strong>Current monitored state</strong><span>${escapeHtml(String(status.document_count || 0))} indexed documents</span><span>${escapeHtml(String(status.tracked_source_count || 0))} official sources</span><span>${escapeHtml(String(nonCurrent))} non-current</span><span>${escapeHtml(String(review))} need review</span>`;
+}
+
+async function loadUpdatesView() {
+  const list = $('#updates-list');
+  if (!list) return;
+  list.innerHTML = '<p class="relationship-empty">Loading monitored changes…</p>';
+  try {
+    const [updatesResponse, statusResponse] = await Promise.all([fetch(api('/regulatory-updates')), fetch(api('/monitoring-status'))]);
+    if (!updatesResponse.ok || !statusResponse.ok) throw new Error();
+    const updates = await updatesResponse.json();
+    const status = await statusResponse.json();
+    latestMonitoringStatus = status;
+    const lifecycle = status.lifecycle_counts || {};
+    const nonCurrent = (lifecycle.WITHDRAWN || 0) + (lifecycle.REPEALED || 0) + (lifecycle.SUPERSEDED || 0);
+    const review = (lifecycle.REVIEW_REQUIRED || 0) + (lifecycle.UNKNOWN || 0);
+    updateUnreadBadge(updates);
+    markUpdatesSeen();
+    $('#monitoring-health').textContent = relativeTime(status.last_checks?.[0]?.checked_at);
+    $('#monitoring-summary').innerHTML = [
+      ['Documents monitored', status.document_count], ['Official sources', status.tracked_source_count],
+      ['Non-current sources', nonCurrent], ['Needs review', review], ['Last successful check', relativeTime(status.last_checks?.[0]?.checked_at)],
+    ].map(([label, value]) => `<article><small>${escapeHtml(label)}</small><strong>${escapeHtml(String(value))}</strong></article>`).join('');
+    list.innerHTML = updates.length ? updates.map((update) => {
+      const lifecycle = update.current_lifecycle || 'REVIEW_REQUIRED';
+      const evidence = update.status_evidence_excerpt ? `<blockquote>${escapeHtml(update.status_evidence_excerpt)}</blockquote>` : '';
+      const statusSource = update.status_evidence_url && update.status_evidence_url !== update.source_url
+        ? `<a href="${escapeHtml(update.status_evidence_url)}" target="_blank" rel="noreferrer">View status evidence →</a>` : '';
+      return `<article class="update-card"><header><div><p class="eyebrow">${escapeHtml(updateLabel(update))}</p><h3>${escapeHtml(update.title)}</h3></div><span class="lifecycle-pill lifecycle-${escapeHtml(lifecycle)}">${escapeHtml(readableStatus(lifecycle))}</span></header><dl><div><dt>What changed</dt><dd>${escapeHtml(update.summary || 'A monitoring change was detected.')}</dd></div><div><dt>Detected</dt><dd>${escapeHtml(formatDateTime(update.detected_at))}</dd></div><div><dt>Current status</dt><dd>${escapeHtml(readableStatus(lifecycle))}</dd></div><div><dt>Action</dt><dd>${escapeHtml(updateAction(update))}</dd></div></dl>${evidence ? `<div class="status-evidence"><p>Supporting RBI status evidence</p>${evidence}</div>` : ''}<footer>${update.source_url ? `<a href="${escapeHtml(update.source_url)}" target="_blank" rel="noreferrer">Open original RBI source →</a>` : ''}${statusSource}</footer></article>`;
+    }).join('') : '<section class="updates-empty"><p class="eyebrow">No recent material changes</p><h3>The latest monitor check found no new or modified lending documents.</h3><p>Lifecycle status and source availability are still tracked separately.</p></section>';
+    renderLifecycleLiveSummary(status);
+  } catch {
+    list.innerHTML = '<p class="relationship-empty">Regulatory updates are temporarily unavailable. Please retry after the next monitoring check.</p>';
+  }
+}
+
+function portfolioGraphHtml(graph) {
+  if (!graph?.edges?.length) return '<p class="relationship-empty">No query-relevant graph relationship was returned for this question.</p>';
+  const nodes = graph.nodes || [];
+  const center = { x: 170, y: 120 };
+  const radius = Math.min(78, 28 + nodes.length * 5);
+  const points = new Map(nodes.map((node, index) => {
+    const angle = (-Math.PI / 2) + ((Math.PI * 2 * index) / Math.max(nodes.length, 1));
+    return [node.node_id, { x: center.x + Math.cos(angle) * radius, y: center.y + Math.sin(angle) * radius, node }];
+  }));
+  const lines = graph.edges.map((edge) => { const a = points.get(edge.source_id); const b = points.get(edge.target_id); return a && b ? `<line x1="${a.x}" y1="${a.y}" x2="${b.x}" y2="${b.y}"/>` : ''; }).join('');
+  const graphNodes = [...points.values()].map(({ x, y, node }) => `<g class="portfolio-graph-node" tabindex="0" role="button" data-portfolio-node="${escapeHtml(node.node_id)}" aria-label="Highlight ${escapeHtml(node.name)}"><circle cx="${x}" cy="${y}" r="27"/><text x="${x}" y="${y - 3}">${escapeHtml(node.name.slice(0, 17))}</text><text x="${x}" y="${y + 10}">${escapeHtml(node.entity_type)}</text></g>`).join('');
+  return `<svg viewBox="0 0 340 240" role="img" aria-label="Live query-relevant regulatory graph">${lines}${graphNodes}</svg>`;
+}
+
+function bindPortfolioGraphInteractions() {
+  $$('.portfolio-graph-node').forEach((node) => {
+    const select = () => $$('.portfolio-graph-node').forEach((item) => item.classList.toggle('selected', item === node));
+    node.addEventListener('click', select);
+    node.addEventListener('keydown', (event) => { if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); select(); } });
+  });
+}
+
+async function loadGraphExample(question) {
+  const status = $('#graph-example-status');
+  const target = $('#portfolio-graph');
+  status.textContent = 'Reading the current knowledge graph…';
+  target.innerHTML = '';
+  try {
+    const response = await fetch(api(`/graph-snapshot?query=${encodeURIComponent(question)}`));
+    const graph = await response.json();
+    if (!response.ok) throw new Error(graph.detail || 'Graph evidence is unavailable.');
+    target.innerHTML = portfolioGraphHtml(graph);
+    status.textContent = graph.edges?.length ? `${graph.edges.length} real relationship${graph.edges.length === 1 ? '' : 's'} returned for this question.` : 'No query-relevant relationship was returned for this question.';
+    bindPortfolioGraphInteractions();
+  } catch (error) {
+    status.textContent = error.message || 'Graph evidence is temporarily unavailable.';
+  }
+}
+
+function revealPortfolioContent(view) {
+  const root = viewElement(view);
+  if (!root) return;
+  $(`${root}`)?.querySelectorAll('.story-section, .portfolio-reveal, .regression-ending').forEach((element) => element.classList.add('is-visible'));
+}
+
+function titleCase(value) {
+  return String(value || '').replaceAll('-', ' ').replaceAll('_', ' ').replace(/\b\w/g, (letter) => letter.toUpperCase());
+}
+
+function resultCard(label, passed, total, description, state = 'measured') {
+  if (!total || state !== 'measured') {
+    return `<article class="evaluation-result unavailable"><p class="eyebrow">${escapeHtml(label)}</p><h3>Not yet evaluated</h3><p>${escapeHtml(description)}</p></article>`;
+  }
+  const percentage = Math.round((passed / total) * 100);
+  return `<article class="evaluation-result"><p class="eyebrow">${escapeHtml(label)}</p><strong>${escapeHtml(String(passed))} <small>/ ${escapeHtml(String(total))}</small></strong><div class="result-bar" aria-label="${escapeHtml(label)}: ${escapeHtml(String(passed))} of ${escapeHtml(String(total))}"><i style="--result-width:${percentage}%"></i></div><p>${escapeHtml(description)}</p></article>`;
+}
+
+function renderEvaluationUnavailable(reason) {
+  $('#evaluation-dataset-note').textContent = reason || 'A published benchmark run is not available yet.';
+  $('#evaluation-categories').innerHTML = '<p class="relationship-empty">The evaluation harness and labelled datasets are implemented. Results appear here only after a reproducible run is published.</p>';
+  $('#evaluation-results').innerHTML = [
+    resultCard('Source retrieval', 0, 0, 'No published benchmark result is available.'),
+    resultCard('Lifecycle safety', 0, 0, 'Automated regression coverage exists, but no benchmark score is published.'),
+    resultCard('Citation traceability', 0, 0, 'No published benchmark result is available.'),
+    resultCard('Abstention', 0, 0, 'No published benchmark result is available.'),
+  ].join('');
+  $('#evaluation-cases').innerHTML = '<p class="relationship-empty">Individual cases will appear with the published benchmark report.</p>';
+}
+
+function renderEvaluationReport(report) {
+  const cases = Array.isArray(report.results) ? report.results : [];
+  if (!cases.length || !report.generated_at) {
+    renderEvaluationUnavailable('The available report does not contain the provenance required for portfolio display.');
+    return;
+  }
+  const groups = cases.reduce((accumulator, item) => {
+    const category = item.category || 'unlabelled';
+    accumulator[category] = (accumulator[category] || 0) + 1;
+    return accumulator;
+  }, {});
+  $('#evaluation-dataset-note').textContent = `${report.total_cases} labelled RBI lending questions · deterministic run · published ${formatDateTime(report.generated_at)}. This run exposes a legacy-source alignment gap, so it is shown as a re-baselining finding—not a generic answer-accuracy score.`;
+  $('#evaluation-categories').innerHTML = Object.entries(groups).map(([category, count]) => `<article><strong>${escapeHtml(String(count))}</strong><span>${escapeHtml(titleCase(category))}</span></article>`).join('');
+  $('#evaluation-results').innerHTML = [
+    resultCard('Source retrieval', report.source_retrieval_pass_count, report.source_retrieval_evaluable_count, 'Did the labelled official RBI source appear in the eligible evidence set?'),
+    resultCard('Lifecycle safety', 0, 0, 'Automated lifecycle regression tests exist; this benchmark does not yet publish a lifecycle-safety score.'),
+    resultCard('Citation traceability', report.citation_traceability_pass_count, report.citation_traceability_evaluable_count, 'Did citation identifiers resolve to evidence returned by the same research turn?'),
+    resultCard('Abstention', report.abstention_pass_count, report.abstention_evaluable_count, 'Did out-of-scope questions return no RBI research evidence?'),
+  ].join('');
+  $('#evaluation-cases').innerHTML = cases.map((item) => {
+    const result = item.passed ? 'Pass' : 'Needs investigation';
+    const sources = item.expected_source_urls?.length ? `<p><b>Expected source</b>${escapeHtml(item.expected_source_urls.join(' · '))}</p>` : '';
+    const actual = item.actual_source_urls?.length ? `<p><b>Actual source</b>${escapeHtml(item.actual_source_urls.join(' · '))}</p>` : '';
+    return `<details class="evaluation-case"><summary><span><b>${escapeHtml(item.case_id)}</b><small>${escapeHtml(titleCase(item.category))}</small></span><i class="case-${item.passed ? 'pass' : 'review'}">${result}</i></summary><div><p><b>Question</b>${escapeHtml(item.question)}</p><p><b>Expected behaviour</b>${escapeHtml(item.expected_behavior)}</p><p><b>Actual behaviour</b>${escapeHtml(item.actual_behavior)}</p>${sources}${actual}<p><b>Why this matters</b>${escapeHtml(item.why_this_matters)}</p></div></details>`;
+  }).join('');
+}
+
+async function loadEvaluationReport() {
+  if (evaluationReportLoaded) return;
+  evaluationReportLoaded = true;
+  try {
+    const response = await fetch(api('/evaluation-report'));
+    const payload = await response.json();
+    if (!response.ok || !payload.available) {
+      renderEvaluationUnavailable(payload.reason || 'No published benchmark report is available yet.');
+      return;
+    }
+    renderEvaluationReport(payload.report);
+  } catch {
+    renderEvaluationUnavailable('The published benchmark report is temporarily unavailable.');
+  }
 }
 
 function cleanTerms(value) {
@@ -229,6 +440,7 @@ function setProgress(stage) {
 }
 
 function setLoading(loading) {
+  researchIsLoading = loading;
   $('#analysis-state').classList.toggle('hidden', !loading); $('#analysis-state').setAttribute('aria-busy', String(loading));
   if (loading) { $('#result').classList.add('hidden'); $('#behind-route').textContent = ''; $('#behind-summary').innerHTML = '<p>Research is preparing a new evidence-backed answer.</p>'; setProgress('understanding_question'); loadingStartedAt = Date.now(); clearInterval(loadingTimer); loadingTimer = setInterval(() => { $('#loading-time').textContent = `Researching · ${Math.max(1, Math.round((Date.now() - loadingStartedAt) / 1000))}s`; }, 1000); }
   else { clearInterval(loadingTimer); }
@@ -262,7 +474,7 @@ async function loadStatus() {
   try {
     const [statusResponse, documentsResponse, updatesResponse] = await Promise.all([fetch(api('/monitoring-status')), fetch(api('/documents')), fetch(api('/regulatory-updates'))]);
     if (!statusResponse.ok || !documentsResponse.ok) throw new Error();
-    const status = await statusResponse.json(); const documentList = await documentsResponse.json(); latestDocuments = documentList.documents || [];
+    const status = await statusResponse.json(); const documentList = await documentsResponse.json(); latestDocuments = documentList.documents || []; latestMonitoringStatus = status;
     if (updatesResponse.ok) updateUnreadBadge(await updatesResponse.json());
     const checks = status.last_checks || []; const latest = checks[0]?.checked_at;
     $('#document-count').textContent = `${status.document_count} RBI documents`; $('#source-count').textContent = `${status.tracked_source_count} official sources`;
@@ -271,6 +483,7 @@ async function loadStatus() {
     $('#non-current-count').textContent = `${withdrawnCount} non-current`; $('#review-count').textContent = `${reviewCount} needs review`;
     $('#knowledge-summary').textContent = relativeTime(latest); $('#header-last-check').textContent = relativeTime(latest); $('#knowledge-health').textContent = reviewCount ? `${reviewCount} status review${reviewCount === 1 ? '' : 's'}` : status.health === 'healthy' ? '● Live' : 'Needs review'; $('#source-live').classList.toggle('healthy', status.health === 'healthy' && !reviewCount);
     if (withdrawnCount) $('#knowledge-health').textContent = `${withdrawnCount} non-current · ${reviewCount} review`;
+    renderLifecycleLiveSummary(status);
   } catch {
     $('#document-count').textContent = 'Knowledge base unavailable'; $('#source-count').textContent = 'Status will retry on refresh'; $('#non-current-count').textContent = ''; $('#review-count').textContent = ''; $('#knowledge-health').textContent = 'Unavailable';
   }
@@ -295,21 +508,20 @@ $('#follow-up-form').addEventListener('submit', (event) => {
 });
 $('#new-research').addEventListener('click', () => { $('#app-shell').classList.remove('research-mode'); $('#result').classList.add('hidden'); $('#analysis-state').classList.add('hidden'); $('#new-research').classList.add('hidden'); $('#question').value = ''; $('#question').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 $$('.evidence-tabs button').forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.tab)));
-$('#updates-toggle').addEventListener('click', async () => {
-  const view = $('#updates-view'); const open = view.classList.toggle('hidden'); $('#updates-toggle').setAttribute('aria-expanded', String(!open));
-  setActiveView(open ? 'research' : 'updates');
-  if (open) return;
-  try { const [updatesResponse, statusResponse] = await Promise.all([fetch(api('/regulatory-updates')), fetch(api('/monitoring-status'))]); const updates = await updatesResponse.json(); const status = await statusResponse.json(); const lifecycle = status.lifecycle_counts || {}; const nonCurrent = (lifecycle.WITHDRAWN || 0) + (lifecycle.REPEALED || 0) + (lifecycle.SUPERSEDED || 0); const review = (lifecycle.REVIEW_REQUIRED || 0) + (lifecycle.UNKNOWN || 0); updateUnreadBadge(updates); markUpdatesSeen(); $('#monitoring-health').textContent = relativeTime(status.last_checks?.[0]?.checked_at); $('#monitoring-summary').innerHTML = [`${status.document_count} documents monitored`, `${status.tracked_source_count} official sources`, `${nonCurrent} non-current`, `${review} needs review`, relativeTime(status.last_checks?.[0]?.checked_at)].map((item) => `<span>${escapeHtml(item)}</span>`).join(''); $('#updates-list').innerHTML = updates.length ? updates.map((update) => `<article class="source-card"><p class="eyebrow">${escapeHtml(update.change_type)}</p><h3>${escapeHtml(update.title)}</h3><blockquote>${escapeHtml(update.summary)}</blockquote>${update.source_url ? `<a href="${escapeHtml(update.source_url)}" target="_blank" rel="noreferrer">View original RBI source →</a>` : ''}</article>`).join('') : '<p class="relationship-empty">No material new or revised RBI lending documents were detected in the latest check.</p>'; } catch { $('#updates-list').innerHTML = '<p class="relationship-empty">Regulatory updates are temporarily unavailable.</p>'; }
-});
-
 function openCatalog() { const dialog = $('#source-catalog'); $('#catalog-content').innerHTML = latestDocuments.length ? latestDocuments.map((document) => { const lifecycle = document.lifecycle || 'UNKNOWN'; const detail = document.status_evidence_excerpt ? `<p>${escapeHtml(document.status_evidence_excerpt)}</p>` : ''; const review = ['UNKNOWN', 'REVIEW_REQUIRED'].includes(lifecycle) ? `<button class="review-source" type="button" data-review-document="${escapeHtml(document.document_id)}">Review status</button>` : ''; return `<article class="catalog-card"><h3>${escapeHtml(document.title)} <span class="lifecycle-pill lifecycle-${escapeHtml(lifecycle)}">${escapeHtml(lifecycle.replaceAll('_', ' '))}</span></h3><p>${document.page_count ? `Pages ${escapeHtml(document.page_count)} · ` : ''}Indexed RBI material</p>${detail}${document.source_url ? `<a href="${escapeHtml(document.source_url)}" target="_blank" rel="noreferrer">Open original source →</a>` : ''}${review}</article>`; }).join('') : '<p class="relationship-empty">Document details are not available yet. Refresh after the knowledge base loads.</p>'; $$('[data-review-document]').forEach((button) => button.addEventListener('click', () => openReviewDialog(button.dataset.reviewDocument))); dialog.showModal(); }
 
 function openReviewDialog(documentId) { const document = latestDocuments.find((item) => item.document_id === documentId); if (!document) return; $('#review-document-id').value = document.document_id; $('#review-document-title').textContent = document.title; $('#review-evidence-url').value = document.source_url || ''; $('#review-evidence-excerpt').value = ''; $('#review-admin-key').value = ''; $('#review-result').textContent = ''; $('#review-dialog').showModal(); }
 
 $('#review-form').addEventListener('submit', async (event) => { event.preventDefault(); const documentId = $('#review-document-id').value; const key = $('#review-admin-key').value; const result = $('#review-result'); result.textContent = 'Recording approval…'; try { const response = await fetch(api(`/admin/documents/${encodeURIComponent(documentId)}/lifecycle-review`), { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Key': key }, body: JSON.stringify({ lifecycle: $('#review-lifecycle').value, evidence_url: $('#review-evidence-url').value, evidence_excerpt: $('#review-evidence-excerpt').value }) }); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.detail || 'Approval could not be recorded.'); result.textContent = 'Approved status recorded.'; $('#review-admin-key').value = ''; await loadStatus(); setTimeout(() => { $('#review-dialog').close(); if ($('#source-catalog').open) openCatalog(); }, 550); } catch (error) { result.textContent = error.message; } });
-$$('[data-product-view="research"]').forEach((button) => button.addEventListener('click', () => showView('research')));
-$$('[data-product-view="how-it-works"]').forEach((button) => button.addEventListener('click', () => showView('how-it-works')));
-$$('[data-product-view="evals"]').forEach((button) => button.addEventListener('click', () => showView('evals')));
+$$('[data-product-view]').forEach((button) => button.addEventListener('click', () => navigateTo(button.dataset.productView)));
+$('#graph-example-form').addEventListener('submit', (event) => {
+  event.preventDefault();
+  const question = $('#graph-example-question').value.trim();
+  if (question) loadGraphExample(question);
+});
+window.addEventListener('popstate', () => showView(routeView(), { focus: true }));
+window.addEventListener('hashchange', () => showView(routeView(), { focus: true }));
 $('#view-all-sources').addEventListener('click', openCatalog); $('#close-source-catalog').addEventListener('click', () => $('#source-catalog').close());
 $('#close-review-dialog').addEventListener('click', () => $('#review-dialog').close());
 loadStatus();
+navigateTo(routeView(), { replace: true, focus: false });

@@ -80,3 +80,19 @@ def test_withdrawn_marker_overrides_curated_approval(tmp_path: Path) -> None:
     monitor.check_source(source)
 
     assert monitor.store.versions()[0].lifecycle is DocumentLifecycle.WITHDRAWN
+
+
+def test_lifecycle_transition_creates_a_real_monitoring_event(tmp_path: Path) -> None:
+    source = RegulatorySource(
+        source_id="irac", source_name="IRAC", url="https://rbi.org.in/irac",
+        source_type=SourceType.DOCUMENT, regulatory_topics=["advances"], parser_strategy="rbi_document",
+    )
+    store = MonitoringStore(tmp_path / "monitor.json")
+    RegulatoryMonitor(store, ReviewRequiredFetcher(), RecordingProcessor()).check_source(source)
+
+    check, updates = RegulatoryMonitor(store, WatermarkedFetcher(), RecordingProcessor()).check_source(source)
+
+    assert check.status.value == "CHANGES_DETECTED"
+    assert len(updates) == 1
+    assert updates[0].change_type.value == "LIFECYCLE_CHANGED"
+    assert store.versions()[0].lifecycle is DocumentLifecycle.WITHDRAWN

@@ -40,6 +40,30 @@ def test_primary_navigation_uses_real_updates_and_no_knowledge_base_tab() -> Non
     assert 'id="update-badge"' in page
     assert 'source-catalog-toggle' not in page
     assert "rbi-updates-last-seen-at" in script
+    assert "function navigateTo" in script
+    assert "window.addEventListener('popstate'" in script
+    assert "window.addEventListener('hashchange'" in script
+    assert "primary-view updates-page" in page
+
+
+def test_portfolio_endpoints_and_pages_only_expose_available_data() -> None:
+    client = TestClient(create_app())
+    root = Path(__file__).resolve().parents[1]
+    page = (root / "frontend" / "index.html").read_text(encoding="utf-8")
+    script = (root / "frontend" / "assets" / "app.js").read_text(encoding="utf-8")
+
+    graph = client.get("/graph-snapshot", params={"query": "Which entities are covered by digital lending guidance?"})
+    evaluation = client.get("/evaluation-report")
+
+    assert graph.status_code == 200
+    assert {"nodes", "edges"}.issubset(graph.json())
+    assert evaluation.status_code == 200
+    assert "available" in evaluation.json()
+    if evaluation.json()["available"]:
+        report = evaluation.json()["report"]
+        assert {"generated_at", "total_cases", "results"}.issubset(report)
+    assert "Not yet evaluated" in script
+    assert "Load a real relationship snapshot" in page
 
 
 def test_research_workspace_has_conversation_follow_up_and_artifact_summary() -> None:
