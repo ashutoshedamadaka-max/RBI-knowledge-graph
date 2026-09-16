@@ -19,6 +19,16 @@ function setActiveView(view) {
     else item.removeAttribute('aria-current');
   });
 }
+function showView(view) {
+  ['updates-view', 'how-it-works-view', 'evals-view'].forEach((id) => $(`#${id}`).classList.add('hidden'));
+  const research = view === 'research';
+  $('#research').classList.toggle('hidden', !research); $('#knowledge-status').classList.toggle('hidden', !research);
+  if (!research) $('#result').classList.add('hidden');
+  if (view === 'updates') $('#updates-toggle').click();
+  if (view === 'how-it-works') $('#how-it-works-view').classList.remove('hidden');
+  if (view === 'evals') $('#evals-view').classList.remove('hidden');
+  setActiveView(view);
+}
 
 function updateUnreadBadge(updates) {
   regulatoryUpdates = updates;
@@ -297,7 +307,9 @@ function openCatalog() { const dialog = $('#source-catalog'); $('#catalog-conten
 function openReviewDialog(documentId) { const document = latestDocuments.find((item) => item.document_id === documentId); if (!document) return; $('#review-document-id').value = document.document_id; $('#review-document-title').textContent = document.title; $('#review-evidence-url').value = document.source_url || ''; $('#review-evidence-excerpt').value = ''; $('#review-admin-key').value = ''; $('#review-result').textContent = ''; $('#review-dialog').showModal(); }
 
 $('#review-form').addEventListener('submit', async (event) => { event.preventDefault(); const documentId = $('#review-document-id').value; const key = $('#review-admin-key').value; const result = $('#review-result'); result.textContent = 'Recording approval…'; try { const response = await fetch(api(`/admin/documents/${encodeURIComponent(documentId)}/lifecycle-review`), { method: 'POST', headers: { 'Content-Type': 'application/json', 'X-Admin-Key': key }, body: JSON.stringify({ lifecycle: $('#review-lifecycle').value, evidence_url: $('#review-evidence-url').value, evidence_excerpt: $('#review-evidence-excerpt').value }) }); const body = await response.json().catch(() => ({})); if (!response.ok) throw new Error(body.detail || 'Approval could not be recorded.'); result.textContent = 'Approved status recorded.'; $('#review-admin-key').value = ''; await loadStatus(); setTimeout(() => { $('#review-dialog').close(); if ($('#source-catalog').open) openCatalog(); }, 550); } catch (error) { result.textContent = error.message; } });
-$$('[data-product-view="research"]').forEach((button) => button.addEventListener('click', () => { setActiveView('research'); $('#updates-view').classList.add('hidden'); $('#updates-toggle').setAttribute('aria-expanded', 'false'); }));
+$$('[data-product-view="research"]').forEach((button) => button.addEventListener('click', () => showView('research')));
+$$('[data-product-view="how-it-works"]').forEach((button) => button.addEventListener('click', () => showView('how-it-works')));
+$$('[data-product-view="evals"]').forEach((button) => button.addEventListener('click', () => showView('evals')));
 $('#view-all-sources').addEventListener('click', openCatalog); $('#close-source-catalog').addEventListener('click', () => $('#source-catalog').close());
 $('#close-review-dialog').addEventListener('click', () => $('#review-dialog').close());
 loadStatus();
