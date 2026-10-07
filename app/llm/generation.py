@@ -48,6 +48,34 @@ class AnswerGenerator(ABC):
         raise NotImplementedError
 
 
+def align_research_headings(research: StructuredResearch, evidence: list[ChunkMetadata]) -> StructuredResearch:
+    """Remove unsupported topic labels; this is not semantic claim verification.
+
+    Headings are optional presentation metadata. Require their substantive words
+    in both their own body and cited text rather than adding an ungrounded topic.
+    Conservative false negatives simply result in an untitled, numbered provision.
+    """
+    ignored = {"a", "an", "and", "are", "as", "at", "be", "by", "for", "from", "in", "is", "of", "on", "or", "the", "to", "with",
+               "key", "requirements", "requirement", "supporting", "provisions", "provision", "changes", "change", "rules", "rule", "modifications"}
+    def terms(value: str) -> set[str]:
+        return {word.rstrip("s") for word in re.findall(r"[a-z0-9]+", value.lower()) if word not in ignored}
+    chunks = {chunk.chunk_id: chunk.text for chunk in evidence}
+    def supported(title: str, claims: list[ResearchClaim]) -> bool:
+        heading_terms = terms(title)
+        body = " ".join(claim.text for claim in claims)
+        cited = " ".join(chunks.get(cid, "") for claim in claims for cid in claim.citation_ids)
+        return not heading_terms or (heading_terms <= terms(body) and heading_terms <= terms(cited))
+    sections = []
+    for section in research.sections:
+        claims = [claim.model_copy(update={"title": None}) if claim.title and not supported(claim.title, [claim]) else claim
+                  for claim in section.claims]
+        sections.append(section.model_copy(update={
+            "claims": claims,
+            "title": section.title if supported(section.title, claims) else "Supporting provisions",
+        }))
+    return research.model_copy(update={"sections": sections})
+
+
 def research_to_markdown(research: StructuredResearch) -> str:
     if research.status is ResearchStatus.INSUFFICIENT_EVIDENCE:
         return "### Insufficient evidence\nI could not find enough RBI lending evidence in the indexed corpus to answer this responsibly."
@@ -166,7 +194,7 @@ class OpenAIAnswerGenerator(AnswerGenerator):
 
     def generate(self, query: str, evidence: list[ChunkMetadata]) -> GenerationResult:
         context = "\n\n".join(
-            f"CHUNK {chunk.chunk_id} | {chunk.document_title} | page {chunk.page_number}\n{chunk.text}"
+            f"CHUNK {chunk.chunk_id} | {chunk.document_title} | lifecycle {chunk.lifecycle.value} | passage {chunk.chunk_index + 1}\n{chunk.text}"
             for chunk in evidence
         )
         prompt = (
@@ -182,6 +210,11 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             "do not imply that the summary covers all amendments. Never present struck-out or deleted text as a current rule. "
             "citation_ids must contain bare supplied chunk IDs without square brackets. "
             "Each claim title should be scannable and factual. Use only meaningful sections; "
+            "Keep the summary under 90 words and prefer at most 5 distinct requirements. Expand unfamiliar abbreviations. "
+            "Every heading must describe its own claim: never label healthcare provisions as housing, or infer a category. "
+            "Only include a heading if its wording is supported by both the claim and its cited passage; otherwise use null. "
+            "Do not infer that a provision is new just because it appears in an amendment. "
+            "Historical or withdrawn evidence must be explicitly labelled as such, not presented as current guidance. "
             "do not create empty sections. related_questions is optional and must be RBI lending questions.\n"
             "JSON shape: {status, display_title|null, direct_answer:{text,citation_ids}|null, "
             "sections:[{id,title,claims:[{title|null,text,citation_ids}]}], related_questions:[...]}.\n\n"

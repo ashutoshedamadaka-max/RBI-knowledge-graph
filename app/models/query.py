@@ -27,6 +27,8 @@ class QueryPipelineSummary(BaseModel):
     excluded_after_validity_check: int = 0
     selected_evidence_count: int = 0
     historical_query: bool = False
+    retrieval_method: str = "unknown"
+    answer_mode: str = "unknown"
 
 
 class QueryResponse(BaseModel):

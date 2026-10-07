@@ -3,38 +3,40 @@
 <head>
   <meta charset="utf-8">
   <meta name="viewport" content="width=device-width, initial-scale=1">
-  <meta name="description" content="Evidence-first RBI lending regulatory intelligence.">
+  <meta name="description" content="Research RBI lending rules, inspect source status and follow changes across a selected official corpus. An independent AI product portfolio prototype.">
   <title>RBI Lending Intelligence</title>
   <link rel="stylesheet" href="./assets/styles.css">
+  <link rel="stylesheet" href="./assets/refinements.css">
 </head>
 <body>
   <main class="app-shell" id="app-shell">
     <header class="topbar">
-      <a class="brand" href="#research" aria-label="RBI Lending Intelligence home"><b>R</b><span>RBI Lending <em>Intelligence</em><small>Regulations. Relationships. Real answers.</small></span></a>
+      <a class="brand" href="#research" aria-label="RBI Lending Intelligence home"><b>R</b><span>RBI Lending <em>Intelligence</em><small>Evidence-first regulatory research</small></span></a>
       <nav aria-label="Primary navigation">
         <button class="nav-item active" type="button" data-product-view="research" aria-current="page">Research</button>
         <button class="nav-item" id="updates-toggle" type="button" data-product-view="updates">Regulatory updates <span class="update-badge hidden" id="update-badge" aria-label="Unread regulatory updates"></span></button>
         <button class="nav-item" type="button" data-product-view="how-it-works">How I built this</button>
-        <button class="nav-item" type="button" data-product-view="evals">Evals</button>
+        <button class="nav-item" type="button" data-product-view="evals">Quality &amp; testing</button>
       </nav>
-      <div class="source-live" id="source-live"><i aria-hidden="true"></i><span>Official RBI sources monitored<small id="header-last-check">Checking status…</small></span></div>
+      <div class="source-live" id="source-live"><i aria-hidden="true"></i><span><span id="header-monitor-label">Selected RBI sources</span><small id="header-last-check">Checking status…</small></span></div>
     </header>
 
     <section class="discovery" id="research">
       <div class="hero-copy">
-        <p class="eyebrow">Evidence-first regulatory research</p>
-        <h1>Clear lending guidance,<br><i>with the source attached.</i></h1>
-        <p>Research RBI lending regulations with answers grounded in official circulars, directions and master directions—powered by regulatory relationships and retrieved evidence.</p>
+        <p class="eyebrow">RBI lending research · source-aware by design</p>
+        <h1>Find the rule.<br><i>Know if it still applies.</i></h1>
+        <p>Research RBI lending guidance with the source, status and regulatory context attached. Every result is designed to be inspected—not simply accepted.</p>
+        <p class="prototype-note">Independent portfolio prototype · Not affiliated with RBI · Not legal advice</p>
         <div class="trust-row" aria-label="Product benefits">
           <article><b aria-hidden="true">▤</b><span><strong>Real RBI sources</strong><small>Official circulars, directions and master directions</small></span></article>
-          <article><b aria-hidden="true">⌘</b><span><strong>Regulatory relationships</strong><small>Understand how rules connect across documents</small></span></article>
+          <article><b aria-hidden="true">⌘</b><span><strong>Current or withdrawn?</strong><small>Source status checked before current-guidance answers</small></span></article>
           <article><b aria-hidden="true">✓</b><span><strong>Answers you can trace</strong><small>Follow every claim back to source evidence</small></span></article>
         </div>
       </div>
       <form id="query-form" class="research-composer">
-        <div class="composer-heading"><label for="question">Ask a regulatory question</label><span>RBI lending scope</span></div>
+        <div class="composer-heading"><div><p class="eyebrow">Start a research brief</p><label for="question">What do you need to verify?</label></div><span>Selected RBI lending corpus</span></div>
         <div class="input-shell"><textarea id="question" rows="2" placeholder="e.g. What do the 2026 Priority Sector Lending amendments change?" required></textarea></div>
-        <div class="composer-actions"><button id="submit" class="primary-action" type="submit"><span class="submit-label">Research with RBI sources</span><span aria-hidden="true">→</span></button><button id="new-research" class="quiet-action hidden" type="button">Return to overview</button></div>
+        <div class="composer-actions"><p>Answers include inspectable RBI evidence and lifecycle status.</p><button id="submit" class="primary-action" type="submit"><span class="submit-label">Research with RBI sources</span><span aria-hidden="true">→</span></button><button id="new-research" class="quiet-action hidden" type="button">Return to overview</button></div>
         <div class="example-grid" aria-label="Example questions">
           <button type="button" data-question="What do the RBI Priority Sector Lending amendments issued in 2026 change?"><strong>Priority sector lending</strong><span>What do the 2026 RBI amendments change?</span><i aria-hidden="true">→</i></button>
           <button type="button" data-question="What does the RBI MSME lending amendment issued in 2026 cover?"><strong>MSME lending</strong><span>What does the 2026 amendment cover?</span><i aria-hidden="true">→</i></button>
@@ -52,7 +54,8 @@
     </section>
 
     <section id="analysis-state" class="analysis-state hidden" aria-live="polite" aria-busy="true">
-      <div class="loading-heading"><div><p class="eyebrow">Research in progress</p><h2>Working from indexed RBI guidance</h2></div><span id="loading-time">Preparing…</span></div>
+      <div class="loading-heading"><div><p class="eyebrow">Research in progress</p><h2 id="loading-stage">Understanding your question</h2><p class="loading-note">Searching indexed evidence, checking source status, then preparing an answer.</p></div><span id="loading-time">Preparing…</span></div>
+      <details class="loading-details"><summary>View research steps</summary>
       <ol class="research-progress" id="research-progress">
         <li data-stage="understanding_question"><b>1</b><span><strong>Understanding your question</strong><small>Identifying the RBI lending topic</small></span></li>
         <li data-stage="searching_regulatory_relationships"><b>2</b><span><strong>Searching regulatory relationships</strong><small>Checking the evidence graph when relevant</small></span></li>
@@ -61,6 +64,7 @@
         <li data-stage="selecting_authoritative_evidence"><b>5</b><span><strong>Selecting source evidence</strong><small>Preparing the eligible evidence set</small></span></li>
         <li data-stage="building_grounded_answer"><b>6</b><span><strong>Building the answer</strong><small>Linking the response to retrieved evidence</small></span></li>
       </ol>
+      </details>
       <div class="research-skeleton" aria-hidden="true"><div></div><div></div><div></div></div>
     </section>
 
@@ -72,20 +76,21 @@
           <article class="conversation-turn assistant-turn"><span class="turn-avatar" aria-hidden="true">R</span><div class="assistant-response"><div class="answer-heading"><div><p class="eyebrow">RBI Lending Intelligence</p><h2 id="answer-title">RBI lending guidance</h2></div><span id="evidence-badge"></span></div><div id="structured-answer"></div></div></article>
           <section class="evidence-panel" id="evidence-panel"><div class="evidence-tabs" role="tablist" aria-label="Evidence views"><button class="active" data-tab="sources" role="tab" aria-selected="true" aria-controls="sources-tab">Sources <span id="source-tab-count"></span></button><button data-tab="relationships" role="tab" aria-selected="false" aria-controls="relationships-tab">Regulatory relationships <span id="graph-tab-count"></span></button></div><div id="sources-tab" class="tab-content" role="tabpanel"></div><div id="relationships-tab" class="tab-content hidden" role="tabpanel"></div></section>
           <section id="related-questions" class="related-questions hidden"><p class="eyebrow">Continue research</p><div id="related-question-list"></div></section>
-          <form class="follow-up-composer" id="follow-up-form"><label for="follow-up-question">Continue research</label><div><input id="follow-up-question" type="text" placeholder="Ask a follow-up question…"><button class="primary-action" type="submit" aria-label="Research follow-up question">→</button></div><small>Each question is researched against the current RBI evidence set.</small></form>
+          <form class="follow-up-composer" id="follow-up-form"><label for="follow-up-question">Research another question</label><div><input id="follow-up-question" type="text" placeholder="Include the topic and entity you want to research…"><button class="primary-action" type="submit" aria-label="Research follow-up question">→</button></div><small>Each question is independent. Previous answers are not sent as context.</small></form>
         </section>
-        <aside class="behind-panel" id="behind-panel" aria-label="Behind this answer"><div class="behind-heading"><div><p class="eyebrow">Research summary</p><h2>Behind this answer</h2></div><span id="behind-route"></span></div><div id="behind-summary" class="behind-summary"><p>Research details will appear after an answer is returned.</p></div></aside>
+        <aside class="behind-panel" id="behind-panel" aria-label="Evidence and research details"><h2 class="evidence-heading">Check the evidence</h2><p class="evidence-help">Select a citation to inspect its supporting passage. Several passages can belong to one document.</p><div id="evidence-slot"></div><details class="process-details"><summary>Behind this answer <span id="behind-route"></span></summary><div id="behind-summary" class="behind-summary"><p>Research details will appear after an answer is returned.</p></div></details></aside>
       </div>
     </section>
 
     <section id="updates-view" class="primary-view updates-page hidden" tabindex="-1" aria-labelledby="updates-title">
       <header class="view-intro"><p class="eyebrow">Source monitoring</p><h1 id="updates-title">Regulatory updates</h1><p>See what changed across the official RBI lending sources monitored by the knowledge base.</p></header>
       <div class="monitoring-summary" id="monitoring-summary" aria-label="Monitoring status"></div>
-      <section class="updates-feed" aria-labelledby="updates-feed-title"><div class="section-heading"><div><p class="eyebrow">Latest changes</p><h2 id="updates-feed-title">Detected monitoring events</h2></div><p id="monitoring-health"></p></div><div id="updates-list" class="updates-list" aria-live="polite"></div></section>
+      <section class="updates-feed" aria-labelledby="updates-feed-title"><div class="section-heading"><div><p class="eyebrow">Latest recorded event per source</p><h2 id="updates-feed-title">Source changes &amp; review decisions</h2><p>Monitoring events are not necessarily new rules. Open the original source to verify regulatory impact; earlier events are grouped below each source.</p></div><p id="monitoring-health"></p></div><div id="updates-list" class="updates-list" aria-live="polite"></div></section>
     </section>
 
     <section id="how-it-works-view" class="primary-view portfolio-view hidden" tabindex="-1" aria-labelledby="how-title">
       <header class="portfolio-intro"><p class="eyebrow">How I built this</p><h1 id="how-title">An official citation<br><i>can still be wrong.</i></h1><p class="portfolio-lead">A source can be genuine and relevant, but no longer be the rule in force. This product checks both relevance and regulatory validity.</p></header>
+      <section class="product-story" aria-label="Product rationale"><article><p class="eyebrow">The intended job</p><h2>Less searching. More checking.</h2><p>Help lending and compliance researchers find relevant RBI passages and inspect their authority before relying on an answer. This is a target use case, not a claim of validated adoption.</p></article><article><p class="eyebrow">The MVP choice</p><h2>A small, inspectable corpus.</h2><p>Start with selected lending sources, explicit lifecycle rules and traceable citations. Completeness and automated legal interpretation are outside this prototype’s promise.</p></article><article><p class="eyebrow">What the failures taught me</p><h2>Relevance is only one check.</h2><p>Withdrawn watermarks, contaminated page text and misleading answer headings exposed different failure modes. Each needs its own guardrail—not a single accuracy score.</p></article></section>
       <div class="comparison-flow portfolio-reveal"><article><p class="eyebrow">Basic retrieval</p><strong>Find similar RBI text</strong><span>↓</span><strong>Generate answer</strong><span>↓</span><b>⚠ A withdrawn source can still win</b></article><article class="decision-card"><p class="eyebrow">Product decision</p><h2>Validity must outrank similarity.</h2><p>Retrieval finds what looks relevant. Lifecycle checks decide what is authoritative now.</p></article></div>
 
       <section class="story-section architecture-section" aria-labelledby="architecture-title"><div class="section-kicker"><p class="eyebrow">From question to answer</p><h2 id="architecture-title">One evidence path, made inspectable.</h2><p>Each stage has a distinct job. Together, they keep evidence selection separate from answer generation.</p></div>
@@ -101,8 +106,8 @@
         </div>
       </section>
 
-      <section class="story-section graph-story" aria-labelledby="graph-title"><div class="section-kicker"><p class="eyebrow">The knowledge graph</p><h2 id="graph-title">Search finds text. The graph finds connections.</h2><p>Semantic search asks what looks relevant. The graph asks how regulations, entities and requirements connect. Lifecycle checks decide which of those sources can be relied upon now.</p></div>
-        <div class="graph-explainer"><div class="graph-difference"><article><b>Semantic search</b><strong>“What text looks relevant?”</strong></article><article><b>Knowledge graph</b><strong>“How are regulations connected?”</strong></article><article><b>Validity layer</b><strong>“Which sources are eligible now?”</strong></article></div><div class="live-graph-card"><p class="eyebrow">Live graph evidence</p><h3>Load a real relationship snapshot</h3><p>This visual only draws nodes and edges returned by the current knowledge graph.</p><form id="graph-example-form"><label for="graph-example-question">Graph question</label><div><input id="graph-example-question" value="Which entities are covered by digital lending guidance?"><button class="secondary-action" type="submit">Load graph</button></div></form><p id="graph-example-status" class="inline-status">No graph snapshot loaded.</p><div id="portfolio-graph" class="portfolio-graph" aria-live="polite"></div></div></div>
+      <section class="story-section graph-story" aria-labelledby="graph-title"><div class="section-kicker"><p class="eyebrow">The knowledge graph</p><h2 id="graph-title">Search finds text. The graph finds connections.</h2><p>The current search uses feature hashing and word matching—not a semantic embedding model. The graph adds explicit, source-backed relationships where available; it is not guaranteed to improve every question.</p></div>
+        <div class="graph-explainer"><div class="graph-difference"><article><b>Text retrieval</b><strong>“Which passages match?”</strong></article><article><b>Knowledge graph</b><strong>“How are regulations connected?”</strong></article><article><b>Validity layer</b><strong>“Which sources are eligible now?”</strong></article></div><div class="live-graph-card"><p class="eyebrow">Live graph evidence</p><h3>Load a real relationship snapshot</h3><p>This visual shows stored relationships, not proof of current authority. Answer retrieval separately checks lifecycle eligibility.</p><form id="graph-example-form"><label for="graph-example-question">Graph question</label><div><input id="graph-example-question" value="Which entities are covered by priority sector lending guidance?"><button class="secondary-action" type="submit">Load graph</button></div></form><p id="graph-example-status" class="inline-status">No graph snapshot loaded.</p><div id="portfolio-graph" class="portfolio-graph" aria-live="polite"></div></div></div>
       </section>
 
       <section class="story-section lifecycle-story" aria-labelledby="lifecycle-title"><div class="section-kicker"><p class="eyebrow">Self-updating knowledge base</p><h2 id="lifecycle-title">Regulations change. The knowledge base changes with them.</h2><p>Monitoring does not assume that an available page is current. It records source checks, detects meaningful changes and applies explicit lifecycle evidence before future current-guidance retrieval.</p></div>
@@ -120,7 +125,7 @@
     </section>
 
     <section id="evals-view" class="primary-view portfolio-view hidden" tabindex="-1" aria-labelledby="evals-title">
-      <header class="portfolio-intro"><p class="eyebrow">Evaluation</p><h1 id="evals-title">Grounded is not<br><i>the same as current.</i></h1><p class="portfolio-lead">The product is tested across the failure modes that matter for regulatory research—not reduced to one generic AI accuracy score.</p></header>
+      <header class="portfolio-intro"><p class="eyebrow">Quality &amp; testing · Evals</p><h1 id="evals-title">Test the promise.<br><i>Show the gaps.</i></h1><p class="portfolio-lead">Can it find the right source, exclude withdrawn material and decline unsupported questions? These are separate checks. Citation mapping does not prove that a claim is factually correct.</p></header>
       <section class="evaluation-principles"><div class="evaluation-grid"><article><b>01</b><h2>Source retrieval</h2><p>Does the expected official RBI source appear for a labelled question?</p></article><article><b>02</b><h2>Lifecycle safety</h2><p>Can withdrawn or uncertain material be kept out of current guidance?</p></article><article><b>03</b><h2>Citation traceability</h2><p>Does every displayed citation resolve to retrieved evidence?</p></article><article><b>04</b><h2>Abstention</h2><p>Does the product decline questions outside the indexed RBI lending scope?</p></article></div></section>
       <section class="story-section test-set-story" aria-labelledby="test-set-title"><div class="section-kicker"><p class="eyebrow">What we actually test</p><h2 id="test-set-title">The test set</h2><p id="evaluation-dataset-note">Loading the published benchmark metadata…</p></div><div id="evaluation-categories" class="evaluation-categories" aria-live="polite"></div></section>
       <section class="story-section evaluation-results-story" aria-labelledby="results-title"><div class="section-kicker"><p class="eyebrow">Evaluation results</p><h2 id="results-title">Measure each failure mode separately.</h2><p>Each result explains what it tests, not just whether a number is high or low.</p></div><div id="evaluation-results" class="evaluation-results" aria-live="polite"></div></section>
@@ -129,7 +134,7 @@
       <section class="regression-ending" aria-labelledby="regression-title"><p class="eyebrow">Regression philosophy</p><h2 id="regression-title">Every repeatable failure becomes a test.</h2><ol><li>Reproduce it</li><li>Understand the root cause</li><li>Fix the system</li><li>Add a regression case</li><li>Protect future changes from reintroducing it</li></ol></section>
     </section>
 
-    <section id="about" class="about research-footer"><p class="eyebrow">About this project</p><p>RBI Lending Intelligence combines official-source retrieval with regulatory relationships so lending guidance can be researched and traced to evidence.</p></section>
+    <section id="about" class="about research-footer"><p class="eyebrow">An AI product portfolio prototype</p><p>Built to explore a practical problem: how do you research rules when the sources keep changing? The system combines retrieval, source-backed relationships and lifecycle checks. Coverage is selected, monitoring can become stale, and generated answers still need human verification.</p><p>Independent project. Not affiliated with the Reserve Bank of India. Not legal or compliance advice.</p></section>
   </main>
   <div id="citation-popover" class="citation-popover hidden" role="tooltip"></div>
   <dialog id="source-catalog"><div class="drawer-head"><div><p class="eyebrow">Indexed material</p><h2>RBI lending sources</h2></div><button id="close-source-catalog" type="button" aria-label="Close sources">×</button></div><div id="catalog-content"></div></dialog>

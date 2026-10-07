@@ -1,22 +1,20 @@
-# RBI Regulatory Intelligence Engine
+# RBI Lending Intelligence
+
+[Open the app](https://rbiknowledgegraph.vercel.app/) · Independent AI product portfolio prototype · Not affiliated with RBI
 
 ## Problem
 
-Regulatory lending information is fragmented across documents, and conventional vector RAG can struggle with questions requiring relationships between regulations, entities, requirements, and amendments.
+Lending and compliance researchers need to find a relevant rule and check whether its source can still be relied on. An official citation may resolve correctly while pointing to a withdrawn document. This prototype explores that problem with a selected RBI lending corpus; user adoption and time savings have not been validated.
 
 ## What I built
 
-An AI-powered regulatory intelligence system that monitors RBI lending regulations, detects changes, maps their impact across regulated entities and lending processes, and answers current and historical regulatory questions using graph + vector retrieval with source-level citations.
+A research workspace that retrieves selected official RBI material, filters current-guidance evidence by recorded lifecycle, generates cited summaries, and exposes source monitoring events. Relationship-aware retrieval uses a provenance graph when supported; text retrieval is a hashing/lexical baseline, not a semantic embedding model. Historical/change research can include prior material but does not reconstruct exact legal authority on a specified date.
 
 ## Results
 
-- X% retrieval recall (measured after the evaluation corpus is ingested)
-- X% citation validity (measured after grounded generation is implemented)
-- X% improvement on multi-hop questions (measured against the vector baseline)
-- X ms median latency (measured after the query service is implemented)
-- $X estimated cost per query (measured after model-backed operations are enabled)
+The [current deterministic benchmark](data/evaluation/current-report.json) records measured source retrieval, citation mapping, abstention and routing on 30 unchanged labelled questions. Its manifest includes the base commit, dirty-worktree flag, code/dataset/corpus fingerprints, source checks and lifecycle counts. The [older report](data/evaluation/portfolio-report.json) is retained for comparison.
 
-No benchmark values are fabricated. Placeholders will be replaced only by evaluation output.
+Source-retrieval performance remains weak; several benchmark labels refer to documents excluded from current guidance. The benchmark is not live-model answer accuracy. Citation mapping does not establish semantic correctness, and deterministic latency/cost must not be presented as OpenAI production latency/cost. No graph superiority or business-impact improvement is claimed.
 
 ## Regulatory monitoring coverage
 
@@ -39,7 +37,17 @@ The graph deliberately restricts entity types (such as Regulation, Requirement, 
 
 ## Evaluation methodology
 
-The checked-in 36-question set covers single-hop, two-hop, multi-hop, comparison, temporal/change, and out-of-scope queries. It compares vector-only source recall to routed retrieval by hop count, plus citation validity, routing accuracy, latency, and cost. Results are only meaningful after the real source URLs have been ingested.
+The 30-question portfolio benchmark covers single-hop, two-hop, multi-hop, comparison, temporal/change, and out-of-scope queries. Vector-only and routed retrieval use the same historical-intent eligibility rule. Questions and source labels are not rewritten to improve the score. Lifecycle regression tests and the retrieval benchmark are separate evidence.
+
+Reproduce in an isolated directory (never use the production data directory):
+
+```powershell
+python scripts/publish_evaluation.py --data-dir data/runtime/isolated-evaluation --output data/evaluation/current-report.json
+python -m pytest -q
+node --test tests/frontend-behavior.test.cjs
+```
+
+The publisher checks all individually curated sources through the existing monitor and configured approval path. It does not manually approve unresolved documents. `--offline` records that no source refresh was attempted.
 
 ## Failure handling
 
@@ -90,7 +98,7 @@ The query router selects vector retrieval for direct factual questions, graph re
 
 ## Phase 6: evaluation
 
-The evaluation harness compares vector-only retrieval against routed retrieval across 36 labeled questions, stratified by hop count and question type. It calculates source recall@k, citation validity, routing accuracy, latency, and cost—but leaves portfolio result placeholders untouched until the real RBI source documents have been ingested. [Phase 6 details](docs/phase-6-plan.md) describe the methodology.
+The evaluation harness compares vector-only retrieval against routed retrieval across labelled questions, stratified by hop count and question type. The current portfolio run and its limitations are linked above; older phase documents describe the original implementation plan.
 
 ## Phase 7: observability and cost
 
@@ -123,4 +131,4 @@ The default mode is deterministic and has no API cost. Configure an OpenAI provi
 
 ## Deployment
 
-The current product deploys its persistent Python API on Render and its static browser interface on Vercel. The step-by-step configuration is in [the deployment guide](docs/deployment.md). This separation preserves the local graph, vector index, documents, and monitoring history on a persistent disk while allowing the interface to be served globally.
+The Python API runs on Render and the static browser interface on Vercel. Configured durable runtime snapshots use PostgreSQL; otherwise local files require durable hosting storage. Both the API root and Vercel build now serve the canonical `frontend/` implementation, avoiding two diverging UIs. See [the deployment guide](docs/deployment.md); verify actual environment settings before deploying.

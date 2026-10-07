@@ -1,6 +1,7 @@
 from app.llm.citations import validate_structured_citations
 from app.llm.generation import research_to_markdown
 from app.llm.generation import deterministic_research
+from app.llm.generation import align_research_headings
 from app.models.chunks import ChunkMetadata
 from app.models.research import ResearchClaim, ResearchSection, ResearchStatus, StructuredResearch
 
@@ -49,3 +50,19 @@ def test_structured_research_supports_scannable_display_metadata() -> None:
     assert research.display_title == "Digital lending consent requirements"
     assert research.sections[0].claims[0].title == "Borrowers control consent"
     assert validate_structured_citations(research, evidence)
+
+
+def test_heading_cannot_relabel_healthcare_as_housing():
+    text = "Loans up to Rs 12 crore for healthcare facilities are eligible for priority sector lending."
+    chunk = ChunkMetadata(chunk_id="chunk_healthcare", document_id="doc_healthcare", document_title="RBI Directions",
+                          page_number=1, chunk_index=0, text=text)
+    research = StructuredResearch(status=ResearchStatus.GROUNDED, direct_answer=ResearchClaim(text=text, citation_ids=[chunk.chunk_id]),
+        sections=[ResearchSection(id="loans", title="Housing loans", claims=[
+            ResearchClaim(title="Housing loans", text=text, citation_ids=[chunk.chunk_id]),
+            ResearchClaim(title="Healthcare facilities", text=text, citation_ids=[chunk.chunk_id]),
+        ])])
+    aligned = align_research_headings(research, [chunk])
+    assert aligned.sections[0].title == "Supporting provisions"
+    assert aligned.sections[0].claims[0].title is None
+    assert aligned.sections[0].claims[1].title == "Healthcare facilities"
+    assert aligned.sections[0].claims[0].text == text

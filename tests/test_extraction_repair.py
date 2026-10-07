@@ -72,3 +72,19 @@ def test_repair_supports_monitored_plain_text_and_department_circular_id(tmp_pat
     assert document.mime_type == "text/plain"
     assert repair_legacy_notifications(service) == 1
     assert service.vector_store.get_by_document_id(document.document_id)[0].text.startswith("RBI/FIDD/")
+
+
+def test_repairs_saved_deleted_markup_without_changing_lifecycle(tmp_path):
+    service = IngestionService(Settings(_env_file=None, data_dir=tmp_path / 'data'))
+    source = tmp_path / 'notification.html'
+    source.write_text('<div id="NotificationUser"><p>RBI/2026-27/15 Loans <s>up to twelve crore</s> shall follow the revised limit.</p></div>')
+    document = service.ingest(IngestRequest(local_path=str(source), title='RBI amendment')).document
+    raw = service.settings.raw_dir / f'{document.document_id}.aspx'
+    raw.write_bytes(source.read_bytes())
+    chunks = service.vector_store.get_by_document_id(document.document_id)
+    service.vector_store.upsert([chunks[0].model_copy(update={'text':'Loans up to twelve crore shall follow the revised limit.'})])
+    before = service.manifest.path.read_bytes()
+    assert repair_legacy_notifications(service) == 1
+    assert 'twelve crore' not in service.vector_store.get_by_document_id(document.document_id)[0].text
+    assert service.manifest.path.read_bytes() == before
+    assert repair_legacy_notifications(service) == 0

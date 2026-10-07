@@ -29,7 +29,10 @@ class _RbiHtmlTextExtractor(HTMLParser):
         parent_active = self._stack[-1][1] if self._stack else self.content_id is None
         parent_ignored = self._stack[-1][2] if self._stack else False
         active = parent_active or (attributes.get("id") or "").lower() == self.content_id
-        ignored = parent_ignored or tag in {"script", "style", "noscript", "nav", "header", "footer"}
+        # Amendment pages display deleted wording alongside the replacement.
+        # Do not flatten that visual distinction into an operative requirement.
+        struck_out = bool(re.search(r"text-decoration(?:-line)?\s*:[^;]*line-through", attributes.get("style") or "", re.I))
+        ignored = parent_ignored or struck_out or tag in {"script", "style", "noscript", "nav", "header", "footer", "s", "strike", "del"}
         if tag not in {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}:
             self._stack.append((tag, active, ignored))
         if active and not ignored and tag in {"p", "br", "div", "li", "tr", "td", "th", "h1", "h2", "h3", "h4"}:

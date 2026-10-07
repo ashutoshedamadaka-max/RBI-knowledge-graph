@@ -21,7 +21,9 @@ def repair_legacy_notifications(service) -> int:
         if document.mime_type != "text/html" and not (document.mime_type == "text/plain" and is_rbi_notification):
             continue
         old_chunks = service.vector_store.get_by_document_id(document.document_id)
-        if not any(CHROME.search(chunk.text) for chunk in old_chunks):
+        raw = service.settings.raw_dir / f"{document.document_id}.aspx"
+        has_deleted_markup = raw.exists() and bool(re.search(r"<(?:s|strike|del)\b|text-decoration(?:-line)?\s*:[^;]*line-through", raw.read_text(encoding="utf-8"), re.I))
+        if not has_deleted_markup and not any(CHROME.search(chunk.text) for chunk in old_chunks):
             continue
         if any(data.get("source_document_id") == document.document_id and data.get("extraction_method") != "deterministic"
                for _, _, data in service.graph_service.store.graph.edges(data=True)):
@@ -29,7 +31,6 @@ def repair_legacy_notifications(service) -> int:
             continue
         # Prefer the original captured bytes, never the live URL: that might now
         # contain a different regulation or withdrawal marker.
-        raw = service.settings.raw_dir / f"{document.document_id}.aspx"
         processed = service.settings.processed_dir / f"{document.document_id}.json"
         if raw.exists():
             pages = parse_document(raw, document.mime_type).pages
@@ -63,13 +64,15 @@ def repair_legacy_notifications(service) -> int:
         if len(cleaned) != len(pages) or not cleaned:
             logger.warning("legacy_extraction_repair_skipped document_id=%s reason=unverified_boundaries", document.document_id)
             continue
+        chunks = chunk_pages(document, cleaned, service.settings.chunk_size, service.settings.chunk_overlap)
+        if [chunk.model_dump() for chunk in chunks] == [chunk.model_dump() for chunk in old_chunks]:
+            continue
         paths = [service.vector_store.path, service.graph_service.store.path]
         before = {path.name: json.loads(path.read_text()) for path in paths if path.exists()}
         backup = service.settings.runtime_dir / "extraction_repair_backup.json"
         if not backup.exists():
             backup.write_text(json.dumps(before, indent=2))
         try:
-            chunks = chunk_pages(document, cleaned, service.settings.chunk_size, service.settings.chunk_overlap)
             service.vector_store.remove_document_ids({document.document_id})
             service.vector_store.upsert(chunks)
             service.graph_service.store.remove_document_ids({document.document_id})

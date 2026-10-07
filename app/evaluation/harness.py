@@ -3,8 +3,7 @@ import statistics
 from pathlib import Path
 
 from app.config.settings import Settings
-from app.llm.citations import validate_citations
-from app.llm.generation import DeterministicAnswerGenerator
+from app.llm.citations import validate_structured_citations
 from app.models.chunks import ChunkMetadata
 from app.models.query import QueryResponse
 from app.models.retrieval import RetrievalRoute
@@ -47,10 +46,11 @@ class EvaluationHarness:
         benchmark_id: str = "rbi-lending-questions",
     ) -> EvaluationReport:
         results = []
-        generator = DeterministicAnswerGenerator()
         for case in cases:
-            vector_evidence = self.vector_service.retrieve_vector(case.question, top_k)
-            baseline_answer = generator.generate(case.question, vector_evidence)
+            # Compare retrieval methods under the same temporal eligibility rules.
+            vector_evidence = self.vector_service.retrieve_vector(
+                case.question, top_k, current_only=not self.query_service._is_historical_query(case.question),
+            )
             response: QueryResponse = self.query_service.query(case.question, top_k)
             proposed_recall = self._recall(response.retrieved_evidence, case.expected_source_urls)
             actual_source_urls = sorted({item.source_url for item in response.retrieved_evidence if item.source_url})
@@ -77,13 +77,14 @@ class EvaluationHarness:
                 route_correct=response.route == case.expected_route,
                 vector_recall=self._recall(vector_evidence, case.expected_source_urls),
                 proposed_recall=proposed_recall,
-                citation_valid=validate_citations(response.answer, response.retrieved_evidence) if response.retrieved_evidence else True,
+                citation_valid=validate_structured_citations(response.research, response.retrieved_evidence) if response.research else False,
                 citation_evaluable=citation_evaluable,
                 abstention_correct=abstention_correct,
                 latency_ms=response.latency_ms,
                 estimated_cost_usd=response.estimated_cost_usd,
                 expected_source_urls=case.expected_source_urls,
                 actual_source_urls=actual_source_urls,
+                vector_source_urls=sorted({item.source_url for item in vector_evidence if item.source_url}),
                 expected_behavior=expected_behavior,
                 actual_behavior=actual_behavior,
                 why_this_matters=self._why_this_matters(case.category.value),

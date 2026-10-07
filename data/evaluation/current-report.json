@@ -1,0 +1,1190 @@
+{
+  "benchmark_id": "rbi-lending-questions",
+  "generated_at": "2026-10-07T16:19:30.536126Z",
+  "answer_provider": "deterministic",
+  "total_cases": 30,
+  "retrieval_recall_at_k": 0.2,
+  "citation_validity": 1.0,
+  "abstention_accuracy": 1.0,
+  "routing_accuracy": 0.7666666666666667,
+  "median_latency_ms": 113.21000000000001,
+  "estimated_cost_usd": 0.0,
+  "by_hop_count": {
+    "1": {
+      "vector_recall_at_k": 0.0,
+      "proposed_recall_at_k": 0.0,
+      "count": 5.0
+    },
+    "2": {
+      "vector_recall_at_k": 0.3333333333333333,
+      "proposed_recall_at_k": 0.3333333333333333,
+      "count": 15.0
+    },
+    "3": {
+      "vector_recall_at_k": 0.0,
+      "proposed_recall_at_k": 0.0,
+      "count": 5.0
+    },
+    "0": {
+      "vector_recall_at_k": 0.0,
+      "proposed_recall_at_k": 0.0,
+      "count": 5.0
+    }
+  },
+  "source_retrieval_pass_count": 5,
+  "source_retrieval_evaluable_count": 25,
+  "citation_traceability_pass_count": 22,
+  "citation_traceability_evaluable_count": 22,
+  "abstention_pass_count": 5,
+  "abstention_evaluable_count": 5,
+  "results": [
+    {
+      "case_id": "single_01",
+      "question": "What does RBI say about penal charges in loan accounts?",
+      "category": "single-hop",
+      "hop_count": 1,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 58.59,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://rbi.org.in/Scripts/NotificationUser.aspx?Id=12527&Mode=0"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that a direct regulatory question can recover its labelled RBI source.",
+      "passed": false
+    },
+    {
+      "case_id": "single_02",
+      "question": "What is covered by the RBI Digital Lending Directions, 2025?",
+      "category": "single-hop",
+      "hop_count": 1,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 59.26,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that a direct regulatory question can recover its labelled RBI source.",
+      "passed": false
+    },
+    {
+      "case_id": "single_03",
+      "question": "What does RBI require when property documents are released after a personal loan is repaid?",
+      "category": "single-hop",
+      "hop_count": 1,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 49.43,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12535&Mode=0"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that a direct regulatory question can recover its labelled RBI source.",
+      "passed": false
+    },
+    {
+      "case_id": "single_04",
+      "question": "What is the RBI guidance on resetting a floating interest rate for EMI based personal loans?",
+      "category": "single-hop",
+      "hop_count": 1,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 78.06,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12529"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that a direct regulatory question can recover its labelled RBI source.",
+      "passed": false
+    },
+    {
+      "case_id": "single_05",
+      "question": "What does RBI say about income recognition and asset classification for advances?",
+      "category": "single-hop",
+      "hop_count": 1,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 79.22,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://rbi.org.in/scripts/NotificationUser.aspx?Id=12822"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13674&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13674&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that a direct regulatory question can recover its labelled RBI source.",
+      "passed": false
+    },
+    {
+      "case_id": "two_01",
+      "question": "Which entities do the RBI Digital Lending Directions apply to and what lending activity do they cover?",
+      "category": "two-hop",
+      "hop_count": 2,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 194.02,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks whether a relationship question is routed through the graph-aware path.",
+      "passed": false
+    },
+    {
+      "case_id": "two_02",
+      "question": "Which banks and NBFCs are subject to the RBI co-lending FAQs?",
+      "category": "two-hop",
+      "hop_count": 2,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 232.73,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/commonperson/english/Scripts/FAQs.aspx?Id=1105"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13305&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13305&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks whether a relationship question is routed through the graph-aware path.",
+      "passed": false
+    },
+    {
+      "case_id": "two_03",
+      "question": "Which borrower protections apply to the release of property documents after a loan settlement?",
+      "category": "two-hop",
+      "hop_count": 2,
+      "route_correct": false,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": false,
+      "abstention_correct": null,
+      "latency_ms": 76.95,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12535&Mode=0"
+      ],
+      "actual_source_urls": [],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 0 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks whether a relationship question is routed through the graph-aware path.",
+      "passed": false
+    },
+    {
+      "case_id": "two_04",
+      "question": "Which borrowers are subject to a floating rate reset and what must the lender communicate?",
+      "category": "two-hop",
+      "hop_count": 2,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 170.51,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12529"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks whether a relationship question is routed through the graph-aware path.",
+      "passed": false
+    },
+    {
+      "case_id": "two_05",
+      "question": "Which Primary Urban Co-operative Banks are subject to the RBI directions on management of advances?",
+      "category": "two-hop",
+      "hop_count": 2,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 168.07,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12827"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks whether a relationship question is routed through the graph-aware path.",
+      "passed": false
+    },
+    {
+      "case_id": "multi_01",
+      "question": "How are RBI, banks, NBFCs and borrowers related in co-lending arrangements?",
+      "category": "multi-hop",
+      "hop_count": 3,
+      "route_correct": false,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 147.32,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/commonperson/english/Scripts/FAQs.aspx?Id=1105"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13305&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13305&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that multi-step regulatory relationships remain traceable to source evidence.",
+      "passed": false
+    },
+    {
+      "case_id": "multi_02",
+      "question": "What relationship does RBI set between digital lenders, regulated entities and borrowers?",
+      "category": "multi-hop",
+      "hop_count": 3,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 124.69,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13674&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13674&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that multi-step regulatory relationships remain traceable to source evidence.",
+      "passed": false
+    },
+    {
+      "case_id": "multi_03",
+      "question": "How are loan repayment, settlement and release of property documents related under RBI guidance?",
+      "category": "multi-hop",
+      "hop_count": 3,
+      "route_correct": false,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 101.73,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12535&Mode=0"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that multi-step regulatory relationships remain traceable to source evidence.",
+      "passed": false
+    },
+    {
+      "case_id": "multi_04",
+      "question": "How are default, asset classification and provisioning related for bank advances?",
+      "category": "multi-hop",
+      "hop_count": 3,
+      "route_correct": false,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 149.02,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://rbi.org.in/scripts/NotificationUser.aspx?Id=12822"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13674&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13674&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that multi-step regulatory relationships remain traceable to source evidence.",
+      "passed": false
+    },
+    {
+      "case_id": "multi_05",
+      "question": "How are borrowers, lenders and EMI based personal loans related to floating interest rate resets?",
+      "category": "multi-hop",
+      "hop_count": 3,
+      "route_correct": false,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 125.86,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12529"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that multi-step regulatory relationships remain traceable to source evidence.",
+      "passed": false
+    },
+    {
+      "case_id": "compare_01",
+      "question": "Compare RBI guidance on penal charges with the Digital Lending Directions.",
+      "category": "comparison",
+      "hop_count": 2,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": false,
+      "abstention_correct": null,
+      "latency_ms": 130.81,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://rbi.org.in/Scripts/NotificationUser.aspx?Id=12527&Mode=0"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that the product can distinguish related RBI requirements instead of conflating them.",
+      "passed": false
+    },
+    {
+      "case_id": "compare_02",
+      "question": "What is the difference between co-lending by banks and NBFCs and digital lending?",
+      "category": "comparison",
+      "hop_count": 2,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 136.77,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/commonperson/english/Scripts/FAQs.aspx?Id=1105"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13305&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13674&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13305&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13674&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that the product can distinguish related RBI requirements instead of conflating them.",
+      "passed": false
+    },
+    {
+      "case_id": "compare_03",
+      "question": "Compare borrower protections for floating rate personal loans and property document release.",
+      "category": "comparison",
+      "hop_count": 2,
+      "route_correct": false,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 91.44,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12529"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that the product can distinguish related RBI requirements instead of conflating them.",
+      "passed": false
+    },
+    {
+      "case_id": "compare_04",
+      "question": "What is the difference between penal charges and loan default classification?",
+      "category": "comparison",
+      "hop_count": 2,
+      "route_correct": false,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 84.85,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://rbi.org.in/Scripts/NotificationUser.aspx?Id=12527&Mode=0"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that the product can distinguish related RBI requirements instead of conflating them.",
+      "passed": false
+    },
+    {
+      "case_id": "compare_05",
+      "question": "Compare RBI guidance for commercial banks and Primary Urban Co-operative Banks on advances.",
+      "category": "comparison",
+      "hop_count": 2,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 96.15,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12827"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13305&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13305&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was not present in the returned evidence.",
+      "why_this_matters": "Checks that the product can distinguish related RBI requirements instead of conflating them.",
+      "passed": false
+    },
+    {
+      "case_id": "temporal_01",
+      "question": "What changed in RBI guidance on releasing property documents after loan repayment?",
+      "category": "temporal-change",
+      "hop_count": 2,
+      "route_correct": true,
+      "vector_recall": 1.0,
+      "proposed_recall": 1.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 139.04,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12535&Mode=0"
+      ],
+      "actual_source_urls": [
+        "https://rbi.org.in/scripts/NotificationUser.aspx?Id=12822",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12535&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12827"
+      ],
+      "vector_source_urls": [
+        "https://rbi.org.in/scripts/NotificationUser.aspx?Id=12822",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12535&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12827"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was present in the returned evidence.",
+      "why_this_matters": "Checks whether changes over time are handled as a distinct research task.",
+      "passed": true
+    },
+    {
+      "case_id": "temporal_02",
+      "question": "What changed in the RBI Digital Lending Directions, 2025?",
+      "category": "temporal-change",
+      "hop_count": 2,
+      "route_correct": true,
+      "vector_recall": 1.0,
+      "proposed_recall": 1.0,
+      "citation_valid": true,
+      "citation_evaluable": false,
+      "abstention_correct": null,
+      "latency_ms": 143.71,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was present in the returned evidence.",
+      "why_this_matters": "Checks whether changes over time are handled as a distinct research task.",
+      "passed": true
+    },
+    {
+      "case_id": "temporal_03",
+      "question": "What changed when RBI issued guidance on penal charges in loan accounts?",
+      "category": "temporal-change",
+      "hop_count": 2,
+      "route_correct": true,
+      "vector_recall": 1.0,
+      "proposed_recall": 1.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 131.96,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://rbi.org.in/Scripts/NotificationUser.aspx?Id=12527&Mode=0"
+      ],
+      "actual_source_urls": [
+        "https://rbi.org.in/Scripts/NotificationUser.aspx?Id=12527&Mode=0"
+      ],
+      "vector_source_urls": [
+        "https://rbi.org.in/Scripts/NotificationUser.aspx?Id=12527&Mode=0"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was present in the returned evidence.",
+      "why_this_matters": "Checks whether changes over time are handled as a distinct research task.",
+      "passed": true
+    },
+    {
+      "case_id": "temporal_04",
+      "question": "What changed in the RBI framework for co-lending by banks and NBFCs?",
+      "category": "temporal-change",
+      "hop_count": 2,
+      "route_correct": true,
+      "vector_recall": 1.0,
+      "proposed_recall": 1.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 141.66,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/commonperson/english/Scripts/FAQs.aspx?Id=1105"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/commonperson/english/Scripts/FAQs.aspx?Id=1105"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/commonperson/english/Scripts/FAQs.aspx?Id=1105"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was present in the returned evidence.",
+      "why_this_matters": "Checks whether changes over time are handled as a distinct research task.",
+      "passed": true
+    },
+    {
+      "case_id": "temporal_05",
+      "question": "What changed in RBI directions on the management of advances for Urban Co-operative Banks?",
+      "category": "temporal-change",
+      "hop_count": 2,
+      "route_correct": true,
+      "vector_recall": 1.0,
+      "proposed_recall": 1.0,
+      "citation_valid": true,
+      "citation_evaluable": true,
+      "abstention_correct": null,
+      "latency_ms": 133.62,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12827"
+      ],
+      "actual_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12827"
+      ],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12827"
+      ],
+      "expected_behavior": "Retrieve the labelled official RBI source for this lending question.",
+      "actual_behavior": "Retrieved 5 evidence passage(s); the labelled source was present in the returned evidence.",
+      "why_this_matters": "Checks whether changes over time are handled as a distinct research task.",
+      "passed": true
+    },
+    {
+      "case_id": "out_01",
+      "question": "What are RBI rules for cryptocurrency exchanges?",
+      "category": "out-of-scope",
+      "hop_count": 0,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": false,
+      "abstention_correct": true,
+      "latency_ms": 0.1,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [],
+      "actual_source_urls": [],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Decline the question because it is outside the indexed RBI lending scope.",
+      "actual_behavior": "The scope guard returned no research evidence.",
+      "why_this_matters": "Checks that unsupported questions are declined instead of receiving an invented regulatory answer.",
+      "passed": true
+    },
+    {
+      "case_id": "out_02",
+      "question": "What is the current share price of RBI?",
+      "category": "out-of-scope",
+      "hop_count": 0,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": false,
+      "abstention_correct": true,
+      "latency_ms": 0.11,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [],
+      "actual_source_urls": [],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Decline the question because it is outside the indexed RBI lending scope.",
+      "actual_behavior": "The scope guard returned no research evidence.",
+      "why_this_matters": "Checks that unsupported questions are declined instead of receiving an invented regulatory answer.",
+      "passed": true
+    },
+    {
+      "case_id": "out_03",
+      "question": "How do I file my income tax return in India?",
+      "category": "out-of-scope",
+      "hop_count": 0,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": false,
+      "abstention_correct": true,
+      "latency_ms": 0.11,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [],
+      "actual_source_urls": [],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13305&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Decline the question because it is outside the indexed RBI lending scope.",
+      "actual_behavior": "The scope guard returned no research evidence.",
+      "why_this_matters": "Checks that unsupported questions are declined instead of receiving an invented regulatory answer.",
+      "passed": true
+    },
+    {
+      "case_id": "out_04",
+      "question": "What is the weather in Mumbai today?",
+      "category": "out-of-scope",
+      "hop_count": 0,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": false,
+      "abstention_correct": true,
+      "latency_ms": 0.1,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [],
+      "actual_source_urls": [],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Decline the question because it is outside the indexed RBI lending scope.",
+      "actual_behavior": "The scope guard returned no research evidence.",
+      "why_this_matters": "Checks that unsupported questions are declined instead of receiving an invented regulatory answer.",
+      "passed": true
+    },
+    {
+      "case_id": "out_05",
+      "question": "Which smartphone should I buy?",
+      "category": "out-of-scope",
+      "hop_count": 0,
+      "route_correct": true,
+      "vector_recall": 0.0,
+      "proposed_recall": 0.0,
+      "citation_valid": true,
+      "citation_evaluable": false,
+      "abstention_correct": true,
+      "latency_ms": 0.1,
+      "estimated_cost_usd": 0.0,
+      "expected_source_urls": [],
+      "actual_source_urls": [],
+      "vector_source_urls": [
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0"
+      ],
+      "expected_behavior": "Decline the question because it is outside the indexed RBI lending scope.",
+      "actual_behavior": "The scope guard returned no research evidence.",
+      "why_this_matters": "Checks that unsupported questions are declined instead of receiving an invented regulatory answer.",
+      "passed": true
+    }
+  ],
+  "run_manifest": {
+    "git_commit": "6a23eac97276e32e3ea9ca57927520f30f06507a",
+    "working_tree_dirty": true,
+    "timestamp": "2026-10-07T16:19:30.798264+00:00",
+    "source_refresh_attempted": true,
+    "source_checks": [
+      {
+        "run_id": "run_aafe11d500e44495906be4233c5960fb",
+        "source_id": "rbi_digital_lending_directions",
+        "checked_at": "2026-10-07T16:19:07.015812Z",
+        "status": "NO_CHANGES",
+        "discovered_count": 1,
+        "changes_detected": 0,
+        "error": null
+      },
+      {
+        "run_id": "run_dd067d9a0790468ba6554502a65a4525",
+        "source_id": "rbi_penal_charges",
+        "checked_at": "2026-10-07T16:19:08.628118Z",
+        "status": "NO_CHANGES",
+        "discovered_count": 1,
+        "changes_detected": 0,
+        "error": null
+      },
+      {
+        "run_id": "run_8f9fc3dc29944772b73336fa60c66b1b",
+        "source_id": "rbi_floating_rate_personal_loans",
+        "checked_at": "2026-10-07T16:19:09.832817Z",
+        "status": "NO_CHANGES",
+        "discovered_count": 1,
+        "changes_detected": 0,
+        "error": null
+      },
+      {
+        "run_id": "run_c433f0d891394452a05e86d0eed0d5f5",
+        "source_id": "rbi_irac_advances",
+        "checked_at": "2026-10-07T16:19:10.887112Z",
+        "status": "NO_CHANGES",
+        "discovered_count": 1,
+        "changes_detected": 0,
+        "error": null
+      },
+      {
+        "run_id": "run_65e460283d3841238d2868ebe60d878c",
+        "source_id": "rbi_property_document_release",
+        "checked_at": "2026-10-07T16:19:12.642686Z",
+        "status": "NO_CHANGES",
+        "discovered_count": 1,
+        "changes_detected": 0,
+        "error": null
+      },
+      {
+        "run_id": "run_61fa9cea418b4f7e90ab3fd030ce6041",
+        "source_id": "rbi_colending_faqs",
+        "checked_at": "2026-10-07T16:19:14.335302Z",
+        "status": "NO_CHANGES",
+        "discovered_count": 1,
+        "changes_detected": 0,
+        "error": null
+      },
+      {
+        "run_id": "run_3ee74e6b3ecd4c24a69776b5effe3bf1",
+        "source_id": "rbi_ucb_management_of_advances",
+        "checked_at": "2026-10-07T16:19:15.448139Z",
+        "status": "NO_CHANGES",
+        "discovered_count": 1,
+        "changes_detected": 0,
+        "error": null
+      },
+      {
+        "run_id": "run_f81a1451f0544f1a82350c54208321c1",
+        "source_id": "rbi_psl_amendment_2026",
+        "checked_at": "2026-10-07T16:19:17.192046Z",
+        "status": "NO_CHANGES",
+        "discovered_count": 1,
+        "changes_detected": 0,
+        "error": null
+      },
+      {
+        "run_id": "run_2a1e4258f4b24b448e5726eabd98c6bb",
+        "source_id": "rbi_psl_third_amendment_2026",
+        "checked_at": "2026-10-07T16:19:18.814921Z",
+        "status": "NO_CHANGES",
+        "discovered_count": 1,
+        "changes_detected": 0,
+        "error": null
+      },
+      {
+        "run_id": "run_d8d46f6abedb43489e4ec045d4a870b1",
+        "source_id": "rbi_psl_second_amendment_2026",
+        "checked_at": "2026-10-07T16:19:20.071577Z",
+        "status": "NO_CHANGES",
+        "discovered_count": 1,
+        "changes_detected": 0,
+        "error": null
+      },
+      {
+        "run_id": "run_397c33d08c7d43869b797b66b854361a",
+        "source_id": "rbi_fema_borrowing_lending_first_amendment_a",
+        "checked_at": "2026-10-07T16:19:21.426378Z",
+        "status": "NO_CHANGES",
+        "discovered_count": 1,
+        "changes_detected": 0,
+        "error": null
+      },
+      {
+        "run_id": "run_420edbeb3c6d444baaa177dc5c56ee0e",
+        "source_id": "rbi_fema_borrowing_lending_first_amendment_b",
+        "checked_at": "2026-10-07T16:19:22.759427Z",
+        "status": "NO_CHANGES",
+        "discovered_count": 1,
+        "changes_detected": 0,
+        "error": null
+      },
+      {
+        "run_id": "run_0c8f15290f6d4850889f30b205962069",
+        "source_id": "rbi_msme_amendment_2026",
+        "checked_at": "2026-10-07T16:19:24.277101Z",
+        "status": "NO_CHANGES",
+        "discovered_count": 1,
+        "changes_detected": 0,
+        "error": null
+      }
+    ],
+    "corpus_document_count": 13,
+    "lifecycle_status_counts": {
+      "ACTIVE": 6,
+      "AMENDED": 0,
+      "SUPERSEDED": 0,
+      "WITHDRAWN": 6,
+      "REPEALED": 0,
+      "REVIEW_REQUIRED": 1,
+      "UNKNOWN": 0
+    },
+    "top_k": 5,
+    "chunk_size": 900,
+    "chunk_overlap": 150,
+    "extraction_provider": "deterministic",
+    "dataset_sha256": "c1ad9732c4fef9f84657e6e6251a258d912daf76f6f083e78d925e1c49269fb4",
+    "code_sha256": {
+      "app/__init__.py": "5332ee57cebf6b6dc817d98a72bcce4624d632957789e0a2b9e6556b9354938c",
+      "app/api/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "app/api/routes.py": "81c22050bfcb240a08dba5c539a82b6a0a7f6325892fa007cb758600db97d102",
+      "app/config/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "app/config/settings.py": "945fc75f2adaec8fe0ccb3d7971c6047e0b7865961be39fa0c84a5291a059f07",
+      "app/embeddings/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "app/embeddings/hashing.py": "7be10faa9624c6f78cd5aedf3e9836625e3f3fd8d61d81d88493b15db69ca5f5",
+      "app/evaluation/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "app/evaluation/harness.py": "4a0998ee6562cf9b2777519e49c4f5ad2ea2363836278d92829e48367504879c",
+      "app/evaluation/models.py": "4a7fcedfe98e64ad13b96550739ccc395684912d2aaece8ff5dd66f792369567",
+      "app/graph/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "app/graph/extraction.py": "d4a73636e19df1ba44c36ed565554b81f411db242131f9cc4038446bdeb0075f",
+      "app/graph/query_service.py": "d6696936715df7ef696c91bd9daab92a46b26cf9b96d93a598bec5d7527b3bcd",
+      "app/graph/resolution.py": "b45f79f500957f1e31c28d0310eda9d18c14435cfde1e67991a15774ac54f318",
+      "app/graph/retrieval.py": "16cde47d457dc218612855b39bfaff3bfafe9dc31c313e0cb0c955967903bc6f",
+      "app/graph/service.py": "93343a01efbda062f7f2949aadf660c1ec4ee46f5b6893b3fbaee843172fda95",
+      "app/graph/store.py": "32ae33c0058c96e3089eb0f48974a8294f8a0fae805b46007fc3015b6d4dfbec",
+      "app/ingestion/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "app/ingestion/chunking.py": "2820907db7393cb8c6e722122b4962581ef1625df832724db613c6c3c6f5b5d3",
+      "app/ingestion/exceptions.py": "80fb5b99381092d54b335f7bd477ab90538f7c4e67e1e3427980169ea5d8d339",
+      "app/ingestion/manifest.py": "91c45729322143b6316aeafad3335dd80dfdc9a75a2797567af5f006e3c1a89c",
+      "app/ingestion/parser.py": "83240285fea9a449024a40c6592916788bb6211c84d2029e5449f0a8ec3d627b",
+      "app/ingestion/repair.py": "61029039f42398b04f3d9952bf0e15fbbca55210bdd0363aba5c055f52cb1adc",
+      "app/ingestion/service.py": "9f583d85f18bf22d36dd67482ef13dff37221477f2eb782de10370d5d1604c21",
+      "app/llm/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "app/llm/citations.py": "1cfbedd1122127251a821d2cc60408241cac538efeb7cce420b40df4cc3ca443",
+      "app/llm/generation.py": "cb8645b1c1c9aef07a11f24761ea196ff9ddd94345bda5e5bd4f346bd9cebaab",
+      "app/main.py": "b6cd922589084bf91b59b0efbe45aee6560b79a2b532a527fafea85cc5338ffb",
+      "app/models/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "app/models/chunks.py": "af5dbf52fe68665146504c77631b144979449ca7e27960d77ae9e667ed135727",
+      "app/models/documents.py": "4e181923cbd296deb114832fb3f65867c7a489ead9cc793232d3d2b6dede0938",
+      "app/models/graph.py": "11bf5baa966216317850c108252320373898ec96413cfa3eb9575bdc0dad6b28",
+      "app/models/monitoring.py": "d19f09a62b325b4f72faa74a10418b3e6e16ac68a95db56a64417edbf932391e",
+      "app/models/query.py": "a259d289d4e8c8d4c69e75e304613d099f5d77a5228d06ced58b8d4a437333c0",
+      "app/models/research.py": "f7ea8dc35e0ba4a2df7d2ac0f434008bdeb54847d6e6724abebb5c848976758d",
+      "app/models/retrieval.py": "e83b262c1d892a92d7c7149d1f1a6e9e8269f92a7af8e61d9c2b703904bc8a0a",
+      "app/monitoring/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "app/monitoring/alerts.py": "391126054357725db4f16eb7ca3ec8dfad96915ec5c8d9dc64a8f449869cc81f",
+      "app/monitoring/diff.py": "592009ce8559bf4d796378056f0caf922eb6bb74cc0d14249b1313528355f4d1",
+      "app/monitoring/fetcher.py": "edfb40e315ae99ea4ac23279ec92d49fce3f4ae9f49119a20a5ee7eb5e2ebb02",
+      "app/monitoring/interpretation.py": "06be7f101fd2be6e103763bc7aad45ae3d4449b580ca8724bd11624eba8c5410",
+      "app/monitoring/lifecycle.py": "7f0f6283d7e36ad2bcda3edd147ce8e5d317c40772774796721e8e87cd7e9fd5",
+      "app/monitoring/metadata.py": "25beba4a846c60e8ce0a647e924c2b8ea9db44af5d902a6a0ebeb6a449272558",
+      "app/monitoring/processor.py": "c924944acbeb877c58329a42ddf816a85bb26c2963e0aa1227a9cf758033cbe6",
+      "app/monitoring/registry.py": "431acd9d0d35d44c7787bf18605b871948a2b930e4b53e39a54ddb312142a975",
+      "app/monitoring/runner.py": "35c6cb8a5d978299b76c6718bb2a84b2150e50fb127df704c8fdf861930aaf7c",
+      "app/monitoring/service.py": "43da985b564b0cd90bda1b9032266e74f75b72627c629699a8b04010f0cf619c",
+      "app/monitoring/store.py": "e54ed9c7395f95394578b6594f6b53f496c6815da24feab405f59f9bd9b8b37d",
+      "app/observability/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "app/observability/costs.py": "4a590785d0f8089b3c3dcb50f1efe51fc4429ceff88eb84b8853d05f3e1ec76c",
+      "app/observability/events.py": "16b92be1e24920a8855c2965ed89617684b75eb678382dc2b41b6e1899b00563",
+      "app/observability/metrics.py": "13531890581b7c1d86a1f5994cb7959ec334f3488aab76ffcd2dfdfa76502fb3",
+      "app/persistence/__init__.py": "c25fc520c72f60c1b3299e4009b6cd4fc036076cd05ac4cafd419152cccf6b12",
+      "app/persistence/runtime_state.py": "b363913fcdd1588a1ca088e6bcc71b25cb341b90c4ca9c97f2d064d12be64c9e",
+      "app/retrieval/__init__.py": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b",
+      "app/retrieval/query_service.py": "09d849a41c3a4dacc6e562b4a68d939674fae981471da8f6de2150538f4f8d14",
+      "app/retrieval/router.py": "55d438d2a6ca2c8ba4804e225893af38db6f149832d758fa20c93464f11898ff",
+      "app/retrieval/scope.py": "c332afc2ddcbfe5295538195a21cc43b64ed7ad90a3533d9705d5a1c84e2a06a",
+      "app/retrieval/service.py": "8912ce17dc608b46c79f56838452b1ee945faf0055eb4dd8321426a17ca43809",
+      "app/retrieval/vector_store.py": "76f6760647e26de4abcee5ab66c86be8531e8cceb114480a42162e836db6aa4e",
+      "config/regulatory_sources.yaml": "eb44c1ec07482fb14f03ed7e417d1f65a441ce838b980cbab991de8048639abc",
+      "scripts/publish_evaluation.py": "35eb5bef94b596d7aa442c1ef5d7bce22e68670b4214e9b4a4eac6aae1f7b9f2"
+    },
+    "corpus_sha256": {
+      "documents.json": "a0a390013de5385c371ce90f4b5616da7d0f48039d26afc6d64b669aa16b36ef",
+      "knowledge_graph.json": "da270d4ffa8b07206b370d1375f52fc31ab7e8a1277f569a81ef27005d64d6de",
+      "vectors.json": "5afc4e8c5b85c8c4be882ef71d3ec8a880714a26df78d0d7dd6eeda367ee986b"
+    },
+    "documents": [
+      {
+        "document_id": "doc_4c2f0c83cd571377",
+        "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13290&Mode=0",
+        "lifecycle": "ACTIVE"
+      },
+      {
+        "document_id": "doc_34afebca7fe417f0",
+        "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13305&Mode=0",
+        "lifecycle": "ACTIVE"
+      },
+      {
+        "document_id": "doc_a6650948941a6e0a",
+        "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13306&Mode=0",
+        "lifecycle": "ACTIVE"
+      },
+      {
+        "document_id": "doc_4319013b86793553",
+        "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13674&Mode=0",
+        "lifecycle": "ACTIVE"
+      },
+      {
+        "document_id": "doc_fd5ceff72d20ac64",
+        "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13698&Mode=0",
+        "lifecycle": "ACTIVE"
+      },
+      {
+        "document_id": "doc_80c43f600f34bfa5",
+        "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "lifecycle": "ACTIVE"
+      },
+      {
+        "document_id": "doc_cefd4e06f72c0471",
+        "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12827",
+        "lifecycle": "WITHDRAWN"
+      },
+      {
+        "document_id": "doc_7eaf1f336b26b2ed",
+        "source_url": "https://www.rbi.org.in/commonperson/english/Scripts/FAQs.aspx?Id=1105",
+        "lifecycle": "REVIEW_REQUIRED"
+      },
+      {
+        "document_id": "doc_d08af03b8d997230",
+        "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12535&Mode=0",
+        "lifecycle": "WITHDRAWN"
+      },
+      {
+        "document_id": "doc_67058826c265fbe0",
+        "source_url": "https://rbi.org.in/scripts/NotificationUser.aspx?Id=12822",
+        "lifecycle": "WITHDRAWN"
+      },
+      {
+        "document_id": "doc_310728eef0cf7f4a",
+        "source_url": "https://www.rbi.org.in/Scripts/BS_ViewMasDirections.aspx?id=12529",
+        "lifecycle": "WITHDRAWN"
+      },
+      {
+        "document_id": "doc_fbb646c00bffc288",
+        "source_url": "https://rbi.org.in/Scripts/NotificationUser.aspx?Id=12527&Mode=0",
+        "lifecycle": "WITHDRAWN"
+      },
+      {
+        "document_id": "doc_0fed325910abe07d",
+        "source_url": "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0",
+        "lifecycle": "WITHDRAWN"
+      }
+    ],
+    "limitations": [
+      "Deterministic generation: not live OpenAI answer quality, cost or latency.",
+      "Citation mapping is not semantic claim verification.",
+      "Historical questions permit prior material; exact as-of authority is not reconstructed.",
+      "Existing benchmark labels retained, including sources no longer eligible for current guidance."
+    ]
+  }
+}

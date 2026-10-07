@@ -22,6 +22,18 @@ def test_extract_html_text_ignores_page_scripts_and_styles() -> None:
     assert text == "RBI lending rule"
 
 
+def test_deleted_amendment_wording_cannot_become_current_evidence():
+    text = extract_html_text('''<div id="NotificationUser"><p>Loans <s>up to twelve crore</s>
+        <span style="text-decoration: line-through">under the old rule</span> shall follow the revised limit.</p>
+        <del>Withdrawn provision with nested <b>details</b>.</del><strike>Obsolete rule.</strike>
+        <p>Current clause remains.</p></div>''')
+    assert "twelve crore" not in text
+    assert "old rule" not in text
+    assert "Obsolete" not in text
+    assert "Withdrawn provision" not in text
+    assert "Current clause remains" in text
+
+
 def test_notification_body_excludes_legacy_site_navigation_and_preserves_amendment_table() -> None:
     text = extract_html_text('''<html><body><div>Skip to main content Not Pressed</div>
     <div id="NotificationUser"><h2>Priority Sector Lending Amendment</h2>

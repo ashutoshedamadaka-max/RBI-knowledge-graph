@@ -69,11 +69,47 @@ function navigateTo(view, { replace = false, focus = true } = {}) {
 function updateUnreadBadge(updates) {
   regulatoryUpdates = updates;
   const seenAt = new Date(localStorage.getItem('rbi-updates-last-seen-at') || 0).getTime();
-  const unread = updates.filter((update) => new Date(update.detected_at).getTime() > seenAt).length;
+  const unread = groupUpdates(updates).filter((group) => new Date(group[0].detected_at).getTime() > seenAt).length;
   const badge = $('#update-badge');
   badge.textContent = unread > 99 ? '99+' : String(unread);
   badge.classList.toggle('hidden', unread === 0);
-  badge.setAttribute('aria-label', `${unread} unread regulatory update${unread === 1 ? '' : 's'}`);
+  badge.setAttribute('aria-label', `${unread} sources with unread monitoring events`);
+}
+
+function groupUpdates(updates) {
+  const groups = new Map();
+  [...updates].sort((a, b) => new Date(b.detected_at) - new Date(a.detected_at)).forEach((update) => {
+    const key = update.source_url || update.source_id || update.title;
+    groups.set(key, [...(groups.get(key) || []), update]);
+  });
+  return [...groups.values()];
+}
+
+function monitoringFreshness(value, now = Date.now()) {
+  const checked = new Date(value || '').getTime();
+  if (!Number.isFinite(checked)) return { state: 'unavailable', label: 'Monitoring not verified' };
+  // Some configured sources run weekly. This is a display-level freshness
+  // threshold, not a claim that every source was successfully checked.
+  if (now - checked > 8 * 86400000) return { state: 'stale', label: 'Monitoring overdue' };
+  return { state: 'recent', label: 'Recent source check' };
+}
+
+function renderMonitoringFreshness(value, status = null) {
+  const freshness = monitoringFreshness(value);
+  if (freshness.state === 'recent' && status?.health === 'attention') {
+    freshness.state = 'attention'; freshness.label = 'Some source checks failed';
+  }
+  const indicator = $('#source-live');
+  indicator.classList.toggle('healthy', freshness.state === 'recent');
+  indicator.dataset.freshness = freshness.state;
+  $('#header-monitor-label').textContent = freshness.label;
+  $('#header-last-check').textContent = relativeTime(value);
+  $('#knowledge-health').textContent = freshness.label;
+  $('#knowledge-summary').textContent = `${relativeTime(value)} · latest recorded check, not all-source verification`;
+}
+
+function latestSuccessfulCheck(status) {
+  return (status.last_checks || []).find((check) => ['NO_CHANGES', 'CHANGES_DETECTED'].includes(check.status))?.checked_at;
 }
 
 function markUpdatesSeen() {
@@ -110,7 +146,7 @@ function updateLabel(update) {
 function updateAction(update) {
   if (update.action_required) return 'Review required before this source can support current guidance.';
   if (['WITHDRAWN', 'REPEALED', 'SUPERSEDED'].includes(update.current_lifecycle)) return 'Excluded from current-guidance retrieval; retained for historical research.';
-  return 'No user action is required. Current status is recorded in the knowledge base.';
+  return 'Eligible under the recorded lifecycle status. This does not establish whether the change affects your business.';
 }
 
 function renderLifecycleLiveSummary(status) {
@@ -138,17 +174,20 @@ async function loadUpdatesView() {
     const review = (lifecycle.REVIEW_REQUIRED || 0) + (lifecycle.UNKNOWN || 0);
     updateUnreadBadge(updates);
     markUpdatesSeen();
-    $('#monitoring-health').textContent = relativeTime(status.last_checks?.[0]?.checked_at);
+    const latest = latestSuccessfulCheck(status);
+    renderMonitoringFreshness(latest, status);
+    $('#monitoring-health').textContent = `${monitoringFreshness(latest).label} · ${relativeTime(latest)}`;
     $('#monitoring-summary').innerHTML = [
       ['Documents monitored', status.document_count], ['Official sources', status.tracked_source_count],
-      ['Non-current sources', nonCurrent], ['Needs review', review], ['Last successful check', relativeTime(status.last_checks?.[0]?.checked_at)],
+      ['Non-current sources', nonCurrent], ['Needs review', review], ['Latest successful source check', relativeTime(latest)],
     ].map(([label, value]) => `<article><small>${escapeHtml(label)}</small><strong>${escapeHtml(String(value))}</strong></article>`).join('');
-    list.innerHTML = updates.length ? updates.map((update) => {
+    list.innerHTML = updates.length ? groupUpdates(updates).map(([update, ...earlier]) => {
       const lifecycle = update.current_lifecycle || 'REVIEW_REQUIRED';
       const evidence = update.status_evidence_excerpt ? `<blockquote>${escapeHtml(update.status_evidence_excerpt)}</blockquote>` : '';
       const statusSource = update.status_evidence_url && update.status_evidence_url !== update.source_url
         ? `<a href="${escapeHtml(update.status_evidence_url)}" target="_blank" rel="noreferrer">View status evidence →</a>` : '';
-      return `<article class="update-card"><header><div><p class="eyebrow">${escapeHtml(updateLabel(update))}</p><h3>${escapeHtml(update.title)}</h3></div><span class="lifecycle-pill lifecycle-${escapeHtml(lifecycle)}">${escapeHtml(readableStatus(lifecycle))}</span></header><dl><div><dt>What changed</dt><dd>${escapeHtml(update.summary || 'A monitoring change was detected.')}</dd></div><div><dt>Detected</dt><dd>${escapeHtml(formatDateTime(update.detected_at))}</dd></div><div><dt>Current status</dt><dd>${escapeHtml(readableStatus(lifecycle))}</dd></div><div><dt>Action</dt><dd>${escapeHtml(updateAction(update))}</dd></div></dl>${evidence ? `<div class="status-evidence"><p>Supporting RBI status evidence</p>${evidence}</div>` : ''}<footer>${update.source_url ? `<a href="${escapeHtml(update.source_url)}" target="_blank" rel="noreferrer">Open original RBI source →</a>` : ''}${statusSource}</footer></article>`;
+      const history = earlier.length ? `<details class="event-history"><summary>${earlier.length} earlier monitoring event${earlier.length === 1 ? '' : 's'}</summary>${earlier.map((item) => `<p><b>${escapeHtml(formatDateTime(item.detected_at))} · ${escapeHtml(updateLabel(item))}</b><br>${escapeHtml(item.summary || 'No change summary recorded.')}</p>`).join('')}</details>` : '';
+      return `<article class="update-card"><header><div><p class="eyebrow">${escapeHtml(updateLabel(update))}</p><h3>${escapeHtml(update.title)}</h3></div><span class="lifecycle-pill lifecycle-${escapeHtml(lifecycle)}">${escapeHtml(readableStatus(lifecycle))}</span></header><dl><div><dt>Recorded finding</dt><dd>${escapeHtml(update.summary || 'A monitoring change was detected.')} Regulatory impact has not been independently assessed here.</dd></div><div><dt>Detected</dt><dd>${escapeHtml(formatDateTime(update.detected_at))}</dd></div><div><dt>Status at this event</dt><dd>${escapeHtml(readableStatus(lifecycle))}</dd></div><div><dt>Knowledge-base handling</dt><dd>${escapeHtml(updateAction(update))}</dd></div></dl>${evidence ? `<details class="status-evidence"><summary>Recorded status note</summary><p>Stored detector or reviewer evidence; not necessarily a verbatim RBI quotation.</p>${evidence}</details>` : ''}<footer>${update.source_url ? `<a href="${escapeHtml(update.source_url)}" target="_blank" rel="noreferrer">Open original RBI source →</a>` : ''}${statusSource}</footer>${history}</article>`;
     }).join('') : '<section class="updates-empty"><p class="eyebrow">No recent material changes</p><h3>The latest monitor check found no new or modified lending documents.</h3><p>Lifecycle status and source availability are still tracked separately.</p></section>';
     renderLifecycleLiveSummary(status);
   } catch {
@@ -236,19 +275,21 @@ function renderEvaluationReport(report) {
     accumulator[category] = (accumulator[category] || 0) + 1;
     return accumulator;
   }, {});
-  $('#evaluation-dataset-note').textContent = `${report.total_cases} labelled RBI lending questions · deterministic run · published ${formatDateTime(report.generated_at)}. This run exposes a legacy-source alignment gap, so it is shown as a re-baselining finding—not a generic answer-accuracy score.`;
+  const manifest = report.run_manifest;
+  $('#evaluation-dataset-note').textContent = `${report.total_cases} labelled RBI lending questions · ${report.answer_provider || 'unspecified provider'} run · published ${formatDateTime(report.generated_at)}. ${manifest ? `Base commit ${manifest.git_commit?.slice(0, 8) || 'not recorded'}${manifest.working_tree_dirty ? ' + working changes (fingerprinted)' : ''} · ${manifest.corpus_document_count ?? 'unknown'} corpus documents · ${manifest.source_refresh_attempted ? 'source refresh attempted during run' : 'saved corpus snapshot; no refresh during run'}.` : 'Legacy report: no run manifest recorded.'} This measures the saved test corpus, not live-model accuracy or production response time. Historical labels are not rewritten to improve results.`;
   $('#evaluation-categories').innerHTML = Object.entries(groups).map(([category, count]) => `<article><strong>${escapeHtml(String(count))}</strong><span>${escapeHtml(titleCase(category))}</span></article>`).join('');
   $('#evaluation-results').innerHTML = [
-    resultCard('Source retrieval', report.source_retrieval_pass_count, report.source_retrieval_evaluable_count, 'Did the labelled official RBI source appear in the eligible evidence set?'),
+    resultCard('Source retrieval', report.source_retrieval_pass_count, report.source_retrieval_evaluable_count, 'Did the labelled source appear? Legacy labels include non-current and unresolved documents: exclusion is not necessarily a retrieval-ranking error.'),
     resultCard('Lifecycle safety', 0, 0, 'Automated lifecycle regression tests exist; this benchmark does not yet publish a lifecycle-safety score.'),
     resultCard('Citation traceability', report.citation_traceability_pass_count, report.citation_traceability_evaluable_count, 'Did citation identifiers resolve to evidence returned by the same research turn?'),
     resultCard('Abstention', report.abstention_pass_count, report.abstention_evaluable_count, 'Did out-of-scope questions return no RBI research evidence?'),
   ].join('');
+  $('#evaluation-results').innerHTML += `<p class="honesty-note">Routing: ${Math.round((report.routing_accuracy || 0) * cases.length)}/${cases.length} matched the labelled route. These are small samples, not reliability guarantees. Semantic claim correctness, live-model latency and user time savings are not scored by this run.</p>`;
   $('#evaluation-cases').innerHTML = cases.map((item) => {
     const result = item.passed ? 'Pass' : 'Needs investigation';
     const sources = item.expected_source_urls?.length ? `<p><b>Expected source</b>${escapeHtml(item.expected_source_urls.join(' · '))}</p>` : '';
     const actual = item.actual_source_urls?.length ? `<p><b>Actual source</b>${escapeHtml(item.actual_source_urls.join(' · '))}</p>` : '';
-    return `<details class="evaluation-case"><summary><span><b>${escapeHtml(item.case_id)}</b><small>${escapeHtml(titleCase(item.category))}</small></span><i class="case-${item.passed ? 'pass' : 'review'}">${result}</i></summary><div><p><b>Question</b>${escapeHtml(item.question)}</p><p><b>Expected behaviour</b>${escapeHtml(item.expected_behavior)}</p><p><b>Actual behaviour</b>${escapeHtml(item.actual_behavior)}</p>${sources}${actual}<p><b>Why this matters</b>${escapeHtml(item.why_this_matters)}</p></div></details>`;
+    return `<details class="evaluation-case"><summary><span><b>${escapeHtml(item.question)}</b><small>${escapeHtml(item.case_id)} · ${escapeHtml(titleCase(item.category))}</small></span><i class="case-${item.passed ? 'pass' : 'review'}">${result}</i></summary><div><p><b>Expected behaviour</b>${escapeHtml(item.expected_behavior)}</p><p><b>Actual behaviour</b>${escapeHtml(item.actual_behavior)}</p>${sources}${actual}<p><b>Why this matters</b>${escapeHtml(item.why_this_matters)}</p></div></details>`;
   }).join('');
 }
 
@@ -280,17 +321,8 @@ function contextualTitle(research, query) {
   if (normalized.includes('penal charge')) return 'Penal charges in loan accounts';
   if (normalized.includes('property document')) return 'Release of property documents';
   if (normalized.includes('floating interest')) return 'Floating-rate loan disclosures';
+  if (normalized.includes('priority sector')) return 'Priority sector lending — source findings';
   return 'RBI lending guidance';
-}
-
-function fallbackClaimTitle(text) {
-  const normalized = String(text || '').toLowerCase();
-  if (normalized.includes('camera') || normalized.includes('microphone') || normalized.includes('location')) return 'Device permissions require explicit consent';
-  if (normalized.includes('give or deny consent') || normalized.includes('revoke consent')) return 'Borrowers control their data consent';
-  if (normalized.includes('prior and explicit consent')) return 'Prior, explicit consent is required';
-  if (normalized.includes('penal charge')) return 'Penal charges must be clearly disclosed';
-  if (normalized.includes('property document')) return 'Property documents must be released on time';
-  return 'Supporting RBI provision';
 }
 
 function showResearchMode(query) {
@@ -301,13 +333,21 @@ function showResearchMode(query) {
   $('#updates-toggle').setAttribute('aria-expanded', 'false');
 }
 
-function citationMap(data) { return new Map((data.citations || []).map((citation, index) => [citation.chunk_id, index])); }
+function sourceGroups(citations) {
+  const groups = new Map();
+  citations.forEach((citation) => {
+    const key = citation.source_url || citation.document_id || citation.chunk_id;
+    groups.set(key, [...(groups.get(key) || []), citation]);
+  });
+  return [...groups.values()];
+}
+function citationMap(data) { return new Map(sourceGroups(data.citations || []).flatMap((group, index) => group.map((citation) => [citation.chunk_id, index]))); }
 function citationButton(id, index) { return `<button class="citation-button" type="button" data-citation="${escapeHtml(id)}" aria-label="View source ${index + 1}">[${index + 1}]</button>`; }
 
 function claimHtml(claim, index, sourceIndexes) {
   const citations = (claim.citation_ids || []).map((id) => citationButton(id, sourceIndexes.get(id) ?? index)).join('');
-  const title = claim.title || fallbackClaimTitle(claim.text);
-  return `<article class="claim"><span class="claim-number">${String(index + 1).padStart(2, '0')}</span><div><h4>${escapeHtml(title)}</h4><p>${escapeHtml(claim.text)}${citations}</p></div></article>`;
+  // Do not invent a new topic from a claim whose model heading was removed.
+  return `<article class="claim"><span class="claim-number">${String(index + 1).padStart(2, '0')}</span><div>${claim.title ? `<h4>${escapeHtml(claim.title)}</h4>` : ''}<p>${escapeHtml(claim.text)}${citations}</p></div></article>`;
 }
 
 function claimsByCitation(research) {
@@ -329,12 +369,17 @@ function evidenceExcerpt(chunk, claimTexts = []) {
   return best.length > 420 ? `${best.slice(0, 417)}…` : best;
 }
 
+function sourceLocation(citation) {
+  const url = String(citation.source_url || '');
+  return /\.pdf(?:[?#]|$)/i.test(url) && Number.isFinite(citation.page_number) ? `PDF page ${citation.page_number}` : 'Web / text passage · original pagination not verified';
+}
+
 function sourceCard(citation, index, evidence, citedClaims) {
   const chunk = evidence.find((item) => item.chunk_id === citation.chunk_id);
   const excerpt = evidenceExcerpt(chunk, citedClaims.get(citation.chunk_id));
-  const page = Number.isFinite(citation.page_number) ? `Page ${citation.page_number}` : '';
+  const page = sourceLocation(citation);
   const lifecycle = chunk?.lifecycle || 'UNKNOWN';
-  return `<article class="source-card" id="source-${escapeHtml(citation.chunk_id)}" tabindex="-1"><header><span class="index">${index + 1}</span><div><p class="passage-label">${index === 0 ? 'Primary evidence' : 'Supporting evidence'} <span class="lifecycle-pill lifecycle-${escapeHtml(lifecycle)}">${escapeHtml(lifecycle.replaceAll('_', ' '))}</span></p><h3>${escapeHtml(citation.document_title)}</h3>${page ? `<small>${escapeHtml(page)}</small>` : ''}</div></header><p class="passage-label">Relevant passage</p><blockquote>${escapeHtml(excerpt)}</blockquote>${citation.source_url ? `<a href="${escapeHtml(citation.source_url)}" target="_blank" rel="noreferrer">View original RBI source →</a>` : ''}</article>`;
+  return `<article class="source-card" id="source-${escapeHtml(citation.chunk_id)}" tabindex="-1"><p class="passage-label">Passage <span class="lifecycle-pill lifecycle-${escapeHtml(lifecycle)}">${escapeHtml(lifecycle.replaceAll('_', ' '))}</span></p><small>${escapeHtml(page)}</small><blockquote>${escapeHtml(excerpt)}</blockquote>${chunk?.valid_from ? `<small>Stored validity start: ${escapeHtml(formatDateTime(chunk.valid_from))} (not necessarily RBI effective date)</small>` : ''}</article>`;
 }
 
 function selectSource(chunkId, focus = true) {
@@ -342,7 +387,7 @@ function selectSource(chunkId, focus = true) {
   $$('.citation-button').forEach((item) => item.classList.toggle('selected', item.dataset.citation === chunkId));
   const card = document.getElementById(`source-${chunkId}`);
   if (!card) return;
-  if (focus) { card.scrollIntoView({ behavior: 'smooth', block: 'nearest' }); card.focus({ preventScroll: true }); }
+  if (focus) { card.scrollIntoView({ behavior: window.matchMedia('(prefers-reduced-motion: reduce)').matches ? 'auto' : 'smooth', block: 'nearest' }); card.focus({ preventScroll: true }); }
 }
 
 function citationPreview(button, chunkId) {
@@ -350,7 +395,7 @@ function citationPreview(button, chunkId) {
   const citation = (latestAnswer?.citations || []).find((item) => item.chunk_id === chunkId);
   const chunk = (latestAnswer?.retrieved_evidence || []).find((item) => item.chunk_id === chunkId);
   if (!citation || !chunk) return;
-  popover.innerHTML = `<strong>${escapeHtml(citation.document_title)}</strong><p>${escapeHtml(evidenceExcerpt(chunk, claimsByCitation(latestAnswer.research).get(chunkId)))}</p><small>${Number.isFinite(citation.page_number) ? `Page ${citation.page_number} · ` : ''}Select to view evidence</small>`;
+  popover.innerHTML = `<strong>${escapeHtml(citation.document_title)}</strong><p>${escapeHtml(evidenceExcerpt(chunk, claimsByCitation(latestAnswer.research).get(chunkId)))}</p><small>${escapeHtml(sourceLocation(citation))} · Select to view evidence</small>`;
   const rect = button.getBoundingClientRect();
   popover.style.left = `${Math.min(window.innerWidth - popover.offsetWidth - 16, Math.max(16, rect.left))}px`;
   popover.style.top = `${Math.max(12, rect.top - 12)}px`;
@@ -400,35 +445,42 @@ function activateTab(name) {
 
 function renderAnswer(data) {
   latestAnswer = data;
+  $('#workspace-grid').classList.remove('answer-only');
   const research = data.research || {}; const citations = data.citations || []; const sourceIndexes = citationMap(data);
+  const groups = sourceGroups(citations); const sourceCount = groups.length;
   const insufficient = research.status === 'insufficient_evidence'; const outOfScope = research.status === 'out_of_scope';
   $('#user-turn-question').textContent = lastQuery;
   $('#answer-title').textContent = insufficient ? 'Insufficient evidence' : outOfScope ? 'Outside the knowledge base' : contextualTitle(research, lastQuery);
-  $('#evidence-badge').textContent = citations.length ? `Based on ${citations.length} RBI source${citations.length === 1 ? '' : 's'}` : outOfScope ? 'RBI lending scope' : 'No source evidence';
+  $('#evidence-badge').textContent = citations.length ? `${sourceCount} RBI document${sourceCount === 1 ? '' : 's'} · ${citations.length} cited passage${citations.length === 1 ? '' : 's'}` : outOfScope ? 'RBI lending scope' : 'No source evidence';
   const direct = research.direct_answer; let html = '';
-  if (direct) html += `<section class="direct-answer"><h3>${outOfScope ? 'Knowledge-base boundary' : insufficient ? 'What we found' : 'In brief'}</h3><p>${escapeHtml(direct.text)}${(direct.citation_ids || []).map((id) => citationButton(id, sourceIndexes.get(id) ?? 0)).join('')}</p></section>`;
-  (research.sections || []).forEach((section) => { if (section.claims?.length) html += `<section class="answer-section"><h3>${escapeHtml(section.title === 'Supporting provisions' ? 'Key requirements' : section.title)}</h3>${section.claims.map((claim, index) => claimHtml(claim, index, sourceIndexes)).join('')}</section>`; });
+  if (direct) html += `<section class="direct-answer"><h3>${outOfScope ? 'Knowledge-base boundary' : insufficient ? 'What we found' : data.pipeline?.answer_mode === 'excerpt' ? 'From retrieved RBI text' : 'In brief'}</h3><p>${escapeHtml(direct.text)}${(direct.citation_ids || []).map((id) => citationButton(id, sourceIndexes.get(id) ?? 0)).join('')}</p></section>`;
+  let claimIndex = 0;
+  (research.sections || []).forEach((section) => { if (section.claims?.length) html += `<section class="answer-section"><h3>${escapeHtml(section.title === 'Supporting provisions' ? 'Supporting details' : section.title)}</h3>${section.claims.map((claim) => claimHtml(claim, claimIndex++, sourceIndexes)).join('')}</section>`; });
+  if (data.pipeline?.historical_query) html = `<p class="history-warning">Historical / change research: non-current sources may be included. This is not a verified reconstruction of rules in force on a specific date.</p>${html}`;
+  if (insufficient) html += '<p class="answer-limit">This is a coverage limit, not a statement that RBI has no rule on this topic. Check the source catalogue or ask a narrower question.</p>';
+  if (!insufficient && !outOfScope) html += `<p class="answer-limit">${data.pipeline?.answer_mode === 'excerpt' ? 'Source excerpts only; not a synthesized answer.' : 'AI-generated research summary.'} Citation links establish traceability, not legal correctness. Verify the original wording before acting.</p>`;
   if (!html) html = '<section class="direct-answer"><h3>Research result</h3><p>No structured answer was returned. Please retry the research request.</p></section>';
   $('#structured-answer').innerHTML = html;
   const claims = claimsByCitation(research);
-  $('#sources-tab').innerHTML = citations.length ? citations.map((citation, index) => sourceCard(citation, index, data.retrieved_evidence || [], claims)).join('') : '<p class="relationship-empty">No citable RBI source was retrieved for this request.</p>';
+  $('#sources-tab').innerHTML = citations.length ? groups.map((group, index) => `<section class="source-document"><header><span class="index">${index + 1}</span><h3>${escapeHtml(group[0].document_title)}</h3></header><small>${group.length} cited passage${group.length === 1 ? '' : 's'}</small>${group.map((citation) => sourceCard(citation, index, data.retrieved_evidence || [], claims)).join('')}${group[0].source_url ? `<a href="${escapeHtml(group[0].source_url)}" target="_blank" rel="noreferrer">Open original RBI document ↗</a>` : '<p>Original source link unavailable.</p>'}</section>`).join('') : '<p class="relationship-empty">No citable RBI source was retrieved for this request.</p>';
   const graph = research.graph_context; $('#relationships-tab').innerHTML = graphHtml(graph, sourceIndexes);
-  $('#source-tab-count').textContent = citations.length ? `(${citations.length})` : '';
+  $('#source-tab-count').textContent = sourceCount ? `(${sourceCount})` : '';
   $('#graph-tab-count').textContent = graph?.edges?.length ? `(${graph.edges.length})` : '';
   const hasEvidence = Boolean(citations.length || graph?.edges?.length); $('#evidence-panel').classList.toggle('hidden', !hasEvidence);
   const related = research.related_questions || []; $('#related-questions').classList.toggle('hidden', !related.length); $('#related-question-list').innerHTML = related.map((item) => `<button type="button" data-follow-up="${escapeHtml(item)}">${escapeHtml(item)} →</button>`).join('');
-  const trace = [citations.length ? `${citations.length} official source${citations.length === 1 ? '' : 's'} retrieved` : null, data.citation_valid ? 'Answer linked to source evidence' : null, graph?.edges?.length ? `${graph.edges.length} regulatory relationship${graph.edges.length === 1 ? '' : 's'} found` : null].filter(Boolean);
+  const trace = [citations.length ? `${sourceCount} distinct RBI document${sourceCount === 1 ? '' : 's'}` : null, citations.length && data.citation_valid ? 'Answer linked to source evidence' : null, graph?.edges?.length ? `${graph.edges.length} regulatory relationship${graph.edges.length === 1 ? '' : 's'} found` : null].filter(Boolean);
   $('#research-trace').innerHTML = trace.map((item) => `<span>✓ ${escapeHtml(item)}</span>`).join('');
-  const route = String(data.route || 'RETRIEVAL').toLowerCase();
-  $('#behind-route').textContent = `${route} retrieval`;
   const pipeline = data.pipeline || {};
-  const validity = pipeline.historical_query ? 'Historical research keeps prior material available' : `${pipeline.excluded_after_validity_check || 0} candidate${pipeline.excluded_after_validity_check === 1 ? '' : 's'} excluded after validity check`;
+  const method = pipeline.retrieval_method;
+  $('#behind-route').textContent = ({vector:'Text retrieval', graph:'Graph-backed retrieval', hybrid:'Text + graph retrieval', none:'No eligible evidence'})[method] || 'Retrieval method not recorded';
+  const validity = pipeline.historical_query ? 'Prior material permitted for historical/change research; no exact as-of reconstruction' : `Current-guidance filter applied; ${pipeline.excluded_after_validity_check || 0} additional merged candidates excluded`;
   $('#behind-summary').innerHTML = `<dl>
     <div><dt>Question</dt><dd>RBI lending scope checked</dd></div>
-    <div><dt>Relationships</dt><dd>${graph?.edges?.length ? `${graph.edges.length} relevant relationship${graph.edges.length === 1 ? '' : 's'} retrieved` : 'No query-relevant relationship retrieved'}</dd></div>
+    <div><dt>Relationships</dt><dd>${graph?.edges?.length ? `${graph.edges.length} source-backed relationship${graph.edges.length === 1 ? '' : 's'} in selected evidence` : 'No eligible graph relationship shown; do not infer graph benefit'}</dd></div>
     <div><dt>Validity</dt><dd>${escapeHtml(validity)}</dd></div>
     <div><dt>Evidence</dt><dd>${pipeline.selected_evidence_count ?? citations.length} eligible passage${(pipeline.selected_evidence_count ?? citations.length) === 1 ? '' : 's'} selected</dd></div>
     <div><dt>Citations</dt><dd>${citations.length ? (data.citation_valid ? 'Mapped to retrieved evidence' : 'No verified citation mapping') : 'No citations for this response'}</dd></div>
+    <div><dt>Response time</dt><dd>${Number.isFinite(data.latency_ms) ? `${(data.latency_ms / 1000).toFixed(1)}s server processing; network / wake-up time may add delay` : 'Not recorded'}</dd></div>
   </dl><p class="behind-note">This summary uses artifacts returned by this research turn.</p>`;
   bindCitationInteractions(); bindGraphInteractions();
   $$('[data-follow-up]').forEach((button) => button.addEventListener('click', () => { $('#question').value = button.dataset.followUp; $('#query-form').requestSubmit(); }));
@@ -437,6 +489,8 @@ function renderAnswer(data) {
 function setProgress(stage) {
   const stages = ['understanding_question','searching_regulatory_relationships','retrieving_official_evidence','checking_regulatory_validity','selecting_authoritative_evidence','building_grounded_answer']; const index = stages.indexOf(stage);
   $$('#research-progress li').forEach((item, itemIndex) => { item.classList.toggle('active', itemIndex === index); item.classList.toggle('complete', itemIndex < index); });
+  const entered = $$('#research-progress li')[index];
+  if (entered) $('#loading-stage').textContent = entered.querySelector('strong').textContent;
 }
 
 function setLoading(loading) {
@@ -447,6 +501,11 @@ function setLoading(loading) {
 }
 
 function showError(message) {
+  $('#structured-answer').innerHTML = '';
+  $('#answer-title').textContent = 'Research unavailable';
+  $('#evidence-badge').textContent = 'No answer returned';
+  $('#research-trace').innerHTML = '';
+  $('#related-questions').classList.add('hidden');
   $('#behind-route').textContent = '';
   $('#behind-summary').innerHTML = '<p>The research service did not return evidence for this turn.</p>';
   $('#research-error').innerHTML = `<h2>We couldn’t complete this research request.</h2><p>${escapeHtml(message)}</p><button id="retry-research" type="button">Try again</button>`;
@@ -476,15 +535,16 @@ async function loadStatus() {
     if (!statusResponse.ok || !documentsResponse.ok) throw new Error();
     const status = await statusResponse.json(); const documentList = await documentsResponse.json(); latestDocuments = documentList.documents || []; latestMonitoringStatus = status;
     if (updatesResponse.ok) updateUnreadBadge(await updatesResponse.json());
-    const checks = status.last_checks || []; const latest = checks[0]?.checked_at;
-    $('#document-count').textContent = `${status.document_count} RBI documents`; $('#source-count').textContent = `${status.tracked_source_count} official sources`;
+    const latest = latestSuccessfulCheck(status);
+    const eligible = (status.lifecycle_counts?.ACTIVE || 0) + (status.lifecycle_counts?.AMENDED || 0);
+    $('#document-count').textContent = `${eligible} eligible / ${status.document_count} indexed documents`; $('#source-count').textContent = `${status.tracked_source_count} selected sources monitored`;
     const topics = status.topics || []; $('#topic-labels').innerHTML = topics.slice(0, 4).map((topic) => `<span>${escapeHtml(topic)}</span>`).join(''); $('#topic-overflow').textContent = topics.length > 4 ? `+${topics.length - 4}` : ''; $('#topic-overflow').classList.toggle('hidden', topics.length <= 4);
     const lifecycle = status.lifecycle_counts || {}; const reviewCount = (lifecycle.REVIEW_REQUIRED || 0) + (lifecycle.UNKNOWN || 0); const withdrawnCount = (lifecycle.WITHDRAWN || 0) + (lifecycle.REPEALED || 0) + (lifecycle.SUPERSEDED || 0);
     $('#non-current-count').textContent = `${withdrawnCount} non-current`; $('#review-count').textContent = `${reviewCount} needs review`;
-    $('#knowledge-summary').textContent = relativeTime(latest); $('#header-last-check').textContent = relativeTime(latest); $('#knowledge-health').textContent = reviewCount ? `${reviewCount} status review${reviewCount === 1 ? '' : 's'}` : status.health === 'healthy' ? '● Live' : 'Needs review'; $('#source-live').classList.toggle('healthy', status.health === 'healthy' && !reviewCount);
-    if (withdrawnCount) $('#knowledge-health').textContent = `${withdrawnCount} non-current · ${reviewCount} review`;
+    renderMonitoringFreshness(latest, status);
     renderLifecycleLiveSummary(status);
   } catch {
+    renderMonitoringFreshness(null);
     $('#document-count').textContent = 'Knowledge base unavailable'; $('#source-count').textContent = 'Status will retry on refresh'; $('#non-current-count').textContent = ''; $('#review-count').textContent = ''; $('#knowledge-health').textContent = 'Unavailable';
   }
 }
@@ -508,6 +568,12 @@ $('#follow-up-form').addEventListener('submit', (event) => {
 });
 $('#new-research').addEventListener('click', () => { $('#app-shell').classList.remove('research-mode'); $('#result').classList.add('hidden'); $('#analysis-state').classList.add('hidden'); $('#new-research').classList.add('hidden'); $('#question').value = ''; $('#question').focus(); window.scrollTo({ top: 0, behavior: 'smooth' }); });
 $$('.evidence-tabs button').forEach((button) => button.addEventListener('click', () => activateTab(button.dataset.tab)));
+$$('.evidence-tabs button').forEach((button, index, tabs) => button.addEventListener('keydown', (event) => {
+  if (!['ArrowLeft', 'ArrowRight', 'Home', 'End'].includes(event.key)) return;
+  event.preventDefault();
+  const next = event.key === 'Home' ? 0 : event.key === 'End' ? tabs.length - 1 : (index + (event.key === 'ArrowRight' ? 1 : -1) + tabs.length) % tabs.length;
+  activateTab(tabs[next].dataset.tab); tabs[next].focus();
+}));
 function openCatalog() { const dialog = $('#source-catalog'); $('#catalog-content').innerHTML = latestDocuments.length ? latestDocuments.map((document) => { const lifecycle = document.lifecycle || 'UNKNOWN'; const detail = document.status_evidence_excerpt ? `<p>${escapeHtml(document.status_evidence_excerpt)}</p>` : ''; const review = ['UNKNOWN', 'REVIEW_REQUIRED'].includes(lifecycle) ? `<button class="review-source" type="button" data-review-document="${escapeHtml(document.document_id)}">Review status</button>` : ''; return `<article class="catalog-card"><h3>${escapeHtml(document.title)} <span class="lifecycle-pill lifecycle-${escapeHtml(lifecycle)}">${escapeHtml(lifecycle.replaceAll('_', ' '))}</span></h3><p>${document.page_count ? `Pages ${escapeHtml(document.page_count)} · ` : ''}Indexed RBI material</p>${detail}${document.source_url ? `<a href="${escapeHtml(document.source_url)}" target="_blank" rel="noreferrer">Open original source →</a>` : ''}${review}</article>`; }).join('') : '<p class="relationship-empty">Document details are not available yet. Refresh after the knowledge base loads.</p>'; $$('[data-review-document]').forEach((button) => button.addEventListener('click', () => openReviewDialog(button.dataset.reviewDocument))); dialog.showModal(); }
 
 function openReviewDialog(documentId) { const document = latestDocuments.find((item) => item.document_id === documentId); if (!document) return; $('#review-document-id').value = document.document_id; $('#review-document-title').textContent = document.title; $('#review-evidence-url').value = document.source_url || ''; $('#review-evidence-excerpt').value = ''; $('#review-admin-key').value = ''; $('#review-result').textContent = ''; $('#review-dialog').showModal(); }
@@ -523,5 +589,6 @@ window.addEventListener('popstate', () => showView(routeView(), { focus: true })
 window.addEventListener('hashchange', () => showView(routeView(), { focus: true }));
 $('#view-all-sources').addEventListener('click', openCatalog); $('#close-source-catalog').addEventListener('click', () => $('#source-catalog').close());
 $('#close-review-dialog').addEventListener('click', () => $('#review-dialog').close());
+$('#evidence-slot').append($('#evidence-panel'));
 loadStatus();
 navigateTo(routeView(), { replace: true, focus: false });

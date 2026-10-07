@@ -132,3 +132,52 @@ def test_query_progress_reports_only_entered_backend_stages(tmp_path: Path) -> N
         "understanding_question", "searching_regulatory_relationships", "retrieving_official_evidence",
         "checking_regulatory_validity", "selecting_authoritative_evidence", "building_grounded_answer",
     ]
+
+
+def test_document_year_is_not_historical_intent():
+    for query in ["What do RBI amendments issued in 2026 change?", "What is covered by Digital Lending Directions, 2025?",
+                  "What consent is required before collecting borrower data?"]:
+        assert not RegulatoryQueryService._is_historical_query(query)
+    for query in ["What changed in RBI guidance?", "What were the lending rules in 2023?", "What applied as of 2024?",
+                  "What rules applied before the amendment?"]:
+        assert RegulatoryQueryService._is_historical_query(query)
+
+
+def test_graph_fallback_respects_explicit_historical_intent(tmp_path: Path):
+    from app.models.retrieval import GraphRetrievalResult, RetrievalRoute, RouteDecision
+    source = tmp_path / "rbi.txt"
+    source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")
+    settings = Settings(data_dir=tmp_path / "data")
+    IngestionService(settings).ingest(IngestRequest(local_path=str(source), title="RBI penal charges"))
+    service = RegulatoryQueryService(settings)
+    service.router.route = lambda _: RouteDecision(route=RetrievalRoute.GRAPH)
+    service.graph.retrieve_graph = lambda _: GraphRetrievalResult(template=None)
+    current = service.query("What penal charges rules apply in 2026?")
+    historical = service.query("What changed in RBI penal charges rules?")
+    assert not current.retrieved_evidence
+    assert historical.retrieved_evidence
+    assert historical.pipeline.retrieval_method == "vector"
+    assert historical.research.graph_context is None
+
+
+def test_excluded_graph_provenance_is_not_shown_as_answer_evidence(tmp_path: Path):
+    from app.models.retrieval import GraphRetrievalResult, GraphEdgeEvidence, GraphNodeEvidence, RetrievalRoute, RouteDecision
+    source = tmp_path / "rbi.txt"
+    source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")
+    settings = Settings(data_dir=tmp_path / "data")
+    ingest_verified_active(settings, source)
+    service = RegulatoryQueryService(settings)
+    chunk = service.vector.retrieve_vector("penal charges")[0]
+    edge = GraphEdgeEvidence(source_id="a", target_id="b", relationship_type="REQUIRES",
+                             source_chunk_id=chunk.chunk_id, source_document_id=chunk.document_id, confidence=1)
+    graph = GraphRetrievalResult(template="test", nodes=[GraphNodeEvidence(node_id=i, name=i, entity_type="Regulation") for i in ("a", "b")], edges=[edge])
+    service.router.route = lambda _: RouteDecision(route=RetrievalRoute.GRAPH)
+    service.graph.retrieve_graph = lambda _: graph
+    response = service.query("What must lenders disclose about penal charges?")
+    assert response.research.graph_context.edges == [edge]
+    assert response.pipeline.retrieval_method == "graph"
+    service.vector.store.apply_lifecycle(chunk.document_id, DocumentLifecycle.WITHDRAWN.value)
+    response = service.query("What must lenders disclose about penal charges?")
+    assert not response.retrieved_evidence
+    assert response.research.graph_context is None
+    assert response.pipeline.retrieval_method == "none"

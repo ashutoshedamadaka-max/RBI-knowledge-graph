@@ -171,7 +171,10 @@ def evaluation_report() -> dict[str, object]:
     metric. Until a report is intentionally generated and committed, callers
     receive an honest unavailable state.
     """
-    report_path = Path(__file__).resolve().parents[2] / "data" / "evaluation" / "portfolio-report.json"
+    report_dir = Path(__file__).resolve().parents[2] / "data" / "evaluation"
+    report_path = report_dir / "current-report.json"
+    if not report_path.exists():
+        report_path = report_dir / "portfolio-report.json"
     if not report_path.exists():
         return {
             "available": False,

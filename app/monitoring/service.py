@@ -41,7 +41,9 @@ class RegulatoryMonitor:
         updates: list[RegulatoryUpdate] = []
         try:
             for document in discovered:
-                if not self._is_lending_relevant(document.title, source.regulatory_topics):
+                # Individual registry documents were explicitly selected already.
+                # A listing-title heuristic must not silently skip their checks.
+                if source.parser_strategy != "rbi_document" and not self._is_lending_relevant(document.title, source.regulatory_topics):
                     continue
                 previous = self.store.current_version(document.canonical_url)
                 text = self.fetcher.download_text(document)

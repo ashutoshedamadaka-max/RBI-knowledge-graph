@@ -13,6 +13,9 @@ def test_frontend_and_metrics_are_available() -> None:
     script = client.get("/assets/app.js")
 
     assert homepage.status_code == 200
+    assert "Find the rule." in homepage.text
+    assert client.get('/assets/refinements.css').status_code == 200
+    assert client.get('/api-config.js').text == "window.RBI_API_BASE_URL = '';"
     assert "RBI Lending Intelligence" in homepage.text
     assert script.status_code == 200
     assert metrics.status_code == 200

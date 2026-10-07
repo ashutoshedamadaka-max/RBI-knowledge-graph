@@ -2,11 +2,12 @@ from datetime import UTC, datetime
 from time import perf_counter
 from collections.abc import Callable
 from uuid import uuid4
+import re
 
 from app.config.settings import Settings
 from app.graph.query_service import GraphRetrievalService
 from app.llm.citations import validate_structured_citations
-from app.llm.generation import DeterministicAnswerGenerator, get_answer_generator, research_to_markdown
+from app.llm.generation import DeterministicAnswerGenerator, get_answer_generator, research_to_markdown, align_research_headings
 from app.models.chunks import ChunkMetadata
 from app.models.documents import DocumentLifecycle
 from app.models.query import Citation, QueryPipelineSummary, QueryResponse
@@ -48,6 +49,9 @@ class RegulatoryQueryService:
         if progress:
             progress("searching_regulatory_relationships")
         graph_result = self.graph.retrieve_graph(user_query)
+        historical = self._is_historical_query(user_query)
+        vector_used = decision.route in {RetrievalRoute.VECTOR, RetrievalRoute.HYBRID}
+        graph_evidence = []
         if decision.route in {RetrievalRoute.VECTOR, RetrievalRoute.HYBRID}:
             if progress:
                 progress("retrieving_official_evidence")
@@ -57,7 +61,10 @@ class RegulatoryQueryService:
             graph_evidence = self.vector.store.get_by_ids(graph_result.chunk_ids)
             evidence.extend(graph_evidence)
             if decision.route is RetrievalRoute.GRAPH and not graph_evidence:
-                evidence.extend(self.vector.retrieve_vector(user_query, top_k))
+                vector_used = True
+                if progress:
+                    progress("retrieving_official_evidence")
+                evidence.extend(self.vector.retrieve_vector(user_query, top_k, current_only=not historical))
 
         # Graph retrieval is semantic discovery, not a validity exception. Apply
         # regulatory authority resolution after every candidate source is merged.
@@ -83,6 +90,7 @@ class RegulatoryQueryService:
             research = DeterministicAnswerGenerator().generate(user_query, merged).research
             fallback_used = True
         assert research is not None
+        research = align_research_headings(research, merged)
         if research.status is ResearchStatus.INSUFFICIENT_EVIDENCE:
             research = research.model_copy(update={
                 "direct_answer": ResearchClaim(
@@ -93,8 +101,14 @@ class RegulatoryQueryService:
                 "graph_context": None,
             })
         elif graph_result.edges:
+            # Do not present edges backed only by excluded or unselected passages.
+            selected_ids = {chunk.chunk_id for chunk in merged}
+            eligible_edges = [edge for edge in graph_result.edges if edge.source_chunk_id in selected_ids]
+            node_ids = {node_id for edge in eligible_edges for node_id in (edge.source_id, edge.target_id)}
             research = research.model_copy(update={
-                "graph_context": ResearchGraphContext(nodes=graph_result.nodes, edges=graph_result.edges)
+                "graph_context": ResearchGraphContext(
+                    nodes=[node for node in graph_result.nodes if node.node_id in node_ids], edges=eligible_edges,
+                ) if eligible_edges else None
             })
 
         answer = research_to_markdown(research)
@@ -129,13 +143,23 @@ class RegulatoryQueryService:
                 candidate_evidence_count=candidate_evidence_count,
                 excluded_after_validity_check=excluded_after_validity_check,
                 selected_evidence_count=len(merged), historical_query=historical,
+                answer_mode="excerpt" if fallback_used or generation.model == "deterministic" else "summary",
+                retrieval_method=("hybrid" if vector_used else "graph") if any(
+                    chunk.chunk_id in {item.chunk_id for item in graph_evidence} for chunk in merged
+                ) else "vector" if vector_used else "none",
             ),
         )
 
     @staticmethod
     def _is_historical_query(query: str) -> bool:
         normalized = query.lower()
-        return any(term in normalized for term in ("before", "previous", "historical", "what changed", "as of", "in 20"))
+        # A year in a document title or an amendment question is not a request
+        # to bypass current authority. Require an explicit history/change intent.
+        return bool(re.search(
+            r"\b(?:historical|previous(?:ly)?|what changed|as of|used to|no longer)\b"
+            r"|\b(?:before|prior to)\s+(?:the\s+)?(?:20\d{2}|amendment|change|withdrawal)\b"
+            r"|\b(?:what were|which rules applied|rules in force in)\b", normalized,
+        ))
 
     @staticmethod
     def _cited_ids(research: StructuredResearch) -> set[str]:

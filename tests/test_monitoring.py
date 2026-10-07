@@ -76,6 +76,16 @@ def test_curated_document_first_scan_establishes_a_baseline(tmp_path: Path) -> N
     assert len(store.versions()) == 1
 
 
+def test_curated_document_is_checked_even_when_listing_keywords_do_not_match(tmp_path: Path):
+    curated = source().model_copy(update={"parser_strategy": "rbi_document", "regulatory_topics": ["unmatched topic"]})
+    fetcher = FixtureFetcher("Official management of advances source.")
+    fetcher.document.title = "Management of Advances"
+    store = MonitoringStore(tmp_path / "monitoring.json")
+    check, _ = RegulatoryMonitor(store, fetcher).check_source(curated)
+    assert check.status.value == "NO_CHANGES"
+    assert len(store.versions()) == 1
+
+
 def test_monitor_ignores_case_and_whitespace_only_changes(tmp_path: Path) -> None:
     store = MonitoringStore(tmp_path / "monitoring.json")
     first = RegulatoryMonitor(store, FixtureFetcher("RBI lending rule: disclose penal charges."))

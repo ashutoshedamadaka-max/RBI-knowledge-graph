@@ -40,6 +40,7 @@ class CaseResult(BaseModel):
     estimated_cost_usd: float
     expected_source_urls: list[str] = Field(default_factory=list)
     actual_source_urls: list[str] = Field(default_factory=list)
+    vector_source_urls: list[str] = Field(default_factory=list)
     expected_behavior: str
     actual_behavior: str
     why_this_matters: str

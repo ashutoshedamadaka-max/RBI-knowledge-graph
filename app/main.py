@@ -2,7 +2,7 @@ import logging
 from pathlib import Path
 
 from fastapi import FastAPI
-from fastapi.responses import FileResponse
+from fastapi.responses import FileResponse, Response
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.concurrency import run_in_threadpool
@@ -50,8 +50,14 @@ def create_app() -> FastAPI:
     monitoring_store.reset_catalogue_after_extraction_upgrade(curated_source_ids)
     durable_state.sync()
     application.include_router(router)
-    static_dir = Path(__file__).parent / "static"
-    application.mount("/assets", StaticFiles(directory=static_dir), name="assets")
+    # Serve the same frontend locally/on Render as Vercel. The legacy app/static
+    # copy otherwise makes previews disagree with the portfolio-linked app.
+    frontend_dir = Path(__file__).resolve().parents[1] / "frontend"
+    application.mount("/assets", StaticFiles(directory=frontend_dir / "assets"), name="assets")
+
+    @application.get("/api-config.js", include_in_schema=False)
+    def frontend_config() -> Response:
+        return Response("window.RBI_API_BASE_URL = '';", media_type="application/javascript")
 
     @application.middleware("http")
     async def persist_runtime_state(request, call_next):
@@ -65,7 +71,7 @@ def create_app() -> FastAPI:
 
     @application.get("/", include_in_schema=False)
     def frontend() -> FileResponse:
-        return FileResponse(static_dir / "index.html")
+        return FileResponse(frontend_dir / "index.html")
     return application
 
 
