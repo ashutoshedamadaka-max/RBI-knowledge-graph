@@ -61,3 +61,14 @@ def test_repair_rolls_back_indexes_on_failure(tmp_path, monkeypatch):
     with pytest.raises(RuntimeError):
         repair_legacy_notifications(service)
     assert json.loads(service.vector_store.path.read_text()) == json.loads(before)
+
+
+def test_repair_supports_monitored_plain_text_and_department_circular_id(tmp_path):
+    service = IngestionService(Settings(_env_file=None, data_dir=tmp_path / "data"))
+    document = service.ingest_content(
+        b"Skip to main content Not Pressed RBI/FIDD/2025-26/196 Priority sector lending shall include eligible borrowers.",
+        "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=13280&Mode=0",
+        "rbi_monitor_source.txt", "Priority Sector Lending").document
+    assert document.mime_type == "text/plain"
+    assert repair_legacy_notifications(service) == 1
+    assert service.vector_store.get_by_document_id(document.document_id)[0].text.startswith("RBI/FIDD/")

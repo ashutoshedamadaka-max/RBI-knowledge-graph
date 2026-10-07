@@ -1,10 +1,11 @@
 import asyncio
 from datetime import UTC, datetime
 import json
+import os
 from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
-from fastapi import APIRouter, Header, HTTPException, Request
+from fastapi import APIRouter, Header, HTTPException, Request, Response
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
 from starlette.background import BackgroundTask
@@ -44,7 +45,8 @@ router = APIRouter()
 
 
 @router.get("/health")
-def health() -> dict[str, str]:
+def health(response: Response) -> dict[str, str]:
+    response.headers["X-App-Revision"] = os.environ.get("RENDER_GIT_COMMIT", "local")
     return {"status": "ok"}
 
 

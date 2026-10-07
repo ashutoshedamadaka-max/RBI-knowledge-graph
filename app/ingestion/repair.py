@@ -3,6 +3,7 @@
 import json
 import logging
 import re
+from urllib.parse import urlsplit
 
 from app.graph.extraction import DeterministicEntityExtractor
 from app.ingestion.chunking import chunk_pages
@@ -15,7 +16,9 @@ CHROME = re.compile(r"skip to main content|not pressed|search the website", re.I
 def repair_legacy_notifications(service) -> int:
     repaired = 0
     for document in service.manifest.all():
-        if document.mime_type != "text/html":
+        url = urlsplit(document.source_url or "")
+        is_rbi_notification = url.hostname in {"rbi.org.in", "www.rbi.org.in"} and url.path.lower().endswith("/notificationuser.aspx")
+        if document.mime_type != "text/html" and not (document.mime_type == "text/plain" and is_rbi_notification):
             continue
         old_chunks = service.vector_store.get_by_document_id(document.document_id)
         if not any(CHROME.search(chunk.text) for chunk in old_chunks):
@@ -48,7 +51,7 @@ def repair_legacy_notifications(service) -> int:
         cleaned = []
         for page in pages:
             if CHROME.search(page):
-                identifier = re.search(r"\bRBI/\d{4}-\d{2}/\d+\b", page)
+                identifier = re.search(r"\bRBI/(?:[A-Z]+/)?\d{4}-\d{2}/\d+\b", page)
                 if not identifier:
                     break
                 page = page[identifier.start():]

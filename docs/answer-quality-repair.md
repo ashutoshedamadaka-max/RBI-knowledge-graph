@@ -11,7 +11,8 @@ Citation ID validation alone is not a semantic correctness guarantee.
 
 ## Existing evidence
 
-On startup, `repair_legacy_notifications` checks indexed HTML for known legacy
+On startup, `repair_legacy_notifications` checks indexed HTML and RBI notification
+snapshots stored as plain text by the monitor for known legacy
 navigation markers. It uses captured raw HTML, cached processed text, or
 reconstructed chunks with verified overlap. It never fetches today's page to
 rewrite a historical version. Text-only recovery requires an official RBI
