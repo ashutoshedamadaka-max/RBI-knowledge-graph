@@ -47,6 +47,9 @@ def test_answer_schema_requires_exact_nested_ui_fields():
     assert set(schema["required"]) == set(schema["properties"])
     claim = schema["properties"]["direct_answer"]["anyOf"][0]
     assert claim["required"] == ["title", "text", "citation_ids"]
+    section = schema["properties"]["sections"]["items"]
+    assert section["properties"]["id"]["pattern"] == "^[a-z0-9-]+$"
+    assert schema["properties"]["related_questions"]["maxItems"] == 3
 
 
 def test_truncated_output_is_not_turned_into_excerpt_answer():

@@ -18,15 +18,15 @@ def answer_output_schema() -> dict:
     def obj(properties):
         return {"type": "object", "properties": properties,
                 "required": list(properties), "additionalProperties": False}
-    claim = obj({"title": {"type": ["string", "null"]}, "text": {"type": "string"},
+    claim = obj({"title": {"type": ["string", "null"], "maxLength": 120}, "text": {"type": "string", "minLength": 1, "maxLength": 1800},
                  "citation_ids": {"type": "array", "items": {"type": "string"}}})
-    section = obj({"id": {"type": "string"}, "title": {"type": "string"},
-                   "claims": {"type": "array", "items": claim}})
+    section = obj({"id": {"type": "string", "pattern": "^[a-z0-9-]+$"}, "title": {"type": "string", "minLength": 1, "maxLength": 100},
+                   "claims": {"type": "array", "items": claim, "maxItems": 8}})
     return obj({"status": {"type": "string", "enum": ["grounded", "insufficient_evidence"]},
-                "display_title": {"type": ["string", "null"]},
+                "display_title": {"type": ["string", "null"], "maxLength": 140},
                 "direct_answer": {"anyOf": [claim, {"type": "null"}]},
-                "sections": {"type": "array", "items": section},
-                "related_questions": {"type": "array", "items": {"type": "string"}}})
+                "sections": {"type": "array", "items": section, "maxItems": 6},
+                "related_questions": {"type": "array", "items": {"type": "string"}, "maxItems": 3}})
 
 
 class GenerationResult(BaseModel):
@@ -222,7 +222,9 @@ class OpenAIAnswerGenerator(AnswerGenerator):
         try:
             research = StructuredResearch.model_validate(json.loads(content))
         except (json.JSONDecodeError, ValueError) as exc:
-            logger.warning("structured_answer_invalid error_type=%s", type(exc).__name__)
+            issues = [{"field": ".".join(map(str, item["loc"])), "type": item["type"]}
+                      for item in exc.errors()] if hasattr(exc, "errors") else []
+            logger.warning("structured_answer_invalid error_type=%s issues=%s", type(exc).__name__, issues)
             research = None
         return GenerationResult(
             answer=research_to_markdown(research) if research else content,
