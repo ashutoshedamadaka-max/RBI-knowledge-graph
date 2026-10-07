@@ -8,6 +8,10 @@ An explicit model abstention is no longer replaced by quoted excerpts merely
 because retrieval found chunks. The deterministic fallback rejects known page
 chrome, excessively long sentences, and incomplete “modified as below” intros.
 Citation ID validation alone is not a semantic correctness guarantee.
+The OpenAI request now uses strict JSON-schema output for the actual UI fields,
+rather than JSON mode alone. Truncated or refused output is reported safely,
+not silently replaced by an excerpt. Coverage limits must be stated when only
+part of a broad question is supported.
 
 ## Existing evidence
 

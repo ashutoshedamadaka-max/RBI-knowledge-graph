@@ -1,4 +1,5 @@
 import json
+import logging
 import re
 from abc import ABC, abstractmethod
 
@@ -8,6 +9,24 @@ from pydantic import BaseModel
 from app.config.settings import Settings
 from app.models.chunks import ChunkMetadata
 from app.models.research import ResearchClaim, ResearchSection, ResearchStatus, StructuredResearch
+
+logger = logging.getLogger(__name__)
+
+
+def answer_output_schema() -> dict:
+    """Constrain model output to the UI contract, not merely valid JSON."""
+    def obj(properties):
+        return {"type": "object", "properties": properties,
+                "required": list(properties), "additionalProperties": False}
+    claim = obj({"title": {"type": ["string", "null"]}, "text": {"type": "string"},
+                 "citation_ids": {"type": "array", "items": {"type": "string"}}})
+    section = obj({"id": {"type": "string"}, "title": {"type": "string"},
+                   "claims": {"type": "array", "items": claim}})
+    return obj({"status": {"type": "string", "enum": ["grounded", "insufficient_evidence"]},
+                "display_title": {"type": ["string", "null"]},
+                "direct_answer": {"anyOf": [claim, {"type": "null"}]},
+                "sections": {"type": "array", "items": section},
+                "related_questions": {"type": "array", "items": {"type": "string"}}})
 
 
 class GenerationResult(BaseModel):
@@ -159,6 +178,9 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             "For amendment questions explain each actual change, who it affects and its effective date only when supplied. "
             "A reference to another document or 'modified as below' is not the change itself. "
             "Ignore website navigation and boilerplate. Do not claim a before/after comparison unless both are supported. "
+            "When only some requested amendments are supported, explain those and state the coverage limit; "
+            "do not imply that the summary covers all amendments. Never present struck-out or deleted text as a current rule. "
+            "citation_ids must contain bare supplied chunk IDs without square brackets. "
             "Each claim title should be scannable and factual. Use only meaningful sections; "
             "do not create empty sections. related_questions is optional and must be RBI lending questions.\n"
             "JSON shape: {status, display_title|null, direct_answer:{text,citation_ids}|null, "
@@ -177,7 +199,9 @@ class OpenAIAnswerGenerator(AnswerGenerator):
                     ],
                     "temperature": 0,
                     "max_tokens": self.max_output_tokens,
-                    "response_format": {"type": "json_object"},
+                    "response_format": {"type": "json_schema", "json_schema": {
+                        "name": "rbi_research_answer", "strict": True, "schema": answer_output_schema(),
+                    }},
                 },
                 timeout=self.timeout_seconds,
             )
@@ -191,10 +215,14 @@ class OpenAIAnswerGenerator(AnswerGenerator):
         input_tokens = usage.get("prompt_tokens", 0)
         output_tokens = usage.get("completion_tokens", 0)
         from app.observability.costs import estimate_openai_cost
-        content = body["choices"][0]["message"]["content"]
+        choice = body["choices"][0]
+        if choice.get("finish_reason") == "length" or choice["message"].get("refusal"):
+            raise AnswerGenerationError("The AI answer could not be completed safely. Please try a more specific question.")
+        content = choice["message"]["content"]
         try:
             research = StructuredResearch.model_validate(json.loads(content))
-        except (json.JSONDecodeError, ValueError):
+        except (json.JSONDecodeError, ValueError) as exc:
+            logger.warning("structured_answer_invalid error_type=%s", type(exc).__name__)
             research = None
         return GenerationResult(
             answer=research_to_markdown(research) if research else content,

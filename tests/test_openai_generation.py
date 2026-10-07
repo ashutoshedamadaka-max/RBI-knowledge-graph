@@ -3,7 +3,7 @@ from unittest.mock import Mock, patch
 import httpx
 import pytest
 
-from app.llm.generation import AnswerGenerationError, OpenAIAnswerGenerator
+from app.llm.generation import AnswerGenerationError, OpenAIAnswerGenerator, answer_output_schema
 from app.models.chunks import ChunkMetadata
 
 
@@ -38,6 +38,23 @@ def test_openai_generator_limits_output_and_tracks_usage() -> None:
     assert post.call_args.kwargs["timeout"] == 12
     assert post.call_args.kwargs["json"]["max_tokens"] == 450
     assert "test-key" not in post.call_args.kwargs["json"]
+    assert post.call_args.kwargs["json"]["response_format"]["json_schema"]["strict"] is True
+
+
+def test_answer_schema_requires_exact_nested_ui_fields():
+    schema = answer_output_schema()
+    assert schema["additionalProperties"] is False
+    assert set(schema["required"]) == set(schema["properties"])
+    claim = schema["properties"]["direct_answer"]["anyOf"][0]
+    assert claim["required"] == ["title", "text", "citation_ids"]
+
+
+def test_truncated_output_is_not_turned_into_excerpt_answer():
+    response = Mock()
+    response.json.return_value = {"choices": [{"finish_reason": "length", "message": {"content": '{"status":'}}]}
+    with patch("app.llm.generation.httpx.post", return_value=response):
+        with pytest.raises(AnswerGenerationError, match="completed safely"):
+            generator().generate("What must be disclosed?", evidence())
 
 
 def test_openai_generator_returns_safe_error_for_provider_failure() -> None:
