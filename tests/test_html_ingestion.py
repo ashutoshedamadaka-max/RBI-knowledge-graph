@@ -20,3 +20,15 @@ def test_extract_html_text_ignores_page_scripts_and_styles() -> None:
     text = extract_html_text("<style>volatile { value: 1; }</style><p>RBI lending rule</p><script>window.tick = Date.now()</script>")
 
     assert text == "RBI lending rule"
+
+
+def test_notification_body_excludes_legacy_site_navigation_and_preserves_amendment_table() -> None:
+    text = extract_html_text('''<html><body><div>Skip to main content Not Pressed</div>
+    <div id="NotificationUser"><h2>Priority Sector Lending Amendment</h2>
+    <p>The directions are modified as below:</p><table><tr><td>Paragraph 7</td>
+    <td>Loans to eligible borrowers shall qualify from April 1.</td></tr></table></div>
+    <div>Search the Website Annual Publications</div></body></html>''')
+    assert "Paragraph 7" in text
+    assert "Loans to eligible borrowers" in text
+    assert "Search the Website" not in text
+    assert "Not Pressed" not in text

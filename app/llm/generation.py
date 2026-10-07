@@ -72,6 +72,12 @@ def _relevant_sentences(query: str, evidence: list[ChunkMetadata]) -> list[tuple
         title_terms = set(re.findall(r"[a-z0-9]{3,}", chunk.document_title.lower()))
         for sentence in re.split(r"(?<=[.!?])\s+", chunk.text):
             cleaned = _clean_sentence(sentence)
+            # Legacy indexed pages may still contain navigation. Never present it
+            # as a regulatory provision, even when its topic words match.
+            if re.search(r"skip to main content|not pressed|search the website|organisation structure|official website of reserve bank", cleaned, re.I):
+                continue
+            if len(cleaned) > 700 or re.search(r"\bas (?:below|follows)\s*:", cleaned, re.I):
+                continue
             sentence_terms = set(re.findall(r"[a-z0-9]{3,}", cleaned.lower()))
             overlap = len(terms & sentence_terms)
             if len(cleaned) < 45 or overlap == 0:
@@ -149,7 +155,11 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             "or legal requirements. Use status 'insufficient_evidence' when the evidence cannot support a direct answer. "
             "For a grounded answer, direct_answer and every claim must include citation_ids containing only supplied chunk IDs. "
             "display_title should be a concise, factual answer heading. direct_answer should be a plain-English summary "
-            "of the cited evidence. Each claim title should be scannable and factual. Use only meaningful sections; "
+            "of the cited evidence in 2-3 short sentences, directly answering the question. "
+            "For amendment questions explain each actual change, who it affects and its effective date only when supplied. "
+            "A reference to another document or 'modified as below' is not the change itself. "
+            "Ignore website navigation and boilerplate. Do not claim a before/after comparison unless both are supported. "
+            "Each claim title should be scannable and factual. Use only meaningful sections; "
             "do not create empty sections. related_questions is optional and must be RBI lending questions.\n"
             "JSON shape: {status, display_title|null, direct_answer:{text,citation_ids}|null, "
             "sections:[{id,title,claims:[{title|null,text,citation_ids}]}], related_questions:[...]}.\n\n"

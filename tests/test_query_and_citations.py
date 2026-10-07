@@ -77,7 +77,7 @@ def test_query_falls_back_to_cited_evidence_when_model_citation_is_invalid(tmp_p
     assert "RBI Penal Charges Direction states" in response.answer
 
 
-def test_query_uses_direct_evidence_when_model_is_too_conservative(tmp_path: Path) -> None:
+def test_query_preserves_model_abstention_even_when_chunks_were_retrieved(tmp_path: Path) -> None:
     source = tmp_path / "rbi.txt"
     source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")
     settings = Settings(data_dir=tmp_path / "data")
@@ -93,8 +93,8 @@ def test_query_uses_direct_evidence_when_model_is_too_conservative(tmp_path: Pat
     response = service.query("What must lenders disclose about penal charges?")
 
     assert response.research is not None
-    assert response.research.status.value == "grounded"
-    assert response.citations
+    assert response.research.status.value == "insufficient_evidence"
+    assert not response.citations
 
 
 def test_deterministic_research_selects_the_consent_provision_not_page_chrome() -> None:

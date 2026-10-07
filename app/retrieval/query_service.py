@@ -79,7 +79,6 @@ class RegulatoryQueryService:
         if (
             research is None
             or not validate_structured_citations(research, merged)
-            or (research.status is ResearchStatus.INSUFFICIENT_EVIDENCE and merged)
         ):
             research = DeterministicAnswerGenerator().generate(user_query, merged).research
             fallback_used = True

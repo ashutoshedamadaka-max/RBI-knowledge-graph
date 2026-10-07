@@ -5,10 +5,12 @@ from fastapi import FastAPI
 from fastapi.responses import FileResponse
 from fastapi.staticfiles import StaticFiles
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.concurrency import run_in_threadpool
 
 from app.api.routes import router
 from app.config.settings import get_settings
 from app.ingestion.service import IngestionService
+from app.ingestion.repair import repair_legacy_notifications
 from app.monitoring.registry import RegulatorySourceRegistry
 from app.monitoring.store import MonitoringStore
 from app.persistence.runtime_state import DurableRuntimeState
@@ -31,6 +33,12 @@ def create_app() -> FastAPI:
     application.state.settings = settings
     application.state.durable_state = durable_state
     application.state.ingestion_service = IngestionService(settings)
+    try:
+        repair_legacy_notifications(application.state.ingestion_service)
+    except Exception:
+        # The repair rolls indexes back. A failed repair must not take down the
+        # service; leave the captured evidence intact for investigation.
+        logging.getLogger(__name__).exception("legacy_extraction_repair_failed")
     application.state.ingestion_service.cleanup_duplicate_sources()
     curated_source_ids = {
         source.source_id for source in RegulatorySourceRegistry(settings.regulatory_sources_path).enabled_sources()
@@ -50,7 +58,10 @@ def create_app() -> FastAPI:
         try:
             return await call_next(request)
         finally:
-            durable_state.sync()
+            # Reads and health probes do not mutate the corpus. Streamed queries
+            # persist after their generator finishes, not when headers are sent.
+            if request.method in {"POST", "PUT", "PATCH", "DELETE"} and request.url.path != "/query/stream":
+                await run_in_threadpool(durable_state.sync)
 
     @application.get("/", include_in_schema=False)
     def frontend() -> FileResponse:

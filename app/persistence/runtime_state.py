@@ -1,5 +1,7 @@
 import json
+import hashlib
 from pathlib import Path
+from threading import Lock
 
 from app.config.settings import Settings
 
@@ -18,11 +20,14 @@ class DurableRuntimeState:
         "knowledge_graph.json",
         "monitoring.json",
         "cost_events.json",
+        "extraction_repair_backup.json",
     )
 
     def __init__(self, settings: Settings) -> None:
         self.database_url = settings.database_url
         self.runtime_dir = settings.runtime_dir
+        self._saved_hashes: dict[str, str] = {}
+        self._sync_lock = Lock()
 
     @property
     def enabled(self) -> bool:
@@ -41,16 +46,26 @@ class DurableRuntimeState:
             payload = rows.get(file_name)
             if payload is not None:
                 (self.runtime_dir / file_name).write_text(json.dumps(payload, indent=2))
+                self._saved_hashes[file_name] = hashlib.sha256((self.runtime_dir / file_name).read_bytes()).hexdigest()
 
     def sync(self) -> None:
-        """Store the latest local repositories after a completed request."""
+        """Store changed repositories only, serializing concurrent snapshots."""
         if not self.enabled:
             return
+        with self._sync_lock:
+            self._sync_changed()
+
+    def _sync_changed(self) -> None:
         snapshots: list[tuple[str, object]] = []
+        hashes: dict[str, str] = {}
         for file_name in self.file_names:
             path = self.runtime_dir / file_name
             if path.exists():
-                snapshots.append((file_name, json.loads(path.read_text())))
+                content = path.read_bytes()
+                digest = hashlib.sha256(content).hexdigest()
+                if self._saved_hashes.get(file_name) != digest:
+                    snapshots.append((file_name, json.loads(content)))
+                    hashes[file_name] = digest
         if not snapshots:
             return
         with self._connection() as connection, connection.cursor() as cursor:
@@ -65,6 +80,8 @@ class DurableRuntimeState:
                     """,
                     (key, json.dumps(payload)),
                 )
+        # Mark saved only after the transaction committed successfully.
+        self._saved_hashes.update(hashes)
 
     def _connection(self):
         if not self.database_url:

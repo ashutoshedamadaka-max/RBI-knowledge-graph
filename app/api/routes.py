@@ -7,6 +7,7 @@ from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 from fastapi import APIRouter, Header, HTTPException, Request
 from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
+from starlette.background import BackgroundTask
 
 from app.ingestion.exceptions import IngestionError
 from app.models.documents import DocumentLifecycle, DocumentListResponse, IngestRequest, IngestResponse, LifecycleReviewRequest
@@ -149,7 +150,10 @@ async def query_stream(request: Request, payload: QueryRequest) -> StreamingResp
         except Exception:
             yield "event: error\ndata: {\"detail\": \"The RBI research service is temporarily unavailable.\"}\n\n"
 
-    return StreamingResponse(stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"})
+    return StreamingResponse(
+        stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"},
+        background=BackgroundTask(request.app.state.durable_state.sync),
+    )
 
 
 @router.get("/metrics")

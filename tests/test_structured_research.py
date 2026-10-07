@@ -1,7 +1,16 @@
 from app.llm.citations import validate_structured_citations
 from app.llm.generation import research_to_markdown
+from app.llm.generation import deterministic_research
 from app.models.chunks import ChunkMetadata
 from app.models.research import ResearchClaim, ResearchSection, ResearchStatus, StructuredResearch
+
+
+def test_navigation_and_amendment_intro_are_not_a_grounded_answer():
+    evidence = [ChunkMetadata(chunk_id="chunk_legacy", document_id="doc_legacy",
+        document_title="Priority Sector Lending Amendment", page_number=1, chunk_index=0,
+        text="Skip to main content Not Pressed Priority Sector Lending. The priority sector lending directions are modified as below: i.")]
+    result = deterministic_research("What do the priority sector lending amendments change?", evidence)
+    assert result.status is ResearchStatus.INSUFFICIENT_EVIDENCE
 
 
 def test_long_structured_research_keeps_claims_separate_and_cited() -> None:

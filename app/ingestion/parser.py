@@ -18,25 +18,37 @@ class ParsedDocument:
 class _RbiHtmlTextExtractor(HTMLParser):
     """Extract readable text from official RBI notification pages without a web-scraping dependency."""
 
-    def __init__(self) -> None:
+    def __init__(self, content_id: str | None = None) -> None:
         super().__init__()
         self.parts: list[str] = []
-        self._ignored_depth = 0
+        self.content_id = content_id
+        self._stack: list[tuple[str, bool, bool]] = []
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
-        if tag in {"script", "style", "noscript"}:
-            self._ignored_depth += 1
-        elif tag in {"p", "br", "div", "li", "tr", "h1", "h2", "h3", "h4"}:
+        attributes = dict(attrs)
+        parent_active = self._stack[-1][1] if self._stack else self.content_id is None
+        parent_ignored = self._stack[-1][2] if self._stack else False
+        active = parent_active or (attributes.get("id") or "").lower() == self.content_id
+        ignored = parent_ignored or tag in {"script", "style", "noscript", "nav", "header", "footer"}
+        if tag not in {"area", "base", "br", "col", "embed", "hr", "img", "input", "link", "meta", "param", "source", "track", "wbr"}:
+            self._stack.append((tag, active, ignored))
+        if active and not ignored and tag in {"p", "br", "div", "li", "tr", "td", "th", "h1", "h2", "h3", "h4"}:
             self.parts.append("\n")
 
     def handle_endtag(self, tag: str) -> None:
-        if tag in {"script", "style", "noscript"} and self._ignored_depth:
-            self._ignored_depth -= 1
-        elif tag in {"p", "div", "li", "tr", "h1", "h2", "h3", "h4"}:
+        active = self._stack[-1][1] if self._stack else self.content_id is None
+        ignored = self._stack[-1][2] if self._stack else False
+        if active and not ignored and tag in {"p", "div", "li", "tr", "h1", "h2", "h3", "h4"}:
             self.parts.append("\n")
+        for index in range(len(self._stack) - 1, -1, -1):
+            if self._stack[index][0] == tag:
+                del self._stack[index:]
+                break
 
     def handle_data(self, data: str) -> None:
-        if not self._ignored_depth:
+        active = self._stack[-1][1] if self._stack else self.content_id is None
+        ignored = self._stack[-1][2] if self._stack else False
+        if active and not ignored:
             self.parts.append(data)
 
     def text(self) -> str:
@@ -48,7 +60,10 @@ class _RbiHtmlTextExtractor(HTMLParser):
 
 def extract_html_text(value: str) -> str:
     """Return readable RBI page text without scripts, styles, or page chrome."""
-    extractor = _RbiHtmlTextExtractor()
+    # RBI's notification body has a stable container on both legacy and new pages.
+    # Select it before parsing so site navigation cannot become evidence.
+    match = re.search(r'\bid\s*=\s*["\'](NotificationUser)["\']', value, re.I)
+    extractor = _RbiHtmlTextExtractor(match.group(1).lower() if match else None)
     extractor.feed(value)
     return extractor.text()
 
