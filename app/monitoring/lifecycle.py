@@ -6,9 +6,10 @@ available URL or a recent date is not evidence of current authority.
 """
 
 from dataclasses import dataclass
-from datetime import UTC, datetime
+from datetime import datetime
 import re
 
+from app import clock
 from app.models.documents import DocumentLifecycle
 
 
@@ -22,7 +23,7 @@ class LifecycleResolution:
 
 def resolve_lifecycle(text: str) -> LifecycleResolution:
     normalized = " ".join(text.split())
-    checked_at = datetime.now(UTC)
+    checked_at = clock.now()
     patterns = (
         (DocumentLifecycle.WITHDRAWN, r"(?:^|\n)\s*withdrawn\s*(?:$|\n)|\bwithdrawn\b\s*[.?!]?\s*$|\bthis (?:circular|master circular|direction|directions)\b.{0,80}\b(?:stands?|is) withdrawn\b"),
         (DocumentLifecycle.SUPERSEDED, r"\bthis (?:circular|master circular|direction|directions)\b.{0,80}\bsuperseded(?: by)?\b"),
@@ -41,7 +42,7 @@ def resolve_lifecycle(text: str) -> LifecycleResolution:
 
 def resolve_rbi_html_lifecycle(html: str) -> LifecycleResolution:
     """Read RBI's document-level status watermark, not navigation text."""
-    checked_at = datetime.now(UTC)
+    checked_at = clock.now()
     watermark = re.search(r"background\s*:\s*url\([^)]*withdrawn[^)]*\)", html, flags=re.IGNORECASE)
     if watermark:
         return LifecycleResolution(

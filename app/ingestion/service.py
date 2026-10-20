@@ -3,12 +3,13 @@ import json
 import logging
 import mimetypes
 import re
-from datetime import UTC, datetime
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import urlparse
 
 import httpx
 
+from app import clock
 from app.config.settings import Settings
 from app.ingestion.chunking import chunk_pages
 from app.ingestion.exceptions import IngestionError
@@ -81,10 +82,10 @@ class IngestionService:
             content_hash=content_hash,
             file_name=file_name,
             mime_type=mime_type,
-            ingested_at=datetime.now(UTC),
+            ingested_at=clock.now(),
             page_count=parsed.page_count,
             document_version=document_version,
-            valid_from=datetime.now(UTC),
+            valid_from=clock.now(),
         )
         self.manifest.save(metadata)
         chunks = chunk_pages(

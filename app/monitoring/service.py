@@ -1,9 +1,9 @@
 import hashlib
 import re
-from datetime import UTC, datetime
 from typing import Callable
 from uuid import uuid4
 
+from app import clock
 from app.models.documents import DocumentLifecycle
 from app.models.monitoring import (
     DiscoveryStatus, DocumentVersion, Materiality, MonitoringRunStatus,
@@ -29,7 +29,7 @@ class RegulatoryMonitor:
         self.interpreter = DeterministicChangeInterpreter()
 
     def check_source(self, source: RegulatorySource) -> tuple[SourceCheck, list[RegulatoryUpdate]]:
-        run_id, now = f"run_{uuid4().hex}", datetime.now(UTC)
+        run_id, now = f"run_{uuid4().hex}", clock.now()
         try:
             discovered = self.fetcher.discover(source)
         except Exception as exc:
@@ -61,7 +61,7 @@ class RegulatoryMonitor:
                     resolution = LifecycleResolution(
                         source.approved_lifecycle,
                         source.approval_evidence_excerpt or "Curated official RBI source approved for current-guidance intake.",
-                        datetime.now(UTC),
+                        clock.now(),
                         "CURATED_APPROVAL",
                     )
                 lifecycle = resolution.lifecycle if resolution else DocumentLifecycle.REVIEW_REQUIRED

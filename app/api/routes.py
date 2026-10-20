@@ -1,5 +1,4 @@
 import asyncio
-from datetime import UTC, datetime
 import json
 import os
 from pathlib import Path
@@ -10,6 +9,7 @@ from fastapi.concurrency import run_in_threadpool
 from fastapi.responses import StreamingResponse
 from starlette.background import BackgroundTask
 
+from app import clock
 from app.ingestion.exceptions import IngestionError
 from app.models.documents import DocumentLifecycle, DocumentListResponse, IngestRequest, IngestResponse, LifecycleReviewRequest
 from app.models.chunks import VectorSearchResult
@@ -102,7 +102,7 @@ def approve_lifecycle(
     settings = request.app.state.settings
     _require_secret(x_admin_key, settings.admin_api_key, "ADMIN_API_KEY")
     document = request.app.state.ingestion_service.approve_lifecycle(
-        document_id, payload.lifecycle, str(payload.evidence_url), payload.evidence_excerpt, datetime.now(UTC),
+        document_id, payload.lifecycle, str(payload.evidence_url), payload.evidence_excerpt, clock.now(),
     )
     if not document:
         raise HTTPException(status_code=404, detail="Indexed document not found.")

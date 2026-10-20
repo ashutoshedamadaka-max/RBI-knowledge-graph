@@ -124,3 +124,18 @@ def test_official_registry_loads_only_rbi_sources() -> None:
         "rbi_colending_faqs",
         "rbi_property_document_release",
     }.issubset({item.source_id for item in sources})
+
+
+def test_monitor_stamps_the_simulated_clock_during_a_replay(tmp_path: Path) -> None:
+    from datetime import UTC, datetime
+
+    from app import clock
+
+    past = datetime(2023, 6, 1, 3, 0, tzinfo=UTC)
+    store = MonitoringStore(tmp_path / "monitoring.json")
+    with clock.simulated(lambda: past):
+        check, _ = RegulatoryMonitor(store, FixtureFetcher("Penal charges must be disclosed.")).check_source(source())
+
+    assert check.checked_at == past
+    assert store.versions()[0].valid_from == past
+    assert clock.now() > past  # real time is restored after the block
