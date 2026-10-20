@@ -111,3 +111,14 @@ Link closure then adds any document that an included document repeals, supersede
 **Why:** A written rule is repeatable, auditable and needs no one's time. Link closure covers the main weakness of keyword matching, which would otherwise miss a successor whose title does not mention lending.
 
 **Trade-off:** Keyword rules can include marginal documents or miss related ones. Misses that matter for answers will show up as evaluation failures and in the exclusion log, and are fixed by changing the written rule, not by hand-picking documents.
+
+## ADR-014: Superseded versions stay as history and never answer current questions
+
+**Decision:** Three behaviours changed (found in the Phase 0 review).
+1. Current-guidance search requires a chunk to be both operative and the latest version of its page (`is_current`). Before, a revised page's old and new versions were both eligible, because retirement set `is_current` but search only read the lifecycle.
+2. Start-up cleanup no longer deletes retired versions. It removes only an older copy of the same page that was never retired, which is a leftover duplicate from earlier ingestion behaviour.
+3. A reviewer cannot approve a document whose status is withdrawn, repealed or superseded; the API answers 409. Automation can remove trust, but only RBI's own evidence can restore the status (a later monitor check).
+
+**Why:** Hard rule: history is kept, current answers use only the rule in force, and a person cannot override an official withdrawal. The old behaviour hid the first problem by deleting history at each restart.
+
+**Trade-off:** Legacy duplicate rows that were retired by an earlier monitor run are now kept rather than cleaned up. Storage grows slightly; nothing is lost.

@@ -16,10 +16,16 @@ from app.ingestion.exceptions import IngestionError
 from app.ingestion.manifest import DocumentManifest
 from app.ingestion.parser import parse_document
 from app.graph.service import GraphIngestionService
-from app.models.documents import DocumentMetadata, IngestRequest, IngestResponse, IngestStatus
+from app.models.documents import DocumentLifecycle, DocumentMetadata, IngestRequest, IngestResponse, IngestStatus
 from app.retrieval.vector_store import LocalVectorStore
 
 logger = logging.getLogger(__name__)
+
+NON_OPERATIVE = {DocumentLifecycle.WITHDRAWN, DocumentLifecycle.REPEALED, DocumentLifecycle.SUPERSEDED}
+
+
+class OfficialStatusError(Exception):
+    """A reviewer tried to override an official withdrawal, repeal or supersession."""
 
 
 class IngestionService:
@@ -138,6 +144,12 @@ class IngestionService:
         return self.manifest.mark_not_current(document_id, valid_to)
 
     def approve_lifecycle(self, document_id: str, lifecycle, evidence_url: str, excerpt: str, reviewed_at: datetime) -> DocumentMetadata | None:
+        existing = next((item for item in self.manifest.all() if item.document_id == document_id), None)
+        if existing and existing.lifecycle in NON_OPERATIVE:
+            # Automation may remove trust; a person may not give it back.
+            raise OfficialStatusError(
+                f"RBI's own evidence marks this document {existing.lifecycle.value.lower()}; a reviewer cannot override it."
+            )
         updated = self.manifest.approve_lifecycle(document_id, lifecycle, evidence_url, excerpt, reviewed_at)
         if updated:
             self.vector_store.apply_lifecycle(updated.document_id, updated.lifecycle.value)
@@ -145,7 +157,11 @@ class IngestionService:
         return updated
 
     def cleanup_duplicate_sources(self) -> int:
-        """Retain the newest copy of each RBI page and remove stale retrieval evidence."""
+        """Remove legacy duplicate copies of an RBI page; keep every retired version as history.
+
+        A version the monitor replaced is marked not current and is history. Only an older
+        copy that was never retired is a duplicate left by earlier ingestion behaviour.
+        """
         by_source: dict[str, list[DocumentMetadata]] = {}
         for document in self.manifest.all():
             if document.source_url:
@@ -155,7 +171,9 @@ class IngestionService:
         for documents in by_source.values():
             if len(documents) > 1:
                 keep = max(documents, key=lambda item: item.ingested_at)
-                stale_ids.update(item.document_id for item in documents if item.document_id != keep.document_id)
+                stale_ids.update(
+                    item.document_id for item in documents if item.document_id != keep.document_id and item.is_current
+                )
         if not stale_ids:
             return 0
         self.manifest.remove_document_ids(stale_ids)

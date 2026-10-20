@@ -57,9 +57,11 @@ class LocalVectorStore:
         matches = []
         for row in self._read():
             chunk = row["chunk"]
-            # File-version recency is not regulatory authority. Current-guidance
-            # retrieval is limited to evidence-backed, operative sources.
-            if current_only and not chunk.get("authority_current", False):
+            # File-version recency is not regulatory authority, but a retired version
+            # (is_current false) must not sit beside the version that replaced it.
+            # Current-guidance retrieval is limited to evidence-backed, operative,
+            # latest-version sources.
+            if current_only and not (chunk.get("authority_current", False) and chunk.get("is_current", True)):
                 continue
             vector_score = max(0.0, self.embedder.similarity(query_embedding, row["embedding"]))
             lexical_score = self._lexical_score(query_terms, chunk["text"], chunk["document_title"])

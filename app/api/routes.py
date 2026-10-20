@@ -11,6 +11,7 @@ from starlette.background import BackgroundTask
 
 from app import clock
 from app.ingestion.exceptions import IngestionError
+from app.ingestion.service import OfficialStatusError
 from app.models.documents import DocumentLifecycle, DocumentListResponse, IngestRequest, IngestResponse, LifecycleReviewRequest
 from app.models.chunks import VectorSearchResult
 from app.models.query import QueryRequest, QueryResponse
@@ -101,9 +102,12 @@ def approve_lifecycle(
 ) -> IngestResponse:
     settings = request.app.state.settings
     _require_secret(x_admin_key, settings.admin_api_key, "ADMIN_API_KEY")
-    document = request.app.state.ingestion_service.approve_lifecycle(
-        document_id, payload.lifecycle, str(payload.evidence_url), payload.evidence_excerpt, clock.now(),
-    )
+    try:
+        document = request.app.state.ingestion_service.approve_lifecycle(
+            document_id, payload.lifecycle, str(payload.evidence_url), payload.evidence_excerpt, clock.now(),
+        )
+    except OfficialStatusError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
     if not document:
         raise HTTPException(status_code=404, detail="Indexed document not found.")
     return IngestResponse(status="ingested", document=document, message="Lifecycle approval recorded with official RBI evidence.")
