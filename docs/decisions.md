@@ -122,3 +122,11 @@ Link closure then adds any document that an included document repeals, supersede
 **Why:** Hard rule: history is kept, current answers use only the rule in force, and a person cannot override an official withdrawal. The old behaviour hid the first problem by deleting history at each restart.
 
 **Trade-off:** Legacy duplicate rows that were retired by an earlier monitor run are now kept rather than cleaned up. Storage grows slightly; nothing is lost.
+
+## ADR-015: Rules carry an in-force window that search checks against today's date
+
+**Decision:** Documents and chunks have `in_force_from` (the effective date, else the issue date) and `in_force_to` (set when a successor takes over, at the successor's effective date). Current-guidance search keeps a chunk only when today falls inside its window. The window is checked at query time, so a rule that takes effect or ends on a future date changes status without any job running.
+
+**Why:** ADR-010 requires the old rule to keep answering until the new one takes effect. A yes/no "current" flag cannot express that. Regulatory time (the window) is kept apart from system time (`valid_from`/`valid_to`, when a version was ingested or retired).
+
+**Trade-off:** A document with no parsed date has an open-ended window, as before. A later step adds an "as of" parameter and the upcoming-rule notice to answers.

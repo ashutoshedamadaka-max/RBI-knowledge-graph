@@ -97,3 +97,36 @@ def test_the_approval_endpoint_reports_a_conflict_for_a_withdrawn_document(tmp_p
               "evidence_excerpt": "A reviewer says this is still operative."})
 
     assert response.status_code == 409
+
+
+def test_a_rule_is_answerable_only_inside_its_in_force_window(tmp_path: Path) -> None:
+    from datetime import date
+
+    from app import clock
+
+    store = LocalVectorStore(tmp_path / "vectors.json")
+    store.upsert([_chunk("old", document_id="old", in_force_to=date(2025, 11, 1)),
+                  _chunk("new", document_id="new", in_force_from=date(2025, 11, 1))])
+
+    def answers_on(day: date) -> list[str]:
+        with clock.simulated(lambda: datetime(day.year, day.month, day.day, 9, tzinfo=UTC)):
+            return [item.chunk_id for item in store.search("penal charges", top_k=5)]
+
+    assert answers_on(date(2025, 10, 31)) == ["old"]  # issued May 2025, effective 1 November
+    assert answers_on(date(2025, 11, 1)) == ["new"]
+
+
+def test_in_force_dates_come_from_the_header_and_reach_the_chunks(tmp_path: Path) -> None:
+    from datetime import date
+
+    from app.monitoring.metadata import extract_rbi_document_facts
+
+    service = IngestionService(Settings(_env_file=None, data_dir=tmp_path / "data"))
+    text = (Path(__file__).parent / "fixtures" / "rbi_headers" / "digital_lending_directions_2025.txt").read_text(encoding="utf-8")
+    document = service.ingest_content(text.encode(), "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12848&Mode=0",
+                                      "page.txt", "Digital Lending Directions").document
+
+    service.apply_monitoring_metadata(document.source_url, extract_rbi_document_facts(text), datetime.now(UTC))
+
+    assert service.manifest.all()[0].in_force_from == date(2025, 11, 1)  # effective date wins over May 8 issue date
+    assert {c.in_force_from for c in service.vector_store.get_by_document_id(document.document_id)} == {date(2025, 11, 1)}

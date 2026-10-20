@@ -46,6 +46,10 @@ class DocumentMetadata(BaseModel):
     applicable_entities: list[str] = Field(default_factory=list)
     topics: list[str] = Field(default_factory=list)
     successor_document_id: str | None = None
+    # Regulatory time: the rule is in force from in_force_from (effective date, else issue date)
+    # until in_force_to (set when a successor takes over). Not the same as ingestion time.
+    in_force_from: date | None = None
+    in_force_to: date | None = None
     document_version: int = 1
     is_current: bool = True
     valid_from: datetime | None = None

@@ -1,9 +1,17 @@
 import json
 import re
+from datetime import date
 from pathlib import Path
 
+from app import clock
 from app.embeddings.hashing import HashingEmbedder
 from app.models.chunks import ChunkMetadata, VectorSearchResult
+
+
+def in_force_on(chunk: dict, day: date) -> bool:
+    """Whether a stored chunk's rule is in force on ``day`` (open-ended when a bound is unknown)."""
+    start, end = chunk.get("in_force_from"), chunk.get("in_force_to")
+    return (not start or date.fromisoformat(start) <= day) and (not end or day < date.fromisoformat(end))
 
 
 class LocalVectorStore:
@@ -55,13 +63,16 @@ class LocalVectorStore:
         query_embedding = self.embedder.embed(query)
         query_terms = self._keywords(query)
         matches = []
+        today = clock.now().date()
         for row in self._read():
             chunk = row["chunk"]
             # File-version recency is not regulatory authority, but a retired version
             # (is_current false) must not sit beside the version that replaced it.
             # Current-guidance retrieval is limited to evidence-backed, operative,
             # latest-version sources.
-            if current_only and not (chunk.get("authority_current", False) and chunk.get("is_current", True)):
+            if current_only and not (
+                chunk.get("authority_current", False) and chunk.get("is_current", True) and in_force_on(chunk, today)
+            ):
                 continue
             vector_score = max(0.0, self.embedder.similarity(query_embedding, row["embedding"]))
             lexical_score = self._lexical_score(query_terms, chunk["text"], chunk["document_title"])
@@ -84,6 +95,14 @@ class LocalVectorStore:
             if row["chunk"]["document_id"] == document_id:
                 row["chunk"]["is_current"] = False
                 row["chunk"]["valid_to"] = valid_to
+        self.path.write_text(json.dumps(rows, indent=2))
+
+    def set_in_force(self, document_id: str, start: date | None, end: date | None) -> None:
+        rows = self._read()
+        for row in rows:
+            if row["chunk"]["document_id"] == document_id:
+                row["chunk"]["in_force_from"] = start.isoformat() if start else None
+                row["chunk"]["in_force_to"] = end.isoformat() if end else None
         self.path.write_text(json.dumps(rows, indent=2))
 
     def apply_lifecycle(self, document_id: str, lifecycle: str) -> None:

@@ -79,6 +79,18 @@ class DocumentManifest:
             self.path.write_text(json.dumps([item.model_dump(mode="json") for item in documents], indent=2))
         return updated
 
+    def set_in_force(self, document_id: str, start, end) -> DocumentMetadata | None:
+        documents = self._read()
+        updated = None
+        for index, document in enumerate(documents):
+            if document.document_id == document_id:
+                updated = document.model_copy(update={"in_force_from": start, "in_force_to": end})
+                documents[index] = updated
+                break
+        if updated:
+            self.path.write_text(json.dumps([item.model_dump(mode="json") for item in documents], indent=2))
+        return updated
+
     def mark_not_current(self, document_id: str, valid_to) -> DocumentMetadata | None:
         documents = self._read()
         updated = None

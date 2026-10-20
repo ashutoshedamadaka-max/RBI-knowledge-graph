@@ -35,6 +35,8 @@ def chunk_pages(document: DocumentMetadata, pages: list[str], chunk_size: int, o
                     authority_current=document.lifecycle in {DocumentLifecycle.ACTIVE, DocumentLifecycle.AMENDED},
                     valid_from=document.valid_from,
                     valid_to=document.valid_to,
+                    in_force_from=document.in_force_from,
+                    in_force_to=document.in_force_to,
                 ))
                 page_index += 1
             if end == len(words):

@@ -138,7 +138,19 @@ class IngestionService:
         document = self.manifest.get_by_source_url(source_url)
         if not document:
             return None
-        return self.manifest.update_monitoring_metadata(document.document_id, facts, checked_at)
+        updated = self.manifest.update_monitoring_metadata(document.document_id, facts, checked_at)
+        if updated and not updated.in_force_from:
+            # In force from the stated effective date, else the issue date (ADR-010).
+            start = updated.effective_date or updated.publication_date
+            if start:
+                updated = self.set_in_force(updated.document_id, start, updated.in_force_to)
+        return updated
+
+    def set_in_force(self, document_id: str, start, end) -> DocumentMetadata | None:
+        updated = self.manifest.set_in_force(document_id, start, end)
+        if updated:
+            self.vector_store.set_in_force(document_id, start, end)
+        return updated
 
     def mark_document_not_current(self, document_id: str, valid_to: str) -> DocumentMetadata | None:
         return self.manifest.mark_not_current(document_id, valid_to)

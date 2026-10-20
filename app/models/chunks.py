@@ -1,5 +1,5 @@
 from pydantic import BaseModel
-from datetime import datetime
+from datetime import date, datetime
 
 from app.models.documents import DocumentLifecycle
 
@@ -18,6 +18,8 @@ class ChunkMetadata(BaseModel):
     authority_current: bool = False
     valid_from: datetime | None = None
     valid_to: datetime | None = None
+    in_force_from: date | None = None
+    in_force_to: date | None = None
 
 
 class VectorSearchResult(ChunkMetadata):
