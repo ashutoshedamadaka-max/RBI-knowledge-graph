@@ -142,3 +142,14 @@ On a trusted link the successor becomes active, the old rule's `in_force_to` is 
 **Alternatives rejected:** Matching any cited circular number (would retire rules a document merely cites, as the Digital Lending Directions do for the KFS and penal-charges circulars). Trusting title similarity (no official evidence). Trusting a link whose target matches several corpus documents.
 
 **Trade-off:** Links are stored in a JSON file for now (moves with ADR-011). The replay report (Phase 1 gate) measures auto-trust precision; below 100%, `AUTO_TRUST_ENABLED` goes off.
+
+## ADR-017: Answers state what changed, with their own quoted evidence
+
+**Decision:** `/query` takes an optional `as_of` date (default today) and answers only from rules in force on that day. Graph-found passages pass the same check as search results. Each answer may carry change notices, kept separate from its citations:
+- **replaced:** the status filter removed a passage of a superseded document from the top results the answer would otherwise have used, and its successor is in force. The successor's best passages are added to the evidence. Text: "<Old> was repealed by <New>, issued <date>, in force from <date>; this is the current rule." with the link's RBI quote.
+- **withdrawn:** the same, but no successor is known. "<Old> is withdrawn (detected <date>); no replacement was found in the indexed RBI corpus."
+- **upcoming:** a trusted rule that takes effect later replaces a source of the answer, or ranks above every eligible passage. "<New>, issued <date>, takes effect from <date>. Until then, the rule in force is <Old>." with a quoted passage (ADR-010).
+
+**Why:** The brief requires current answers never to cite a withdrawn passage and to say what replaced what; Ashu's D1 requires a future effective date to be quoted. A notice can quote a rule that is not yet in force, so it is never mixed into the fail-closed citations.
+
+**Trade-off:** Notices are rank-based with no tuned threshold, so in a small corpus a weakly related withdrawn document can still trigger one; the replay and the Phase 3 trace measure this. The wording follows the plan's recommendation for D7, which Ashu has not confirmed and can change. Answers in the "historical" mode (an explicit history question) are unchanged until Phase 3 measures a replacement.

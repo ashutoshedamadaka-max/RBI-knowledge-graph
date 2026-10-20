@@ -1,3 +1,6 @@
+from datetime import date
+from typing import Literal
+
 from pydantic import BaseModel, Field
 
 from app.models.chunks import ChunkMetadata
@@ -8,6 +11,7 @@ from app.models.research import StructuredResearch
 class QueryRequest(BaseModel):
     query: str = Field(min_length=3, max_length=2000)
     top_k: int | None = Field(default=None, ge=1, le=20)
+    as_of: date | None = Field(default=None, description="Answer from the rules in force on this date; default today.")
 
 
 class Citation(BaseModel):
@@ -16,6 +20,21 @@ class Citation(BaseModel):
     document_title: str
     page_number: int
     source_url: str | None = None
+
+
+class ChangeNotice(BaseModel):
+    """A statement about a rule change, with its own quoted evidence.
+
+    Kept apart from the answer's citations: a notice may quote a rule that is not yet in
+    force, which must never be cited as current guidance.
+    """
+
+    kind: Literal["replaced", "withdrawn", "upcoming"]
+    text: str
+    document_id: str
+    related_document_id: str | None = None
+    evidence_chunk_id: str | None = None
+    evidence_excerpt: str | None = None
 
 
 class QueryPipelineSummary(BaseModel):
@@ -43,3 +62,5 @@ class QueryResponse(BaseModel):
     citation_valid: bool
     research: StructuredResearch | None = None
     pipeline: QueryPipelineSummary = Field(default_factory=QueryPipelineSummary)
+    as_of: date | None = None
+    notices: list[ChangeNotice] = Field(default_factory=list)

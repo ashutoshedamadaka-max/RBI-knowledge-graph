@@ -163,7 +163,9 @@ def search(request: Request, query: str, top_k: int | None = None) -> list[Vecto
 def query(request: Request, payload: QueryRequest) -> QueryResponse:
     request_id = request.headers.get("X-Request-ID")
     try:
-        return RegulatoryQueryService(request.app.state.settings).query(payload.query, payload.top_k, request_id)
+        return RegulatoryQueryService(request.app.state.settings).query(
+            payload.query, payload.top_k, request_id, as_of=payload.as_of,
+        )
     except AnswerGenerationError as exc:
         raise HTTPException(status_code=503, detail=str(exc)) from exc
 
@@ -181,7 +183,7 @@ async def query_stream(request: Request, payload: QueryRequest) -> StreamingResp
 
     async def stream():
         task = asyncio.create_task(
-            run_in_threadpool(service.query, payload.query, payload.top_k, request_id, progress)
+            run_in_threadpool(service.query, payload.query, payload.top_k, request_id, progress, payload.as_of)
         )
         while not task.done() or not events.empty():
             try:

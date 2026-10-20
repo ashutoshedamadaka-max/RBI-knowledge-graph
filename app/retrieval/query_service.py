@@ -10,7 +10,7 @@ from app.llm.citations import validate_structured_citations
 from app.llm.generation import DeterministicAnswerGenerator, get_answer_generator, research_to_markdown, align_research_headings
 from app.models.chunks import ChunkMetadata
 from app.models.documents import DocumentLifecycle
-from app.models.query import Citation, QueryPipelineSummary, QueryResponse
+from app.models.query import ChangeNotice, Citation, QueryPipelineSummary, QueryResponse
 from app.models.research import ResearchClaim, ResearchGraphContext, ResearchStatus, StructuredResearch
 from app.models.retrieval import RetrievalRoute
 from app.observability.costs import CostEvent, CostTracker
@@ -18,6 +18,11 @@ from app.observability.events import QueryEvent, log_query_event
 from app.retrieval.router import QueryRouter
 from app.retrieval.scope import is_rbi_lending_question
 from app.retrieval.service import VectorRetrievalService
+from app.retrieval.vector_store import is_current_guidance
+from app.ingestion.manifest import DocumentManifest
+from app.models.documents import DocumentMetadata
+from app import clock
+from datetime import date
 
 
 class RegulatoryQueryService:
@@ -35,8 +40,10 @@ class RegulatoryQueryService:
         top_k: int | None = None,
         request_id: str | None = None,
         progress: Callable[[str], None] | None = None,
+        as_of: date | None = None,
     ) -> QueryResponse:
         started = perf_counter()
+        day = as_of or clock.now().date()
         request_id = request_id or f"req_{uuid4().hex}"
         if progress:
             progress("understanding_question")
@@ -56,7 +63,7 @@ class RegulatoryQueryService:
             if progress:
                 progress("retrieving_official_evidence")
             historical = self._is_historical_query(user_query)
-            evidence.extend(self.vector.retrieve_vector(user_query, top_k, current_only=not historical))
+            evidence.extend(self.vector.retrieve_vector(user_query, top_k, current_only=not historical, as_of=day))
         if decision.route in {RetrievalRoute.GRAPH, RetrievalRoute.HYBRID}:
             graph_evidence = self.vector.store.get_by_ids(graph_result.chunk_ids)
             evidence.extend(graph_evidence)
@@ -64,7 +71,7 @@ class RegulatoryQueryService:
                 vector_used = True
                 if progress:
                     progress("retrieving_official_evidence")
-                evidence.extend(self.vector.retrieve_vector(user_query, top_k, current_only=not historical))
+                evidence.extend(self.vector.retrieve_vector(user_query, top_k, current_only=not historical, as_of=day))
 
         # Graph retrieval is semantic discovery, not a validity exception. Apply
         # regulatory authority resolution after every candidate source is merged.
@@ -72,8 +79,13 @@ class RegulatoryQueryService:
         candidate_evidence_count = len(evidence)
         if progress:
             progress("checking_regulatory_validity")
+        notices: list[ChangeNotice] = []
         if not historical:
-            evidence = [chunk for chunk in evidence if chunk.lifecycle in {DocumentLifecycle.ACTIVE, DocumentLifecycle.AMENDED}]
+            # The same rule as search, so graph evidence cannot bypass it: operative, latest
+            # version, and in force on the as-of day.
+            evidence = [chunk for chunk in evidence if is_current_guidance(chunk.model_dump(mode="json"), day)]
+            notices, successor_evidence = self._change_notices(user_query, evidence, day, top_k or self.settings.vector_top_k)
+            evidence = successor_evidence + evidence
         excluded_after_validity_check = candidate_evidence_count - len(evidence)
         merged = list({chunk.chunk_id: chunk for chunk in evidence}.values())[: top_k or self.settings.vector_top_k]
         if progress:
@@ -112,6 +124,8 @@ class RegulatoryQueryService:
             })
 
         answer = research_to_markdown(research)
+        if notices:
+            answer = "### What changed\n" + "\n".join(f"- {item.text}" for item in notices) + "\n\n" + answer
         citation_valid = validate_structured_citations(research, merged)
         cited_ids = self._cited_ids(research)
         citations = [
@@ -137,7 +151,7 @@ class RegulatoryQueryService:
         return QueryResponse(
             request_id=request_id, answer=answer, citations=citations, route=decision.route, in_scope=True,
             retrieved_evidence=merged, latency_ms=latency_ms, estimated_cost_usd=generation.estimated_cost_usd,
-            citation_valid=citation_valid, research=research,
+            citation_valid=citation_valid, research=research, as_of=day, notices=notices,
             pipeline=QueryPipelineSummary(
                 graph_node_count=len(graph_result.nodes), graph_edge_count=len(graph_result.edges),
                 candidate_evidence_count=candidate_evidence_count,
@@ -149,6 +163,68 @@ class RegulatoryQueryService:
                 ) else "vector" if vector_used else "none",
             ),
         )
+
+    def _change_notices(self, query: str, eligible: list[ChunkMetadata], day: date, limit: int
+                        ) -> tuple[list[ChangeNotice], list[ChunkMetadata]]:
+        """Say what replaced a retired rule the question matches, and quote rules not yet in force.
+
+        A retired passage counts when the status filter removed it from the top results the
+        answer would otherwise have used. Its successor's best passages are added to the
+        evidence. Rank-based; no tuned threshold.
+        """
+        documents = {item.document_id: item for item in DocumentManifest(self.settings.runtime_dir / "documents.json").all()}
+        best = max((getattr(chunk, "similarity_score", 0.0) for chunk in eligible), default=0.0)
+        notices: list[ChangeNotice] = []
+        extra: list[ChunkMetadata] = []
+        seen: set[str] = set()
+        for result in self.vector.store.search(query, top_k=limit, current_only=False, as_of=day):
+            if result.document_id in seen or is_current_guidance(result.model_dump(mode="json"), day):
+                continue
+            seen.add(result.document_id)
+            old = documents.get(result.document_id)
+            if old is None:
+                continue
+            successor = documents.get(old.successor_document_id) if old.successor_document_id else None
+            retired = old.lifecycle in NON_CURRENT or (old.in_force_to is not None and old.in_force_to <= day)
+            if successor and retired and _in_force(successor, day):
+                notices.append(ChangeNotice(
+                    kind="replaced", document_id=old.document_id, related_document_id=successor.document_id,
+                    text=(f"{old.title} was repealed by {successor.title}, issued {_day(successor.publication_date)}, "
+                          f"in force from {_day(successor.in_force_from)}; this is the current rule."),
+                    evidence_excerpt=_link_quote(self.settings, old.document_id, successor.document_id),
+                ))
+                extra.extend(self.vector.store.search(query, top_k=2, as_of=day, document_ids={successor.document_id}))
+            elif old.lifecycle in NON_CURRENT and successor is None:
+                notices.append(ChangeNotice(
+                    kind="withdrawn", document_id=old.document_id,
+                    text=(f"{old.title} is {old.lifecycle.value.lower()} (detected {_day(old.status_checked_at)}); "
+                          "no replacement was found in the indexed RBI corpus."),
+                    evidence_excerpt=old.status_evidence_excerpt,
+                ))
+        notices.extend(self._upcoming_notices(query, eligible, documents, day, best))
+        return notices, extra
+
+    def _upcoming_notices(self, query: str, eligible: list[ChunkMetadata], documents: dict[str, DocumentMetadata],
+                          day: date, best: float) -> list[ChangeNotice]:
+        """Rules issued but not yet in force: those replacing an answer's source, or ranking at the top."""
+        replacing = {documents[c.document_id].successor_document_id for c in eligible
+                     if c.document_id in documents and documents[c.document_id].successor_document_id}
+        notices: list[ChangeNotice] = []
+        seen: set[str] = set()
+        for result in self.vector.store.search(query, top_k=5, as_of=day, upcoming_only=True):
+            new = documents.get(result.document_id)
+            if new is None or new.document_id in seen or (new.document_id not in replacing and result.similarity_score < best):
+                continue
+            seen.add(new.document_id)
+            predecessor = next((item for item in documents.values() if item.successor_document_id == new.document_id), None)
+            until = f"Until then, the rule in force is {predecessor.title}." if predecessor else "It does not apply yet."
+            notices.append(ChangeNotice(
+                kind="upcoming", document_id=new.document_id,
+                related_document_id=predecessor.document_id if predecessor else None,
+                text=f"{new.title}, issued {_day(new.publication_date)}, takes effect from {_day(new.in_force_from)}. {until}",
+                evidence_chunk_id=result.chunk_id, evidence_excerpt=result.text[:400],
+            ))
+        return notices
 
     @staticmethod
     def _is_historical_query(query: str) -> bool:
@@ -188,3 +264,26 @@ class RegulatoryQueryService:
             request_id=request_id, answer=research_to_markdown(research), citations=[], route=route, in_scope=False,
             retrieved_evidence=[], latency_ms=latency_ms, estimated_cost_usd=0.0, citation_valid=True, research=research,
         )
+
+
+NON_CURRENT = {DocumentLifecycle.WITHDRAWN, DocumentLifecycle.REPEALED, DocumentLifecycle.SUPERSEDED}
+
+
+def _in_force(document: DocumentMetadata, day: date) -> bool:
+    return document.lifecycle in {DocumentLifecycle.ACTIVE, DocumentLifecycle.AMENDED} and (
+        document.in_force_from is None or document.in_force_from <= day
+    ) and (document.in_force_to is None or day < document.in_force_to)
+
+
+def _day(value) -> str:
+    if value is None:
+        return "on an unrecorded date"
+    return f"{value.day} {value:%B %Y}"
+
+
+def _link_quote(settings: Settings, old_id: str, new_id: str) -> str | None:
+    from app.monitoring.link_store import LinkStore
+
+    link = next((item for item in LinkStore(settings.runtime_dir / "document_links.json").for_old(old_id)
+                 if item.new_document_id == new_id), None)
+    return link.evidence_quote if link else None

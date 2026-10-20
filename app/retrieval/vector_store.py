@@ -14,6 +14,18 @@ def in_force_on(chunk: dict, day: date) -> bool:
     return (not start or date.fromisoformat(start) <= day) and (not end or day < date.fromisoformat(end))
 
 
+def is_current_guidance(chunk: dict, day: date) -> bool:
+    """Operative status, the latest version of its page, and in force on ``day``."""
+    return bool(chunk.get("authority_current", False)) and chunk.get("is_current", True) is not False and in_force_on(chunk, day)
+
+
+def is_upcoming(chunk: dict, day: date) -> bool:
+    """Operative and latest, but taking effect after ``day``."""
+    start = chunk.get("in_force_from")
+    return bool(chunk.get("authority_current", False)) and chunk.get("is_current", True) is not False \
+        and bool(start) and date.fromisoformat(start) > day
+
+
 class LocalVectorStore:
     """Filesystem-backed vector index used by the local-first development mode."""
 
@@ -57,22 +69,28 @@ class LocalVectorStore:
         title_overlap = len(query_terms & cls._keywords(title)) / len(query_terms)
         return (0.55 * text_overlap) + (0.45 * title_overlap)
 
-    def search(self, query: str, top_k: int = 5, current_only: bool = True) -> list[VectorSearchResult]:
+    def search(self, query: str, top_k: int = 5, current_only: bool = True, as_of: date | None = None,
+               document_ids: set[str] | None = None, upcoming_only: bool = False) -> list[VectorSearchResult]:
+        """Rank chunks for ``query``.
+
+        ``current_only`` keeps rules in force on ``as_of`` (default today): operative status,
+        latest version of the page, inside the in-force window. ``upcoming_only`` instead keeps
+        operative rules that take effect later.
+        """
         if not query.strip():
             return []
         query_embedding = self.embedder.embed(query)
         query_terms = self._keywords(query)
         matches = []
-        today = clock.now().date()
+        day = as_of or clock.now().date()
         for row in self._read():
             chunk = row["chunk"]
-            # File-version recency is not regulatory authority, but a retired version
-            # (is_current false) must not sit beside the version that replaced it.
-            # Current-guidance retrieval is limited to evidence-backed, operative,
-            # latest-version sources.
-            if current_only and not (
-                chunk.get("authority_current", False) and chunk.get("is_current", True) and in_force_on(chunk, today)
-            ):
+            if document_ids is not None and chunk["document_id"] not in document_ids:
+                continue
+            if upcoming_only:
+                if not is_upcoming(chunk, day):
+                    continue
+            elif current_only and not is_current_guidance(chunk, day):
                 continue
             vector_score = max(0.0, self.embedder.similarity(query_embedding, row["embedding"]))
             lexical_score = self._lexical_score(query_terms, chunk["text"], chunk["document_title"])
