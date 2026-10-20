@@ -1,0 +1,38 @@
+30. Repeal provisions
+i. With the issuance of these Directions, the instructions/guidelines contained in the circulars mentioned in the Annex - III issued by RBI stand repealed.
+ii. Notwithstanding the repeal under sub-para (i), anything done or any action taken or purported to have been done or taken, or any direction given or any proceeding taken or any penalty or fine imposed under the repealed enactments shall, insofar as it is not inconsistent with the provisions of these Directions, be deemed to have been done or taken under the corresponding provisions of these Directions.
+...
+i. RE shall provide a Key Fact Statement (KFS), as per instructions contained in circular no. DOR.STR.REC.13/13.03.00/2024-25 on ‘Key Facts Statement (KFS) for Loans & Advances’ dated April 15, 2024, as amended from time to time.
+ii. As regards penal charges, RE shall be guided by circular no. DoR.MCS.REC.28/01.01.001/2023-24 on ‘Fair Lending Practice - Penal Charges in Loan Accounts’ dated August 18, 2023, as amended from time to time.
+...
+Annex III: List of circulars to be repealed with the issuance of these Directions
+S.No. 
+Circular No. 
+Date 
+Subject 
+1. 
+RBI/2019-20/258
+ DOR(NBFC)(PD) CC.No.112/03.10.001/2019-20 
+24.06.2020 
+Loans Sourced by Banks and NBFCs over Digital Lending Platforms: Adherence to Fair Practices Code and Outsourcing Guidelines 
+2. 
+RBI/2022-23/111
+ DOR.CRE.REC .66/21.07.001/2022-23 
+02.09.2022 
+Guidelines on Digital Lending 
+3. 
+RBI/2023-24/41
+ DOR.CRE.REC .21/21.07.001/2023-24 
+08.06.2023 
+Guidelines on Default Loss Guarantee (DLG) in Digital Lending 
+1 While entities offering only Payment Aggregator (PA) services in terms of the extant instructions issued by RBI shall remain out of the ambit of these Directions, any PA also performing the role of an LSP shall comply with these Directions.
+2 Circular DOR.ORG.REC.65/21.04.158/2022-23 on ‘Outsourcing of Financial Services - Responsibilities of regulated entities employing Recovery Agents’ dated August 12, 2022, and other relevant instructions as issued from time to time.
+3 Para 2.6 of the Master Circular on “Loans and Advances – Statutory and Other restrictions” dated July 01, 2015; Guidelines on Managing Risks and Code of Conduct in Outsourcing of Financial Services by Banks issued vide Circular dated November 03, 2006 as amended from time to time; Para 48 of Master Direction – Reserve Bank of India (Non-Banking Financial Company – Scale Based Regulation) Directions, 2023 dated October 19, 2023, as amended from time to time; ‘Guidelines for Managing Risk in Outsourcing of Financial Services by Co-operative Banks’, dated June 28, 2021; Circular on ‘Outsourcing of Financial Services - Responsibilities of regulated entities employing Recovery Agents’ dated August 12, 2022, and other related instructions issued by the Reserve Bank from time to time.
+4 As defined under section 2(e) of the ‘Guidelines for Prevention and Regulation of Dark Patterns, 2023’ dated November 30, 2023, issued by Central Consumer Protection Authority, as amended from time to time.
+5 As per the provisions of the Information Technology Act, 2000, as amended from time to time.
+6 Co-lending arrangements shall be governed by the extant instructions, as amended from time to time. This shall also cover co-lending arrangements between REs for non-PSL loans subject to the condition that no third party other than the REs in a co-lending transaction shall have direct or indirect control over the flow of funds at any point of time.
+7 Advances against salary, where the loan is disbursed directly to the bank account of the borrower but the repayment is from the corporate employer, can be allowed subject to the condition that the loan is repaid by the corporate employer by deducting the amount from the borrower’s salary. It must, however, be ensured that LSPs do not have any control over the flow of funds directly or indirectly in such transactions and that repayment is directly from the bank account of the employer to the RE.
+8 In terms of Circular DBR.Dir.BC.No.08/13.03.00/2019-20 “Levy of Foreclosure Charges /Pre-payment Penalty on Floating Rate Term Loans” dated August 02, 2019 for banks and Master Direction – Reserve Bank of India (Non-Banking Financial Company – Scale Based Regulation) Directions, 2023 dated October 19, 2023 for NBFCs, as amended from time to time, and other relevant instructions as issued from time to time.
+9 https://cms.rbi.org.in/
+10 Issued vide Notification CEPD. PRD. No.S873/13.01.001/2021-22 dated November 12, 2021
+11 Para 7 of the ‘Master Circular on Basel III Capital Regulations’ dated April 01, 2025, as amended from time to time, Master Direction – Reserve Bank of India (Non-Banking Financial Company – Scale Based Regulation) Directions, 2023 dated October 19, 2023 (as updated from time to time), Master Circular on ‘Prudential Norms on Capital Adequacy - Primary (Urban) Co-operative Banks (UCBs)’ dated April 01, 2025 as amended from time to time, Circular on ‘Operating Guidelines for Small Finance Banks’ dated October 06, 2016 and Master Direction - Reserve Bank of India (Prudential Regulations on Basel III Capital Framework, Exposure Norms, Significant Investments, Classification, Valuation and Operation of Investment Portfolio Norms and Resource Raising Norms for All India Financial Institutions) Directions, 2023 dated September 21, 2023 (as amended from time to time).
