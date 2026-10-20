@@ -96,3 +96,53 @@ def test_lifecycle_transition_creates_a_real_monitoring_event(tmp_path: Path) ->
     assert len(updates) == 1
     assert updates[0].change_type.value == "LIFECYCLE_CHANGED"
     assert store.versions()[0].lifecycle is DocumentLifecycle.WITHDRAWN
+
+
+def test_a_routine_check_does_not_undo_a_reviewer_approval(tmp_path: Path) -> None:
+    from datetime import UTC, datetime
+
+    from app.config.settings import Settings
+    from app.ingestion.service import IngestionService
+    from app.monitoring.processor import MonitoringDocumentProcessor
+
+    ingestion = IngestionService(Settings(_env_file=None, data_dir=tmp_path / "data"))
+    processor = MonitoringDocumentProcessor(ingestion)
+    source = RegulatorySource(source_id="irac", source_name="IRAC", url="https://rbi.org.in/irac",
+                              source_type=SourceType.DOCUMENT, regulatory_topics=["advances"], parser_strategy="rbi_document")
+    store = MonitoringStore(tmp_path / "monitor.json")
+    RegulatoryMonitor(store, ReviewRequiredFetcher(), processor).check_source(source)
+    document = ingestion.manifest.get_by_source_url("https://rbi.org.in/irac")
+    ingestion.approve_lifecycle(document.document_id, DocumentLifecycle.ACTIVE, "https://rbi.org.in/irac",
+                                "Reviewer confirmed the circular is operative on the RBI page.", datetime.now(UTC))
+
+    _, first = RegulatoryMonitor(store, ReviewRequiredFetcher(), processor).check_source(source)
+    _, later = RegulatoryMonitor(store, ReviewRequiredFetcher(), processor).check_source(source)
+
+    assert ingestion.manifest.get_by_source_url("https://rbi.org.in/irac").lifecycle is DocumentLifecycle.ACTIVE
+    # One honest event records the approval; routine checks after it add nothing.
+    assert [item.summary for item in first] == [
+        "Status changed from review required to active after a reviewer's approval; the RBI page itself did not change."
+    ]
+    assert later == []
+
+
+def test_an_rbi_withdrawal_still_overrides_a_reviewer_approval(tmp_path: Path) -> None:
+    from datetime import UTC, datetime
+
+    from app.config.settings import Settings
+    from app.ingestion.service import IngestionService
+    from app.monitoring.processor import MonitoringDocumentProcessor
+
+    ingestion = IngestionService(Settings(_env_file=None, data_dir=tmp_path / "data"))
+    processor = MonitoringDocumentProcessor(ingestion)
+    source = RegulatorySource(source_id="irac", source_name="IRAC", url="https://rbi.org.in/irac",
+                              source_type=SourceType.DOCUMENT, regulatory_topics=["advances"], parser_strategy="rbi_document")
+    store = MonitoringStore(tmp_path / "monitor.json")
+    RegulatoryMonitor(store, ReviewRequiredFetcher(), processor).check_source(source)
+    document = ingestion.manifest.get_by_source_url("https://rbi.org.in/irac")
+    ingestion.approve_lifecycle(document.document_id, DocumentLifecycle.ACTIVE, "https://rbi.org.in/irac",
+                                "Reviewer confirmed the circular is operative on the RBI page.", datetime.now(UTC))
+
+    RegulatoryMonitor(store, WatermarkedFetcher(), processor).check_source(source)
+
+    assert ingestion.manifest.get_by_source_url("https://rbi.org.in/irac").lifecycle is DocumentLifecycle.WITHDRAWN

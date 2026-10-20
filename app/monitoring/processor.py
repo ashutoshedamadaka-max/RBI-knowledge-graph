@@ -1,7 +1,12 @@
 from app.ingestion.service import IngestionService
 from app.models.monitoring import DiscoveredDocument
-from app.monitoring.lifecycle import resolve_lifecycle
+from app.models.documents import DocumentLifecycle
+from app.monitoring.lifecycle import LifecycleResolution, resolve_lifecycle
 from app.monitoring.metadata import extract_rbi_document_facts
+
+
+# Statuses set from evidence a check cannot re-read: a reviewer's approval or a trusted successor link.
+PERSISTENT_METHODS = {"ADMIN_REVIEW", "AUTO_SUCCESSOR"}
 
 
 class MonitoringDocumentProcessor:
@@ -33,11 +38,23 @@ class MonitoringDocumentProcessor:
         return response.document.document_id, [chunk.chunk_id for chunk in chunks]
 
     def mark_previous(self, document_id: str, valid_to: str) -> None:
-        self.ingestion.vector_store.mark_document_not_current(document_id, valid_to)
         self.ingestion.mark_document_not_current(document_id, valid_to)
 
     def assess_lifecycle(self, document: DiscoveredDocument, text: str, resolution=None):
         resolution = resolution or resolve_lifecycle(text)
+        existing = self.ingestion.manifest.get_by_source_url(document.canonical_url)
+        if (
+            existing
+            and resolution.lifecycle in {DocumentLifecycle.REVIEW_REQUIRED, DocumentLifecycle.UNKNOWN}
+            and existing.lifecycle in {DocumentLifecycle.ACTIVE, DocumentLifecycle.AMENDED}
+            and existing.status_resolution_method in PERSISTENT_METHODS
+        ):
+            # Finding no status signal is not evidence against a reviewer's approval or an
+            # auto-trusted successor link. Only a negative RBI finding may change it.
+            resolution = LifecycleResolution(
+                existing.lifecycle, existing.status_evidence_excerpt or "", resolution.checked_at,
+                existing.status_resolution_method,
+            )
         facts = extract_rbi_document_facts(text)
         self.ingestion.apply_lifecycle(
             document.canonical_url, resolution.lifecycle, resolution.excerpt, resolution.checked_at, resolution.resolution_method,

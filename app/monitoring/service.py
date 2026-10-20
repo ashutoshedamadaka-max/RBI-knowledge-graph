@@ -69,7 +69,8 @@ class RegulatoryMonitor:
                 content_hash = hashlib.sha256(normalized_text.encode()).hexdigest()
                 if previous and previous.normalized_text_hash == content_hash:
                     if hasattr(self.processor, "assess_lifecycle"):
-                        lifecycle = self.processor.assess_lifecycle(document, text, resolution).lifecycle
+                        resolution = self.processor.assess_lifecycle(document, text, resolution)
+                        lifecycle = resolution.lifecycle
                     lifecycle_changed = self.store.update_current_lifecycle(document.canonical_url, lifecycle.value)
                     if lifecycle_changed:
                         update = RegulatoryUpdate(
@@ -79,11 +80,7 @@ class RegulatoryMonitor:
                             publication_date=document.publication_date,
                             detected_at=now,
                             change_type=DiscoveryStatus.LIFECYCLE_CHANGED,
-                            summary=(
-                                f"The monitored RBI page changed lifecycle status from "
-                                f"{previous.lifecycle.value.replace('_', ' ').lower()} to "
-                                f"{lifecycle.value.replace('_', ' ').lower()}."
-                            ),
+                            summary=self._lifecycle_summary(previous.lifecycle, lifecycle, resolution),
                             previous_version_id=previous.version_id,
                             new_version_id=previous.version_id,
                             materiality=Materiality.HIGH if lifecycle in {
@@ -160,6 +157,16 @@ class RegulatoryMonitor:
                             discovered_count=len(discovered), changes_detected=len(updates))
         self.store.add_check(check)
         return check, updates
+
+    @staticmethod
+    def _lifecycle_summary(before: DocumentLifecycle, after: DocumentLifecycle, resolution) -> str:
+        change = f"from {before.value.replace('_', ' ').lower()} to {after.value.replace('_', ' ').lower()}"
+        cause = {
+            "ADMIN_REVIEW": "after a reviewer's approval; the RBI page itself did not change",
+            "AUTO_SUCCESSOR": "because a later RBI document explicitly replaces it",
+            "CURATED_APPROVAL": "from the curated source approval; the RBI page itself did not change",
+        }.get(getattr(resolution, "resolution_method", None))
+        return f"Status changed {change} {cause}." if cause else f"The monitored RBI page changed lifecycle status {change}."
 
     @staticmethod
     def _is_lending_relevant(title: str, topics: list[str]) -> bool:
