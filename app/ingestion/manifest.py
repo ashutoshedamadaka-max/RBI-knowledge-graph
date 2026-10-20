@@ -58,14 +58,19 @@ class DocumentManifest:
             self.path.write_text(json.dumps([item.model_dump(mode="json") for item in documents], indent=2))
         return updated
 
-    def update_monitoring_metadata(self, document_id: str, document_identifier: str | None, effective_date, checked_at) -> DocumentMetadata | None:
+    def update_monitoring_metadata(self, document_id: str, facts, checked_at) -> DocumentMetadata | None:
+        """Record header facts; a fact missing from this read never erases a stored one."""
         documents = self._read()
         updated = None
         for index, document in enumerate(documents):
             if document.document_id == document_id:
                 updated = document.model_copy(update={
-                    "document_identifier": document_identifier or document.document_identifier,
-                    "effective_date": effective_date or document.effective_date,
+                    "document_identifier": facts.document_identifier or document.document_identifier,
+                    "circular_numbers": facts.reference_numbers or document.circular_numbers,
+                    "publication_date": facts.issue_date or document.publication_date,
+                    "effective_date": facts.effective_date or document.effective_date,
+                    "issuing_department": facts.issuing_department or document.issuing_department,
+                    "document_type": facts.document_type or document.document_type,
                     "last_checked_at": checked_at,
                 })
                 documents[index] = updated

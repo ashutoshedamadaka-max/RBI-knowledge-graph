@@ -149,7 +149,8 @@ def test_monitored_page_is_stored_as_html_and_indexed_from_its_body(tmp_path: Pa
 
     page = (
         "<html><body><nav>Skip to main content</nav><script>track()</script>"
-        "<div id='NotificationUser'><p>RBI/2025-26/36</p><p>Lenders must disclose penal charges.</p>"
+        "<div id='NotificationUser'><p>RBI/2025-26/36</p><p>DOR.STR.REC.19/21.07.001/2025-26</p><p>May 8, 2025</p>"
+        "<p>Lenders must disclose penal charges.</p>"
         "<p><s>Old wording that was deleted.</s></p></div></body></html>"
     )
 
@@ -170,3 +171,6 @@ def test_monitored_page_is_stored_as_html_and_indexed_from_its_body(tmp_path: Pa
     indexed = " ".join(chunk.text for chunk in ingestion.vector_store.get_by_document_id(document.document_id))
     assert "Lenders must disclose penal charges." in indexed
     assert "track()" not in indexed and "Skip to main content" not in indexed and "Old wording" not in indexed
+    assert document.circular_numbers == ["RBI/2025-26/36", "DOR.STR.REC.19/21.07.001/2025-26"]
+    assert str(document.publication_date) == "2025-05-08"
+    assert document.issuing_department == "DOR"

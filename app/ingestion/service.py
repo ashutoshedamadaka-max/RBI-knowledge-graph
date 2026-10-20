@@ -128,11 +128,11 @@ class IngestionService:
             self.graph_service.apply_document_lifecycle(updated)
         return updated
 
-    def apply_monitoring_metadata(self, source_url: str, document_identifier: str | None, effective_date, checked_at: datetime) -> DocumentMetadata | None:
+    def apply_monitoring_metadata(self, source_url: str, facts, checked_at: datetime) -> DocumentMetadata | None:
         document = self.manifest.get_by_source_url(source_url)
         if not document:
             return None
-        return self.manifest.update_monitoring_metadata(document.document_id, document_identifier, effective_date, checked_at)
+        return self.manifest.update_monitoring_metadata(document.document_id, facts, checked_at)
 
     def mark_document_not_current(self, document_id: str, valid_to: str) -> DocumentMetadata | None:
         return self.manifest.mark_not_current(document_id, valid_to)

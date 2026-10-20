@@ -38,6 +38,9 @@ class DocumentMetadata(BaseModel):
     status_resolution_method: str = "AUTOMATED"
     status_reviewed_at: datetime | None = None
     document_identifier: str | None = None
+    # The numbers RBI prints on the document itself, normalised (see app/corpus/identifiers.py).
+    circular_numbers: list[str] = Field(default_factory=list)
+    issuing_department: str | None = None
     effective_date: date | None = None
     document_type: str | None = None
     applicable_entities: list[str] = Field(default_factory=list)
