@@ -1,0 +1,2285 @@
+{
+  "checked_at": "2026-10-20T17:59:09.012317+00:00",
+  "decisions": [
+    {
+      "page_id": "11322",
+      "title": "Master Directions on Relief/Savings Bonds",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10476",
+      "title": "Master Direction \u2013 Operational Guidelines for Primary Dealers (Updated as on November 22, 2018)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13443",
+      "title": "Reserve Bank of India [Conduct of Government Business by Agency Banks (ABs) \u2013 Payment of Agency Commission and Oversight of ABs] Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13442",
+      "title": "Reserve Bank of India [Disbursement of Government Pension by Agency Banks (ABs)] Directions, 2026 (Updated as on June 24, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13271",
+      "title": "Reserve Bank of India (Commercial Banks - Internal Ombudsman) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13272",
+      "title": "Reserve Bank of India (Small Finance Banks - Internal Ombudsman) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13273",
+      "title": "Reserve Bank of India (Payments Banks - Internal Ombudsman) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13274",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies - Internal Ombudsman) Directions, 2026",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "13275",
+      "title": "Reserve Bank of India (Non-Bank Prepaid Payment Instruments Issuers - Internal Ombudsman) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13276",
+      "title": "Reserve Bank of India (Credit Information Companies - Internal Ombudsman) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12586",
+      "title": "Master Direction - Reserve Bank of India (Internal Ombudsman for Regulated Entities) Directions, 2023",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13729",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Credit Valuation Adjustment Framework) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13705",
+      "title": "Reserve Bank of India (Commercial Banks - Minimum Capital Requirements for Market Risk) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13399",
+      "title": "Reserve Bank of India (Commercial Banks - Capital Charge for Credit Risk \u2013 Standardised Approach) Directions, 2026 (Effective from April 1, 2027)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13400",
+      "title": "Reserve Bank of India (Commercial Banks - Asset Classification, Provisioning and Income Recognition) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13319",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Prudential Norms on Declaration of Dividend and Remittances of Profits) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13136",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Miscellaneous) Directions, 2025 (Updated as on October 19, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13137",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Forthcoming Instructions) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13138",
+      "title": "Reserve Bank of India (Commercial Banks - Climate Finance and Management of Climate Change Risks) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13139",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Managing Risks in Outsourcing) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13140",
+      "title": "Reserve Bank of India (Commercial Banks - Responsible Business Conduct) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13141",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Know Your Customer) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13143",
+      "title": "Reserve Bank of India (Commercial Banks - Financial Statements: Presentation and Disclosures) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13144",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Treatment of Wilful Defaulters and Large Defaulters) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13145",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Resolution of Stressed Assets) Directions, 2025 (updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13146",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Income Recognition, Asset Classification and Provisioning) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13147",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Asset Liability Management) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13148",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Classification, Valuation and Operation of Investment Portfolio) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13149",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Interest Rates on Advances) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13150",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Securitisation Transactions) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13151",
+      "title": "Reserve Bank of India (Commercial Banks - Transfer and Distribution of Credit Risk) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13152",
+      "title": "Reserve Bank of India (Commercial Banks - Concentration Risk Management) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13153",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Credit Risk Management) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13154",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Credit Information Reporting) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13155",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Credit Cards and Debit Cards: Issuance and Conduct) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13156",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Credit Facilities) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13157",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Interest Rate on Deposits) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13158",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Resource Raising Norms) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13159",
+      "title": "Reserve Bank of India (Commercial Banks - Prudential Norms on Capital Adequacy) Directions, 2025 (Updated as on October 07, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13160",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Cash Reserve Ratio and Statutory Liquidity Ratio) Directions, 2025 (Updated as on October 09, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13161",
+      "title": "Reserve Bank of India (Commercial Banks - Governance) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13162",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Undertaking of Financial Services) Directions, 2025 (Updated as on October 05, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13163",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Digital Banking Channels Authorisation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13164",
+      "title": "Reserve Bank of India (Commercial Banks - Branch Authorisation) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13165",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Voluntary Amalgamation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13166",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Acquisition and Holding of Shares or Voting Rights) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13167",
+      "title": "Reserve Bank of India (Setting Up of Wholly Owned Subsidiaries by Foreign Banks) Guidelines, 2025 (Updated as on April 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13168",
+      "title": "Reserve Bank of India (Universal Banks \u2013 Licensing) Guidelines, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13328",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Prudential Norms on Declaration of Dividend) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13105",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Miscellaneous) Directions, 2025 (Updated as on October 19, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13106",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Climate Finance and Management of Climate Change Risks) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13107",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Managing Risks in Outsourcing) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13108",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Responsible Business Conduct) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13109",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Know Your Customer) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13111",
+      "title": "Reserve Bank of India (Small Finance Banks - Financial Statements: Presentation and Disclosures) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13112",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Treatment of Wilful Defaulters and Large Defaulters) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13113",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Resolution of Stressed Assets) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13114",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Income Recognition, Asset Classification and Provisioning) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13115",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Asset Liability Management) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13116",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Classification, Valuation and Operation of Investment Portfolio) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13117",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Interest Rates on Advances) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13118",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Securitisation Transactions) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13119",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Transfer and Distribution of Credit Risk) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13120",
+      "title": "Reserve Bank of India (Small Finance Banks - Concentration Risk Management) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13121",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Credit Risk Management) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13122",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Credit Information Reporting) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13123",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Credit Cards and Debit Cards: Issuance and Conduct) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13124",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Credit Facilities) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13125",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Interest Rate on Deposits) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13126",
+      "title": "Reserve Bank of India (Small Finance Banks - Resource Raising Norms) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13127",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Prudential Norms on Capital Adequacy) Directions, 2025 (Updated as on October 7, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13128",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Cash Reserve Ratio and Statutory Liquidity Ratio) Directions, 2025 (Updated as on October 09, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13129",
+      "title": "Reserve Bank of India (Small Finance Banks - Governance) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13130",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Undertaking of Financial Services) Directions, 2025 (Updated as on October 05, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13131",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Digital Banking Channels Authorisation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13132",
+      "title": "Reserve Bank of India (Small Finance Banks - Branch Authorisation) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13133",
+      "title": "Reserve Bank of India (Small Finance Banks - Voluntary Amalgamation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13134",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Acquisition and Holding of Shares or Voting Rights) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13135",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Licensing) Guidelines, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13321",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Prudential Norms on Declaration of Dividend) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13087",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Miscellaneous) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13088",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Managing Risks in Outsourcing) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13089",
+      "title": "Reserve Bank of India (Payments Banks - Responsible Business Conduct) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13090",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Know Your Customer) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13092",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Financial Statements: Presentation and Disclosures) Directions, 2025 (Updated as on April 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13093",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Asset Liability Management) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13094",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Classification, Valuation and Operation of Investment Portfolio) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13095",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Debit Cards: Issuance and Conduct) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13096",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Interest Rate on Deposits) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13097",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Prudential Norms on Capital Adequacy) Directions, 2025 (updated as on October 7, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13098",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Cash Reserve Ratio and Statutory Liquidity Ratio) Directions, 2025 (Updated as on October 09, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13099",
+      "title": "Reserve Bank of India (Payments Banks - Governance) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13100",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Undertaking of Financial Services) Directions, 2025 (Updated as on December 05, 2025)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13101",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Digital Banking Channels Authorisation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13102",
+      "title": "Reserve Bank of India (Payments Banks - Branch Authorisation) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13103",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Voluntary Amalgamation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13104",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Acquisition and Holding of Shares or Voting Rights) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13324",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Prudential Norms on Declaration of Dividend) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13061",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Miscellaneous) Directions, 2025 (Updated as on October 05, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13062",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Managing Risks in Outsourcing) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13063",
+      "title": "Reserve Bank of India (Local Area Banks - Responsible Business Conduct) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13064",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Know Your Customer) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13066",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Financial Statements: Presentation and Disclosures) Directions, 2025 (Updated as on May 18, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13067",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Treatment of Wilful Defaulters and Large Defaulters) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13068",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Resolution of Stressed Assets) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13069",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Income Recognition, Asset Classification and Provisioning) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13070",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Asset Liability Management) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13071",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Classification, Valuation and Operation of Investment Portfolio) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13072",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Interest Rates on Advances) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13073",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Transfer and Distribution of Credit Risk) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13074",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Concentration Risk Management) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13075",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Credit Risk Management) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13076",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Credit Information Reporting) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13077",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Debit Cards: Issuance and Conduct) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13078",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Credit Facilities) Directions, 2025 (Updated as on April 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13079",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Interest Rate on Deposits) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13080",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Prudential Norms on Capital Adequacy) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13081",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Cash Reserve Ratio and Statutory Liquidity Ratio) Directions, 2025 (Updated as on October 09, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13082",
+      "title": "Reserve Bank of India (Local Area Banks - Governance) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13083",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Digital Banking Channels Authorisation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13084",
+      "title": "Reserve Bank of India (Local Area Banks - Branch Authorisation) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13085",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Voluntary Amalgamation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13086",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Acquisition and Holding of Shares or Voting Rights) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13327",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Prudential Norms on Declaration of Dividend) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13038",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Miscellaneous) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13039",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Responsible Business Conduct) Directions, 2025 (Updated as on July 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13040",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Know Your Customer) Directions, 2025 (Updated as on September 18, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13041",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Financial Statements: Presentation and Disclosures) Directions, 2025 (Updated as on April 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13042",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Treatment of Wilful Defaulters and Large Defaulters) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13043",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Resolution of Stressed Assets) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13044",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Income Recognition, Asset Classification and Provisioning) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13045",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Asset Liability Management) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13046",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Classification, Valuation and Operation of Investment Portfolio) Directions, 2025 (Updated as on May 18, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13047",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Interest Rates on Advances) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13048",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Transfer and Distribution of Credit Risk) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13049",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Concentration Risk Management) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13050",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Credit Risk Management) Directions, 2025 (updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13051",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Credit Information Reporting) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13052",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Credit Cards and Debit Cards: Issuance and Conduct) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13053",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Credit Facilities) Directions, 2025 (Updated as on April 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13054",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Interest Rate on Deposits) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13055",
+      "title": "Reserve Bank of India (Regional Rural Banks - Prudential Norms on Capital Adequacy) Directions, 2025 (Updated as on June 16, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13056",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Cash Reserve Ratio and Statutory Liquidity Ratio) Directions, 2025 (Updated as on October 09, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13057",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Governance) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13058",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Undertaking of Financial Services) Directions, 2025 (Updated as on October 05, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13059",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Digital Banking Channels Authorisation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13060",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Branch Authorisation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13011",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Miscellaneous) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13012",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Managing Risks in Outsourcing) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13013",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Responsible Business Conduct) Directions, 2025 (Updated as on July 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13014",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Know Your Customer) Directions, 2025 (Updated as on September 18, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13015",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Prudential Norms on Declaration of Dividends) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13016",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Financial Statements: Presentation and Disclosures) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13017",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Treatment of Wilful Defaulters and Large Defaulters) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13018",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Resolution of Stressed Assets) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13019",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Income Recognition, Asset Classification and Provisioning) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13020",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Asset Liability Management) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13021",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Classification, Valuation and Operation of Investment Portfolio) Directions, 2025 (Updated as on September 2, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13022",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Interest Rates on Advances) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13023",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Transfer and Distribution of Credit Risk) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13024",
+      "title": "Reserve Bank of India (Urban Co-operative Banks - Concentration Risk Management) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13025",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Credit Risk Management) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13026",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Credit Information Reporting) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13027",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Credit Cards and Debit Cards: Issuance and Conduct) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13028",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Credit Facilities) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13029",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Interest Rate on Deposits) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13030",
+      "title": "Reserve Bank of India (Urban Co-operative Banks - Prudential Norms on Capital Adequacy) Directions, 2025 (Updated as on June 16, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13031",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Cash Reserve Ratio and Statutory Liquidity Ratio) Directions, 2025 (Updated as on October 09, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13032",
+      "title": "Reserve Bank of India (Urban Co-operative Banks - Governance) Directions, 2025 (Updated as on May 25, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13033",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Undertaking of Financial Services) Directions, 2025 (Updated as on October 05, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13034",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Digital Banking Channels Authorisation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13036",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Voluntary Amalgamation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13203",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Licensing, Scheduling and Regulatory Classification) Guidelines, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13204",
+      "title": "Reserve Bank of India (Urban Co-operative Banks - Branch Authorisation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13205",
+      "title": "Reserve Bank of India (Rural Co-operative Banks - Branch Authorisation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13202",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Miscellaneous) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12986",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Managing Risks in Outsourcing) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12987",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Responsible Business Conduct) Directions, 2025 (Updated as on July 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12988",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Know Your Customer) Directions, 2025 (Updated as on September 18, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12989",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Prudential Norms on Declaration of Dividends) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12990",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Financial Statements: Presentation and Disclosures) Directions, 2025 (Updated as on April 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12991",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Treatment of Wilful Defaulters and Large Defaulters) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12992",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Resolution of Stressed Assets) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12993",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Income Recognition, Asset Classification and Provisioning) Directions, 2025 (updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12994",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Asset Liability Management) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12995",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Classification, Valuation and Operation of Investment Portfolio) Directions, 2025 (Updated as on May 18, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12996",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Interest Rates on Advances) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12997",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Transfer and Distribution of Credit Risk) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12998",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Concentration Risk Management) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12999",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Credit Risk Management) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13000",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Credit Information Reporting) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13001",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Debit Cards: Issuance and Conduct) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13002",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Credit Facilities) Directions, 2025 (Updated as on April 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13003",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Interest Rate on Deposits) Directions, 2025 (Updated as on August 25, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13004",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Prudential Norms on Capital Adequacy) Directions, 2025 (Updated as on May 15, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13005",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Cash Reserve Ratio and Statutory Liquidity Ratio) Directions, 2025 (Updated as on October 09, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13006",
+      "title": "Reserve Bank of India (Rural Co-operative Banks - Governance) Directions, 2025 (Updated as on May 25, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13007",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Undertaking of Financial Services) Directions, 2025 (Updated as on October 05, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13008",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Digital Banking Channels Authorisation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13010",
+      "title": "Reserve Bank of India (Rural Co-operative Banks - Voluntary Amalgamation) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12966",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Miscellaneous) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12967",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Managing Risks in Outsourcing) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12968",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Responsible Business Conduct) Directions, 2025 (Updated as on July 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12969",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Know Your Customer) Directions, 2025 (Updated as on December 29, 2025)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12970",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Financial Statements: Presentation and Disclosures) Directions, 2025 (Updated as on April 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12971",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Treatment of Wilful Defaulters and Large Defaulters) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12972",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Resolution of Stressed Assets) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12973",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Income Recognition, Asset Classification and Provisioning) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12974",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Asset Liability Management) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12975",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Classification, Valuation and Operation of Investment Portfolio) Directions, 2025 (Updated as on September 22, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12976",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Securitisation Transactions) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12977",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Transfer and Distribution of Credit Risk) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12978",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Concentration Risk Management) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12979",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Credit Risk Management) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12980",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Credit Information Reporting) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12981",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Credit Facilities) Directions, 2025 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12982",
+      "title": "Reserve Bank of India (All India Financial Institutions\u2013 Resource Raising Norms) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12983",
+      "title": "Reserve Bank of India (All India Financial Institutions - Prudential Norms on Capital Adequacy) Directions, 2025 (Updated as on October 07, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12984",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Undertaking of Financial Services) Directions, 2025 (Updated as on October 05, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12931",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Miscellaneous) Directions, 2025 (Updated as on February 26, 2026)",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12932",
+      "title": "Reserve Bank of India (Non-Operative Financial Holding Companies) Directions, 2025 (Updated as on December 05, 2025)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12933",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Microfinance Institution) Directions, 2025",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Microfinance'"
+    },
+    {
+      "page_id": "12934",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Peer to Peer Lending Platform) Directions, 2025",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Peer to Peer Lending'"
+    },
+    {
+      "page_id": "12935",
+      "title": "Reserve Bank of India (Mortgage Guarantee Companies) Directions, 2025 (Updated as on March 10, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12936",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies - Account Aggregator) Directions, 2025",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12937",
+      "title": "Reserve Bank of India (Core Investment Companies) Directions, 2025 (Updated as on March 10, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12938",
+      "title": "Reserve Bank of India (Standalone Primary Dealers) Directions, 2025 (Updated as on March 10, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12939",
+      "title": "Reserve Bank of India (Housing Finance Companies) Directions, 2025 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12940",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Climate Finance and Management of Climate Change Risks) Directions, 2025",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12941",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Managing Risks in Outsourcing) Directions, 2025",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Managing Risks in Outsourcing'"
+    },
+    {
+      "page_id": "12942",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Responsible Business Conduct) Directions, 2025 (Updated as on July 1, 2026)",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Responsible Business Conduct'"
+    },
+    {
+      "page_id": "12943",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Know Your Customer) Directions, 2025 (Updated as on December 29, 2025)",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Know Your Customer'"
+    },
+    {
+      "page_id": "12944",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Prudential Norms on Declaration of Dividends) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12945",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Financial Statements: Presentation and Disclosures) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12946",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Treatment of Wilful Defaulters and Large Defaulters) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Wilful Defaulters'"
+    },
+    {
+      "page_id": "12947",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Resolution of Stressed Assets) Directions, 2025 (updated as on October 1, 2026)",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Resolution of Stressed Assets'"
+    },
+    {
+      "page_id": "12948",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Income Recognition, Asset Classification and Provisioning) Directions, 2025 (updated as on October 01, 2026)",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Income Recognition, Asset Classification and Provisioning'"
+    },
+    {
+      "page_id": "12949",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Asset Liability Management) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12950",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Classification, Valuation and Operation of Investment Portfolio) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12951",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Securitisation Transactions) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Securitisation'"
+    },
+    {
+      "page_id": "12952",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies - Transfer and Distribution of Credit Risk) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Transfer and Distribution of Credit Risk'"
+    },
+    {
+      "page_id": "12953",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies - Concentration Risk Management) Directions, 2025 (Updated as on August 25, 2026)",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Concentration Risk Management'"
+    },
+    {
+      "page_id": "12954",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Credit Risk Management) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Credit Risk Management'"
+    },
+    {
+      "page_id": "12955",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Credit Information Reporting) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Credit Information Reporting'"
+    },
+    {
+      "page_id": "12956",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Credit Cards: Issuance and Conduct) Directions, 2025",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Credit Cards'"
+    },
+    {
+      "page_id": "12957",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Credit Facilities) Directions, 2025 (updated as on July 15, 2026)",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Credit Facilities'"
+    },
+    {
+      "page_id": "12958",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Acceptance of Public Deposits) Directions, 2025 (Updated as on April 15, 2026)",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12959",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Prudential Norms on Capital Adequacy) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12960",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Governance) Directions, 2025 (Updated as on June 24, 2026)",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12961",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Undertaking of Financial Services) Directions, 2025 (Updated as on October 05, 2026)",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12962",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Branch Authorisation) Directions, 2025 (Updated as on April 15, 2026)",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12963",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Voluntary Amalgamation) Directions, 2025",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12964",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Acquisition of Shareholding or Control) Directions, 2025",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "12965",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Registration, Exemptions and Framework for Scale Based Regulation) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": true,
+      "reason": "Non-Banking Financial Companies: lending topic 'Scale Based Regulation'"
+    },
+    {
+      "page_id": "12927",
+      "title": "Reserve Bank of India (Asset Reconstruction Companies \u2013 Know Your Customer) Directions, 2025 (Updated as on December 29, 2025)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12928",
+      "title": "Reserve Bank of India (Asset Reconstruction Companies \u2013 Treatment of Wilful Defaulters and Large Defaulters) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12929",
+      "title": "Reserve Bank of India (Asset Reconstruction Companies \u2013 Credit Information Reporting) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12930",
+      "title": "Reserve Bank of India (Asset Reconstruction Companies) Directions, 2025 (Updated as on March 10, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12925",
+      "title": "Reserve Bank of India (Credit Information Companies \u2013 Managing Risks in Outsourcing) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12926",
+      "title": "Reserve Bank of India (Credit Information Companies) Directions, 2025 (Updated as on July 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13637",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Miscellaneous) Supervisory Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13638",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Supervisory Returns) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13639",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Statutory Audit) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13640",
+      "title": "Reserve Bank of India (Commercial Banks - Internal Audit Function) Directions, 2026 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13641",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Fraud Risk Management) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13642",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Digital Payment Security Controls) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13643",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Cybersecurity, Technology: Risk, Resilience and Assurance Framework) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13644",
+      "title": "Reserve Bank of India (Commercial Banks \u2013 Concurrent Audit) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13645",
+      "title": "Reserve Bank of India (Commercial Banks - Compliance Function) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13628",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Miscellaneous) Supervisory Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13629",
+      "title": "Reserve Bank of India (Small Finance Banks - Supervisory Returns) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13630",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Statutory Audit) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13631",
+      "title": "Reserve Bank of India (Small Finance Banks - Internal Audit Function) Directions, 2026 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13632",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Fraud Risk Management) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13633",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Digital Payment Security Controls) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13634",
+      "title": "Reserve Bank of India (Small Finance Banks - Cybersecurity, Technology: Risk, Resilience and Assurance Framework) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13635",
+      "title": "Reserve Bank of India (Small Finance Banks \u2013 Concurrent Audit) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13636",
+      "title": "Reserve Bank of India (Small Finance Banks - Compliance Function) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13619",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Miscellaneous) Supervisory Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13620",
+      "title": "Reserve Bank of India (Payments Banks - Supervisory Returns) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13621",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Statutory Audit) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13622",
+      "title": "Reserve Bank of India (Payments Banks - Internal Audit Function) Directions, 2026 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13623",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Fraud Risk Management) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13624",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Digital Payment Security Controls) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13625",
+      "title": "Reserve Bank of India (Payments Banks - Cybersecurity, Technology: Risk, Resilience and Assurance Framework) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13626",
+      "title": "Reserve Bank of India (Payments Banks \u2013 Concurrent Audit) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13627",
+      "title": "Reserve Bank of India (Payments Banks - Compliance Function) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13603",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Miscellaneous) Supervisory Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13604",
+      "title": "Reserve Bank of India (Local Area Banks - Supervisory Returns) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13605",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Statutory Audit) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13606",
+      "title": "Reserve Bank of India (Local Area Banks - Internal Audit Function) Directions, 2026 (Updated as on October 1, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13607",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Fraud Risk Management) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13608",
+      "title": "Reserve Bank of India (Local Area Banks \u2013 Concurrent Audit) Directions, 2026 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13609",
+      "title": "Reserve Bank of India (Local Area Banks - Compliance Function) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13598",
+      "title": "Reserve Bank of India (Regional Rural Banks - Miscellaneous) Supervisory Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13599",
+      "title": "Reserve Bank of India (Regional Rural Banks \u2013 Fraud Risk Management) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13610",
+      "title": "Reserve Bank of India (Urban Co-operative Banks - Miscellaneous) Supervisory Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13611",
+      "title": "Reserve Bank of India (Urban Co-operative Banks - Supervisory Returns) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13612",
+      "title": "Reserve Bank of India (Urban Co-operative Banks - Statutory Audit) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13613",
+      "title": "Reserve Bank of India (Urban Co-operative Banks - Internal Audit Function) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13614",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Fraud Risk Management) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13615",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Digital Payment Security Controls) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13616",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Cybersecurity, Technology: Risk, Resilience and Assurance Framework) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13617",
+      "title": "Reserve Bank of India (Urban Co-operative Banks \u2013 Concurrent Audit) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13618",
+      "title": "Reserve Bank of India (Urban Co-operative Banks - Compliance Function) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13600",
+      "title": "Reserve Bank of India (Rural Co-operative Banks - Miscellaneous) Supervisory Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13601",
+      "title": "Reserve Bank of India (Rural Co-operative Banks - Statutory Audit) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13602",
+      "title": "Reserve Bank of India (Rural Co-operative Banks \u2013 Fraud Risk Management) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13594",
+      "title": "Reserve Bank of India (All India Financial Institutions - Miscellaneous) Supervisory Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13595",
+      "title": "Reserve Bank of India (All India Financial Institutions - Supervisory Returns) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13596",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Fraud Risk Management) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13597",
+      "title": "Reserve Bank of India (All India Financial Institutions \u2013 Cybersecurity, Technology: Risk, Resilience and Assurance Framework) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13585",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies - Auditor\u2019s Report) Directions, 2026",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "13586",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Miscellaneous) Supervisory Directions, 2026",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "13587",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies - Supervisory Returns) Directions, 2026",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "13588",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies - Statutory Audit) Directions, 2026",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "13589",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies - Internal Audit Function) Directions, 2026",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "13590",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Fraud Risk Management) Directions, 2026",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "13591",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Digital Payment Security Controls) Directions, 2026",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "13592",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies \u2013 Cybersecurity, Technology: Risk, Resilience and Assurance Framework) Directions, 2026",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "13593",
+      "title": "Reserve Bank of India (Non-Banking Financial Companies - Compliance Function) Directions, 2026",
+      "included": false,
+      "reason": "Non-Banking Financial Companies: title names no lending topic in the rule"
+    },
+    {
+      "page_id": "13584",
+      "title": "Reserve Bank of India (Asset Reconstruction Companies - Supervisory Returns) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13582",
+      "title": "Reserve Bank of India (Credit Information Companies - Miscellaneous) Supervisory Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13583",
+      "title": "Reserve Bank of India (Credit Information Companies \u2013 Cybersecurity, Technology: Risk, Resilience and Assurance Framework) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13522",
+      "title": "Reserve Bank of India [Commercial Banks - Kisan Credit Card (KCC) Scheme] Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13523",
+      "title": "Reserve Bank of India [Small Finance Banks - Kisan Credit Card (KCC) Scheme] Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13524",
+      "title": "Reserve Bank of India [Regional Rural Banks - Kisan Credit Card (KCC) Scheme] Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13525",
+      "title": "Reserve Bank of India [Rural Co-operative Banks - Kisan Credit Card (KCC) Scheme] Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12799",
+      "title": "Master Directions - Reserve Bank of India (Priority Sector Lending \u2013 Targets and Classification) Directions, 2025 (Updated as on September 11, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "11959",
+      "title": "Master Directions \u2013 Priority Sector Lending (PSL) \u2013 Targets and Classification dated September 04, 2020",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "11060",
+      "title": "Master Direction - Lending to Micro, Small & Medium Enterprises (MSME) Sector (Updated as on February 09, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "11037",
+      "title": "Master Direction \u2013 Reserve Bank of India (Relief Measures by banks in areas affected by Natural Calamities) Directions 2017",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13552",
+      "title": "Master Direction \u2013 Reserve Bank of India (Credit Derivatives) Directions, 2026 (Updated as on September 22, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13343",
+      "title": "Master Direction - Reserve Bank of India (Unique Identifiers in Financial Markets) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13214",
+      "title": "Master Direction \u2013 Reserve Bank of India (Rupee Interest Rate Derivatives) Directions, 2025 (Updated as on September 22, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12920",
+      "title": "Master Direction \u2013 Reserve Bank of India (Repurchase Transactions (Repo)) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12870",
+      "title": "Master Direction \u2013 Reserve Bank of India (Electronic Trading Platforms) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12784",
+      "title": "Reserve Bank of India (Forward Contracts in Government Securities) Directions, 2025 (Updated as on September 22, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13376",
+      "title": "Master Direction - Reserve Bank of India (Access Criteria for NDS-OM) Directions, 2025 (Updated as on April 27, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12765",
+      "title": "Master Direction - Reserve Bank of India (Non-resident Investment in Debt Instruments) Directions, 2025 (Updated as on June 05, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12682",
+      "title": "Master Direction \u2013 Reserve Bank of India (Margining for Non-Centrally Cleared OTC Derivatives) Directions, 2024 (Updated as on February 21, 2025)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12592",
+      "title": "Master Direction \u2013 Reserve Bank of India (Commercial Paper and Non-Convertible Debentures of original or initial maturity upto one year) Directions, 2024",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12581",
+      "title": "Reserve Bank of India (Financial Benchmark Administrators) Directions, 2023",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12580",
+      "title": "Reserve Bank of India (Government Securities Lending) Directions, 2023",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12427",
+      "title": "Master Direction \u2013 Foreign Exchange Management (Hedging of Commodity Price Risk and Freight Risk in Overseas Markets) Directions, 2022 (Updated as on April 15, 2024)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12163",
+      "title": "Master Direction \u2013 Reserve Bank of India (Market-makers in OTC Derivatives) Directions, 2021 (Updated as on February 21, 2025)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12108",
+      "title": "Master Direction \u2013 Reserve Bank of India (Certificate of Deposit) Directions, 2021",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12061",
+      "title": "Master Direction - Reserve Bank of India (Call, Notice and Term Money Markets) Directions, 2021 (Updated as on June 08, 2023)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "11500",
+      "title": "Reserve Bank of India (Prevention of Market Abuse) Directions, 2019",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10485",
+      "title": "Master Direction - Risk Management and Inter-Bank Dealings (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12839",
+      "title": "Master Directions - Compounding of Contraventions under FEMA, 1999, dated April 22, 2025 (Updated as on April 24, 2025)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12710",
+      "title": "Master Direction - Overseas Investment (Updated as on April 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "11510",
+      "title": "Master Direction - External Commercial Borrowings, Trade Credits and Structured Obligations (Updated as on September 08, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "11200",
+      "title": "Master Direction \u2013 Foreign Investment in India (Updated up to June 15, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10868",
+      "title": "Master Direction \u2013 Money Transfer Service Scheme (MTSS) (Updated as on September 29, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10738",
+      "title": "Master Direction - Insurance (Updated as on December 07, 2021)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10404",
+      "title": "Master Direction - Establishment of Branch Office (BO)/ Liaison Office (LO)/ Project Office (PO) or any other place of business in India by foreign entities (Updated as on May 18, 2021)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10191",
+      "title": "Master Direction \u2013 Borrowing and Lending transactions in Indian Rupee between Persons Resident in India and Non-Resident Indians/ Persons of Indian Origin (Updated as on September 08, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10192",
+      "title": "Master Direction - Liberalised Remittance Scheme (LRS) (Updated as on September 06, 2024)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10193",
+      "title": "Master Direction - Other Remittance Facilities (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10196",
+      "title": "Master Direction \u2013 Acquisition or Transfer of Immovable Property under Foreign Exchange Management Act, 1999 (Updated as on September 01, 2022)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10197",
+      "title": "Master Direction - Remittance of Assets (Updated as on June 29, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10198",
+      "title": "Master Direction - Deposits and Accounts (Updated as on September 02, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10202",
+      "title": "Master Direction \u2013 Reporting under Foreign Exchange Management Act, 1999 (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10203",
+      "title": "Master Direction - Miscellaneous (Updated as on May 13, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10205",
+      "title": "Master Direction \u2013 Opening and Maintenance of Rupee/Foreign Currency Vostro Accounts of Non-resident Exchange Houses (Updated as on October 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "11518",
+      "title": "Master Direction - Money Changing Activities (Updated as on September 29, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13723",
+      "title": "Master Direction on Note Sorting Machines",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13362",
+      "title": "Master Direction \u2013 Facility for Exchange of Notes and Coins (Updated as on October 16, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13361",
+      "title": "Master Direction on Counterfeit Notes \u2013 Detection, Reporting and Monitoring (Updated as on September 01, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13360",
+      "title": "Master Direction on Incentives for Currency Distribution and Exchange and Penalties / Penal Provisions for Bank Branches and Currency Chests for Deficiency in Rendering Customer Service and Reporting of Transactions / Balances (Updated as on May 27, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13526",
+      "title": "Reserve Bank of India (Trade Receivables Discounting System) Directions, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13502",
+      "title": "Master Directions on Authorisation to operate a Payment System",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "13374",
+      "title": "Digital Payments \u2013 E-mandate Framework, 2026",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12898",
+      "title": "Reserve Bank of India (Authentication mechanisms for digital payment transactions) Directions, 2025",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12896",
+      "title": "Master Direction on Regulation of Payment Aggregator (PA)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12715",
+      "title": "Master Directions on Cyber Resilience and Digital Payment Security Controls for non-bank Payment System Operators",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12616",
+      "title": "Master Direction \u2013 Reserve Bank of India (Bharat Bill Payment System) Directions, 2024",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "12156",
+      "title": "Master Directions on Prepaid Payment Instruments (PPIs) (Updated as on September 30, 2026)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    },
+    {
+      "page_id": "10833",
+      "title": "Master Directions on Access Criteria for Payment Systems (Updated as on July 28, 2021)",
+      "included": false,
+      "reason": "regulated entity outside the corpus scope"
+    }
+  ]
+}

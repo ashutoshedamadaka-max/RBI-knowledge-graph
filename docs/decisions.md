@@ -153,3 +153,16 @@ On a trusted link the successor becomes active, the old rule's `in_force_to` is 
 **Why:** The brief requires current answers never to cite a withdrawn passage and to say what replaced what; Ashu's D1 requires a future effective date to be quoted. A notice can quote a rule that is not yet in force, so it is never mixed into the fail-closed citations.
 
 **Trade-off:** Notices are rank-based with no tuned threshold, so in a small corpus a weakly related withdrawn document can still trigger one; the replay and the Phase 3 trace measure this. The wording follows the plan's recommendation for D7, which Ashu has not confirmed and can change. Answers in the "historical" mode (an explicit history question) are unchanged until Phase 3 measures a replacement.
+
+## ADR-018: Consolidated directions come from hand-downloaded PDFs; validity is tracked from RBI's HTML pages
+
+**Context:** RBI's lending rules for NBFCs now sit in entity-wise consolidated directions ("Reserve Bank of India (Non-Banking Financial Companies – …) Directions, 2025"). Their text exists only as PDFs on rbidocs.rbi.org.in, which shows automated clients a CAPTCHA. We do not try to get around it.
+
+**Decision:**
+1. **Scope (amends ADR-013):** consolidated directions are included by entity and topic, per `config/corpus/inclusion.yaml`. The entity is Non-Banking Financial Companies, matching the brief's user; 16 of 40 NBFC directions match a lending topic as of 20 October 2026. Commercial Banks can be added with one line. HTML circulars and notifications for any entity remain automatic.
+2. **Download:** `scripts/build_download_list.py` reads the index on www.rbi.org.in (no CAPTCHA), logs every include and exclude decision, and writes `data/source_pdfs/DOWNLOAD.md`. Ashu saves each PDF into `data/source_pdfs/` with its original file name. The PDFs are committed, since they are public RBI documents and the deployed service needs them.
+3. **Validity tracking:** the daily check reads each direction's HTML page and the index. A Withdrawn watermark retires the rule automatically (already detected on Master Direction pages). A new PDF file name or "Updated as on" date means an in-place amendment: answers keep using the stored text with a visible "RBI updated this on <date>" warning, and the new PDF goes on the download list. A new index entry in scope goes on the list too. A page that disappears goes to review, not to withdrawn.
+
+**Why:** It keeps every document official and every check automatic except the one step RBI reserves for people.
+
+**Trade-off:** Switching to an updated or new PDF-only direction waits for a manual download. The replay report shows that delay separately from automatic detection.

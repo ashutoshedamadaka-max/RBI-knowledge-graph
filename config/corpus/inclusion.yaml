@@ -1,0 +1,26 @@
+# Written corpus inclusion rule (ADR-013). Changing scope means editing this file, not
+# hand-picking documents. Every inclusion and exclusion is logged with its reason.
+
+master_directions:
+  # Regulated entities whose consolidated directions are in scope. Add "Commercial Banks"
+  # here to extend the corpus to banks.
+  entities:
+    - Non-Banking Financial Companies
+  # A direction is included when its title names one of these lending topics.
+  topics:
+    - Credit Facilities
+    - Responsible Business Conduct      # fair practices, penal charges, borrower disclosures
+    - Know Your Customer                # borrower onboarding
+    - Income Recognition, Asset Classification and Provisioning
+    - Resolution of Stressed Assets
+    - Wilful Defaulters
+    - Credit Information Reporting
+    - Transfer and Distribution of Credit Risk   # transfer of loan exposures
+    - Securitisation
+    - Credit Risk Management
+    - Concentration Risk Management     # exposure limits on lending
+    - Scale Based Regulation
+    - Microfinance
+    - Peer to Peer Lending
+    - Credit Cards
+    - Managing Risks in Outsourcing     # includes recovery agents
