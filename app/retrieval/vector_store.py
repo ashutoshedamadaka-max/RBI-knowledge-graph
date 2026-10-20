@@ -89,6 +89,14 @@ class LocalVectorStore:
     def get_by_document_id(self, document_id: str) -> list[ChunkMetadata]:
         return [ChunkMetadata.model_validate(row["chunk"]) for row in self._read() if row["chunk"]["document_id"] == document_id]
 
+    def mark_document_current(self, document_id: str) -> None:
+        rows = self._read()
+        for row in rows:
+            if row["chunk"]["document_id"] == document_id:
+                row["chunk"]["is_current"] = True
+                row["chunk"]["valid_to"] = None
+        self.path.write_text(json.dumps(rows, indent=2))
+
     def mark_document_not_current(self, document_id: str, valid_to: str) -> None:
         rows = self._read()
         for row in rows:

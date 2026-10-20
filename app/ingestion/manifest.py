@@ -91,6 +91,18 @@ class DocumentManifest:
             self.path.write_text(json.dumps([item.model_dump(mode="json") for item in documents], indent=2))
         return updated
 
+    def set_fields(self, document_id: str, **fields) -> DocumentMetadata | None:
+        documents = self._read()
+        updated = None
+        for index, document in enumerate(documents):
+            if document.document_id == document_id:
+                updated = document.model_copy(update=fields)
+                documents[index] = updated
+                break
+        if updated:
+            self.path.write_text(json.dumps([item.model_dump(mode="json") for item in documents], indent=2))
+        return updated
+
     def mark_not_current(self, document_id: str, valid_to) -> DocumentMetadata | None:
         documents = self._read()
         updated = None

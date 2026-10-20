@@ -146,6 +146,24 @@ class IngestionService:
                 updated = self.set_in_force(updated.document_id, start, updated.in_force_to)
         return updated
 
+    def get(self, document_id: str) -> DocumentMetadata | None:
+        return next((item for item in self.manifest.all() if item.document_id == document_id), None)
+
+    def set_lifecycle(self, document_id: str, lifecycle, evidence_url: str, excerpt: str, checked_at: datetime,
+                      resolution_method: str) -> DocumentMetadata | None:
+        """Set status by document ID (not by URL, which may hold several versions)."""
+        updated = self.manifest.update_lifecycle(document_id, lifecycle, evidence_url, excerpt, checked_at, resolution_method)
+        if updated:
+            self.vector_store.apply_lifecycle(document_id, updated.lifecycle.value)
+            self.graph_service.apply_document_lifecycle(updated)
+        return updated
+
+    def mark_document_current(self, document_id: str) -> DocumentMetadata | None:
+        updated = self.manifest.set_fields(document_id, is_current=True, valid_to=None)
+        if updated:
+            self.vector_store.mark_document_current(document_id)
+        return updated
+
     def set_in_force(self, document_id: str, start, end) -> DocumentMetadata | None:
         updated = self.manifest.set_in_force(document_id, start, end)
         if updated:
@@ -153,7 +171,10 @@ class IngestionService:
         return updated
 
     def mark_document_not_current(self, document_id: str, valid_to: str) -> DocumentMetadata | None:
-        return self.manifest.mark_not_current(document_id, valid_to)
+        updated = self.manifest.mark_not_current(document_id, valid_to)
+        if updated:
+            self.vector_store.mark_document_not_current(document_id, valid_to)
+        return updated
 
     def approve_lifecycle(self, document_id: str, lifecycle, evidence_url: str, excerpt: str, reviewed_at: datetime) -> DocumentMetadata | None:
         existing = next((item for item in self.manifest.all() if item.document_id == document_id), None)

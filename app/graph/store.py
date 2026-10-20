@@ -77,6 +77,23 @@ class ProvenanceGraph:
         })
         self._persist()
 
+    def set_document_link(self, link_id: str, old_document_id: str, old_title: str, new_document_id: str, new_title: str,
+                          relation: str, evidence_quote: str, trust: str, present: bool = True) -> None:
+        """A document-to-document edge carrying its quoted evidence; removed when ``present`` is false."""
+        old_node, new_node = f"document:{old_document_id}", f"document:{new_document_id}"
+        if not present:
+            if self.graph.has_edge(new_node, old_node, key=link_id):
+                self.graph.remove_edge(new_node, old_node, key=link_id)
+                self._persist()
+            return
+        for node, title, document_id in ((old_node, old_title, old_document_id), (new_node, new_title, new_document_id)):
+            self.graph.add_node(node, name=title, entity_type="Document", aliases=[], source_document_id=document_id)
+        self.graph.add_edge(
+            new_node, old_node, key=link_id, relationship_type=relation, evidence_quote=evidence_quote, trust=trust,
+            source_chunk_id="", source_document_id=new_document_id, confidence=1.0, extraction_method="successor_link",
+        )
+        self._persist()
+
     def remove_document_ids(self, document_ids: set[str]) -> None:
         if not document_ids:
             return
