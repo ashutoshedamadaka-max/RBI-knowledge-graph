@@ -7,6 +7,7 @@ from app.monitoring.metadata import extract_rbi_document_facts
 
 # Statuses set from evidence a check cannot re-read: a reviewer's approval or a trusted successor link.
 PERSISTENT_METHODS = {"ADMIN_REVIEW", "AUTO_SUCCESSOR"}
+OFFICIAL_NEGATIVE = {DocumentLifecycle.WITHDRAWN, DocumentLifecycle.REPEALED, DocumentLifecycle.SUPERSEDED}
 
 
 class MonitoringDocumentProcessor:
@@ -45,12 +46,13 @@ class MonitoringDocumentProcessor:
         existing = self.ingestion.manifest.get_by_source_url(document.canonical_url)
         if (
             existing
-            and resolution.lifecycle in {DocumentLifecycle.REVIEW_REQUIRED, DocumentLifecycle.UNKNOWN}
-            and existing.lifecycle in {DocumentLifecycle.ACTIVE, DocumentLifecycle.AMENDED}
+            and resolution.lifecycle not in OFFICIAL_NEGATIVE
+            and existing.lifecycle in {DocumentLifecycle.ACTIVE, DocumentLifecycle.AMENDED, DocumentLifecycle.SUPERSEDED}
             and existing.status_resolution_method in PERSISTENT_METHODS
         ):
-            # Finding no status signal is not evidence against a reviewer's approval or an
-            # auto-trusted successor link. Only a negative RBI finding may change it.
+            # A status from a reviewer or a trusted successor link rests on evidence this check
+            # cannot re-read. Finding no signal, or the curated approval, does not change it;
+            # only a negative finding on the RBI page (watermark or withdrawal wording) does.
             resolution = LifecycleResolution(
                 existing.lifecycle, existing.status_evidence_excerpt or "", resolution.checked_at,
                 existing.status_resolution_method,

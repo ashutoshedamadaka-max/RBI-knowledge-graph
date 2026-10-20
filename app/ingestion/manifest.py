@@ -1,4 +1,5 @@
 import json
+from datetime import datetime
 from pathlib import Path
 from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
@@ -108,7 +109,9 @@ class DocumentManifest:
         updated = None
         for index, document in enumerate(documents):
             if document.document_id == document_id:
-                updated = document.model_copy(update={"is_current": False, "valid_to": valid_to})
+                # Callers pass an ISO string (the chunk index stores text); the model holds a datetime.
+                retired_at = datetime.fromisoformat(valid_to) if isinstance(valid_to, str) else valid_to
+                updated = document.model_copy(update={"is_current": False, "valid_to": retired_at})
                 documents[index] = updated
                 break
         if updated:

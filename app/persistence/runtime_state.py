@@ -19,6 +19,7 @@ class DurableRuntimeState:
         "vectors.json",
         "knowledge_graph.json",
         "monitoring.json",
+        "document_links.json",
         "cost_events.json",
         "extraction_repair_backup.json",
     )

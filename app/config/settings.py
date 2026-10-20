@@ -28,6 +28,8 @@ class Settings(BaseSettings):
     chunk_overlap: int = 150
     vector_top_k: int = 5
     log_level: str = "INFO"
+    # Switch off to send every successor to review (the replay report decides whether it stays on).
+    auto_trust_enabled: bool = True
     cors_allowed_origins: str = ""
 
     @property

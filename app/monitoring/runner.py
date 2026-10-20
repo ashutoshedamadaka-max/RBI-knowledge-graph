@@ -1,6 +1,9 @@
+from dataclasses import asdict
+
 from app.config.settings import Settings
 from app.ingestion.service import IngestionService
 from app.monitoring.fetcher import RbiHttpFetcher
+from app.monitoring.linking import LinkingService
 from app.monitoring.processor import MonitoringDocumentProcessor
 from app.monitoring.registry import RegulatorySourceRegistry
 from app.monitoring.service import RegulatoryMonitor
@@ -8,11 +11,12 @@ from app.monitoring.store import MonitoringStore
 
 
 def run_due_monitoring(settings: Settings) -> dict[str, object]:
-    """Run all enabled source checks and return an auditable compact result."""
+    """Run all enabled source checks, then link successors, and return an auditable compact result."""
+    ingestion = IngestionService(settings)
     monitor = RegulatoryMonitor(
         MonitoringStore(settings.runtime_dir / "monitoring.json"),
         RbiHttpFetcher(),
-        MonitoringDocumentProcessor(IngestionService(settings)),
+        MonitoringDocumentProcessor(ingestion),
     )
     runs = []
     for source in RegulatorySourceRegistry(settings.regulatory_sources_path).enabled_sources():
@@ -25,4 +29,5 @@ def run_due_monitoring(settings: Settings) -> dict[str, object]:
             "updates": [update.update_id for update in updates],
             "error": check.error,
         })
-    return {"runs": runs, "sources_checked": len(runs)}
+    linking = LinkingService(ingestion, settings).reconcile()
+    return {"runs": runs, "sources_checked": len(runs), "linking": asdict(linking)}

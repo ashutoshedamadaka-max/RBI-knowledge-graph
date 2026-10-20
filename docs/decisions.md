@@ -130,3 +130,15 @@ Link closure then adds any document that an included document repeals, supersede
 **Why:** ADR-010 requires the old rule to keep answering until the new one takes effect. A yes/no "current" flag cannot express that. Regulatory time (the window) is kept apart from system time (`valid_from`/`valid_to`, when a version was ingested or retired).
 
 **Trade-off:** A document with no parsed date has an open-ended window, as before. A later step adds an "as of" parameter and the upcoming-rule notice to answers.
+
+## ADR-016: Successor trust rule and switch-over
+
+**Decision:** After every monitoring run, each document's text is scanned for successor evidence (ADR in `app/monitoring/successors.py`), matched to the latest version of each corpus page by printed reference number (or exact title for amendments), and given a trust decision by one pure function (`app/monitoring/trust.py`). A link is auto-trusted only if all of these hold: an explicit whole-document repeal or supersession statement, quoted; both documents on an RBI-owned domain (exact host match); the new document issued strictly after the old one; exactly one corpus match; the new document not withdrawn; and automatic trust switched on (`AUTO_TRUST_ENABLED`). Anything else is stored for review with every failed condition listed. Amendments, partial repeals, Master Circular re-issues and title-similarity candidates always wait for review.
+
+On a trusted link the successor becomes active, the old rule's `in_force_to` is set to the successor's in-force date (ADR-010, ADR-015), and on that day the old document becomes SUPERSEDED and leaves current answers while staying stored. The graph gets a SUPERSEDES edge carrying the quote. A reviewer can approve a suggestion (with an evidence URL and excerpt) or reject a link; rejection undoes the switch and leaves both documents for review, so it never adds trust. A status set by a reviewer or a trusted link survives routine checks; only a negative finding on the RBI page changes it.
+
+**Why:** This is the brief's section 2 rule. Keeping the rule in one pure function makes every branch testable (23 cases) and auditable. Running the linker after each pass, idempotently, means documents can arrive in any order.
+
+**Alternatives rejected:** Matching any cited circular number (would retire rules a document merely cites, as the Digital Lending Directions do for the KFS and penal-charges circulars). Trusting title similarity (no official evidence). Trusting a link whose target matches several corpus documents.
+
+**Trade-off:** Links are stored in a JSON file for now (moves with ADR-011). The replay report (Phase 1 gate) measures auto-trust precision; below 100%, `AUTO_TRUST_ENABLED` goes off.

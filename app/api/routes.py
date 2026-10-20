@@ -25,6 +25,9 @@ from app.monitoring.store import MonitoringStore
 from app.models.monitoring import Materiality, RegulatoryUpdate, RegulatoryUpdateView
 from app.llm.generation import AnswerGenerationError
 from app.monitoring.runner import run_due_monitoring
+from app.monitoring.link_store import LinkStore
+from app.monitoring.linking import LinkingService
+from app.models.links import DocumentLink, LinkReviewRequest
 from app.monitoring.registry import RegulatorySourceRegistry
 
 
@@ -111,6 +114,44 @@ def approve_lifecycle(
     if not document:
         raise HTTPException(status_code=404, detail="Indexed document not found.")
     return IngestResponse(status="ingested", document=document, message="Lifecycle approval recorded with official RBI evidence.")
+
+
+@router.get("/document-links", response_model=list[DocumentLink])
+def document_links(request: Request) -> list[DocumentLink]:
+    """Every successor link with its quoted RBI evidence and trust decision."""
+    return LinkStore(request.app.state.settings.runtime_dir / "document_links.json").all()
+
+
+@router.get("/admin/links/review-queue", response_model=list[DocumentLink])
+def link_review_queue(request: Request, x_admin_key: str | None = Header(default=None)) -> list[DocumentLink]:
+    settings = request.app.state.settings
+    _require_secret(x_admin_key, settings.admin_api_key, "ADMIN_API_KEY")
+    return LinkStore(settings.runtime_dir / "document_links.json").pending_review()
+
+
+@router.post("/admin/links/{link_id}/approve", response_model=DocumentLink)
+def approve_link(request: Request, link_id: str, payload: LinkReviewRequest,
+                 x_admin_key: str | None = Header(default=None)) -> DocumentLink:
+    settings = request.app.state.settings
+    _require_secret(x_admin_key, settings.admin_api_key, "ADMIN_API_KEY")
+    try:
+        return LinkingService(request.app.state.ingestion_service, settings).approve(
+            link_id, str(payload.evidence_url), payload.evidence_excerpt,
+        )
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Document link not found.") from exc
+    except OfficialStatusError as exc:
+        raise HTTPException(status_code=409, detail=str(exc)) from exc
+
+
+@router.post("/admin/links/{link_id}/reject", response_model=DocumentLink)
+def reject_link(request: Request, link_id: str, x_admin_key: str | None = Header(default=None)) -> DocumentLink:
+    settings = request.app.state.settings
+    _require_secret(x_admin_key, settings.admin_api_key, "ADMIN_API_KEY")
+    try:
+        return LinkingService(request.app.state.ingestion_service, settings).reject(link_id)
+    except KeyError as exc:
+        raise HTTPException(status_code=404, detail="Document link not found.") from exc
 
 
 @router.get("/search", response_model=list[VectorSearchResult])

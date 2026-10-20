@@ -1,7 +1,7 @@
 from datetime import date, datetime
 from enum import Enum
 
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, HttpUrl
 
 
 class LinkRelation(str, Enum):
@@ -50,3 +50,12 @@ class DocumentLink(BaseModel):
     decided_by: str = "AUTOMATED"  # or ADMIN_REVIEW
     created_at: datetime
     decided_at: datetime | None = None
+    reviewer_evidence_url: str | None = None
+    reviewer_excerpt: str | None = None
+
+
+class LinkReviewRequest(BaseModel):
+    """A reviewer's confirmation of a suggested link, with the evidence they relied on."""
+
+    evidence_url: HttpUrl
+    evidence_excerpt: str = Field(min_length=20, max_length=1200)
