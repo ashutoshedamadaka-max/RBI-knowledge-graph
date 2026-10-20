@@ -273,13 +273,15 @@ The README is rebuilt from saved runs only, keeping the current honest framing.
 
 ## 8. Decisions needed from Ashu
 
-### Decided (21 October 2026; recorded as ADR-010 to ADR-013 in `docs/decisions.md`)
+### Decided (20 October 2026; recorded as ADR-010 to ADR-013 in `docs/decisions.md`)
 
 | # | Decision | Outcome |
 |---|---|---|
 | D1 | Issue date vs effective date | **Ashu:** the answer must quote the future effective date. A rule is in force from its effective date, or from its issue date if none is stated. Between issue and effective date, the answer comes from the rule in force today. It also quotes the new rule and says it "takes effect from <date>". |
 | D2 | Storage for 200–300 documents | **Decided by Claude (delegated):** PostgreSQL + pgvector. In production this runs on the existing Supabase database; locally and for evaluation it runs on the existing Docker `pgvector/pgvector:pg16` service. Moved into Phase 1. See ADR-011 for alternatives and constraints. |
 | D3 | Unknown withdrawal timing | **Ashu:** check on a fixed schedule which documents are in force. Every corpus document is checked by the scheduled job, and the job records the last check before a status change and the first check after it, which brackets when the change happened. For past events the replay uses the dates RBI prints in the documents. |
+| D2a | No Docker or Postgres on the development machine | **Ashu (20 October 2026):** install Docker Desktop and use the repo's pgvector container, so ADR-011 stands unchanged. |
+| D9a | Answer key for successor links | **Ashu:** a short yes/no pass in a helper that shows each RBI repeal-list row beside the document it names, never the system's guess. |
 | D6 | Corpus scope without a manual list review | **Ashu:** no list to review. Inclusion follows a written rule applied automatically (ADR-013). Every inclusion and exclusion is logged with its reason. |
 
 ### Still open (needed before the step named)
