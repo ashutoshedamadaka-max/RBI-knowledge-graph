@@ -71,3 +71,43 @@
 **Why:** Website availability, source changes, and regulatory meaning are separate concerns. Deterministic detection makes monitoring idempotent, auditable, and inexpensive; it also creates a concrete old/new evidence set for later interpretation.
 
 **Trade-off:** The local JSON implementation is a development repository rather than a concurrent production database. Its versioned records intentionally mirror the later PostgreSQL schema: source checks, document versions, change reports, alerts, and evidence references.
+
+## ADR-010: A rule is in force from its effective date, and future dates are quoted
+
+**Decision:** A document is in force from its stated effective date, or from its issue date when it states none. Between a new rule's issue date and its effective date, current answers come from the rule in force today. The answer also quotes the new rule and states that it "takes effect from <date>". Trust in a successor is still decided by the brief's rule (official domain, later issue date, explicit link).
+
+**Why:** RBI often issues rules months ahead of their effective date (Digital Lending Directions, 2025: issued 8 May 2025, effective 1 November 2025). Answering from the new rule early would describe an obligation that does not yet apply. Hiding the new rule would leave the analyst unprepared. Decided by Ashu on 21 October 2026.
+
+**Trade-off:** Two dates per document must be extracted reliably. When the effective date cannot be parsed, the issue date is used and the answer says so.
+
+## ADR-011: PostgreSQL with pgvector for documents, links and chunks
+
+**Decision:** Documents, document links, chunks (with embeddings) and monitoring records move from whole-file JSON stores to PostgreSQL tables with the pgvector extension, in Phase 1. Production uses the existing Supabase database (`DATABASE_URL`). Local development and all evaluation runs use the existing Docker `pgvector/pgvector:pg16` service. BM25 keyword scores are computed in-process from chunk text, because PostgreSQL's full-text ranking is not BM25. Unit tests use an in-memory implementation of the same repository interface, so they run with no database. Evaluation runs only on PostgreSQL, and the manifest records the backend. Decided by Claude, delegated by Ashu on 21 October 2026.
+
+**Why:** At 200–300 documents the JSON stores fail. Every write rewrites a whole file, every search reads one, and every POST copies whole files into Postgres. PostgreSQL is already in production and already in `docker-compose.yml`, so no new hosted service is added. Searching inside the database keeps the API's memory use low on Render. ADR-001 and ADR-004 had already planned this move.
+
+**Alternatives rejected:** LanceDB needs a persistent disk plus pyarrow and would sit beside Supabase as a second store. SQLite with sqlite-vec would make evaluation run on a different engine from production. A hosted vector database is excluded by the brief. Keeping JSON does not scale.
+
+**Trade-off and constraints:** The Supabase free tier is 500 MB, so production holds one chunker's vectors only, and chunker and embedding comparisons run locally. Embedding dimension is a config value. New dependency: the small `pgvector` Python adapter. Enabling the extension on the production database, and the cut-over (with a backup of the current snapshots and preserved approvals), each need Ashu's confirmation at the time.
+
+## ADR-012: Scheduled status checks bracket when a change happened
+
+**Decision:** The existing daily scheduled job (Vercel cron → `POST /monitor/run`) checks every corpus document, not only the 13 curated pages. It runs as a background job that returns immediately and records progress. Each check stores a status observation per document. When status changes, the record keeps the last check before the change and the first check after it. For changes before monitoring began, the replay uses only the dates RBI prints in the documents (issue, effective, and the repealing document's dates). Decided by Ashu on 21 October 2026.
+
+**Why:** RBI does not publish when it applies a Withdrawn watermark. Regular checks are the only honest way to bound that time; a single date would be invented.
+
+**Trade-off:** Timing precision equals the check interval (one day). Checking about 250 pages at a polite rate (at least 1 second apart) takes minutes, hence the background job.
+
+## ADR-013: Corpus inclusion by a written rule, not a manual list review
+
+**Decision:** Documents enter the corpus automatically when they meet all of the following:
+1. Published on an RBI-owned domain.
+2. One of these types: Master Direction, Directions, Amendment Directions, Master Circular, circular or notification, FAQ.
+3. A lending topic match in the title or subject. The topic list in `config/corpus/inclusion.yaml` starts from the brief: NBFC scale-based regulation, KYC, digital lending, fair practices code, interest rate on advances, co-lending, credit information reporting, transfer of loan exposures, and the topics in `docs/rbi-lending-scope.md`.
+4. Issued in roughly the last five years. Master Directions and Directions on a listed topic are included whatever their date.
+
+Link closure then adds any document that an included document repeals, supersedes, amends or is replaced by, whatever its title says, so predecessors and successors are always present. Every inclusion and exclusion is written to a log with its reason. The same rule runs in the daily discovery, so new successors join without manual work. Decided by Ashu on 21 October 2026 (no manual list review).
+
+**Why:** A written rule is repeatable, auditable and needs no one's time. Link closure covers the main weakness of keyword matching, which would otherwise miss a successor whose title does not mention lending.
+
+**Trade-off:** Keyword rules can include marginal documents or miss related ones. Misses that matter for answers will show up as evaluation failures and in the exclusion log, and are fixed by changing the written rule, not by hand-picking documents.
