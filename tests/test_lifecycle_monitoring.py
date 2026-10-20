@@ -33,7 +33,7 @@ class RecordingProcessor:
         self.created = False
         self.applied_after_create = False
 
-    def __call__(self, document, text, version):
+    def __call__(self, document, text, version, raw_html=None):
         self.created = True
         return "doc_latest", []
 

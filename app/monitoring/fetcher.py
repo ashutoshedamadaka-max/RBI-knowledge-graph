@@ -23,6 +23,10 @@ class SourceFetcher(ABC):
     def lifecycle_resolution(self, document: DiscoveredDocument) -> LifecycleResolution | None:
         return None
 
+    def raw_html(self, document: DiscoveredDocument) -> str | None:
+        """The page as fetched, kept so structure and status markup survive extraction."""
+        return None
+
 
 class RbiHttpFetcher(SourceFetcher):
     """Minimal RBI listing reader; exact parsers remain source-strategy specific."""
@@ -64,3 +68,6 @@ class RbiHttpFetcher(SourceFetcher):
             raw = response.text
             self._raw_pages[document.canonical_url] = raw
         return resolve_rbi_html_lifecycle(raw)
+
+    def raw_html(self, document: DiscoveredDocument) -> str | None:
+        return self._raw_pages.get(document.canonical_url)

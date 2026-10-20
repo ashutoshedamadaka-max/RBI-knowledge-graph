@@ -139,3 +139,34 @@ def test_monitor_stamps_the_simulated_clock_during_a_replay(tmp_path: Path) -> N
     assert check.checked_at == past
     assert store.versions()[0].valid_from == past
     assert clock.now() > past  # real time is restored after the block
+
+
+def test_monitored_page_is_stored_as_html_and_indexed_from_its_body(tmp_path: Path) -> None:
+    from app.config.settings import Settings
+    from app.ingestion.parser import extract_html_text
+    from app.ingestion.service import IngestionService
+    from app.monitoring.processor import MonitoringDocumentProcessor
+
+    page = (
+        "<html><body><nav>Skip to main content</nav><script>track()</script>"
+        "<div id='NotificationUser'><p>RBI/2025-26/36</p><p>Lenders must disclose penal charges.</p>"
+        "<p><s>Old wording that was deleted.</s></p></div></body></html>"
+    )
+
+    class HtmlFetcher(FixtureFetcher):
+        def download_text(self, document):
+            return extract_html_text(page)
+
+        def raw_html(self, document):
+            return page
+
+    ingestion = IngestionService(Settings(_env_file=None, data_dir=tmp_path / "data"))
+    store = MonitoringStore(tmp_path / "monitoring.json")
+    RegulatoryMonitor(store, HtmlFetcher(""), MonitoringDocumentProcessor(ingestion)).check_source(source())
+
+    document = ingestion.manifest.all()[0]
+    assert document.mime_type == "text/html"
+    assert (ingestion.settings.raw_dir / f"{document.document_id}.html").read_text(encoding="utf-8") == page
+    indexed = " ".join(chunk.text for chunk in ingestion.vector_store.get_by_document_id(document.document_id))
+    assert "Lenders must disclose penal charges." in indexed
+    assert "track()" not in indexed and "Skip to main content" not in indexed and "Old wording" not in indexed

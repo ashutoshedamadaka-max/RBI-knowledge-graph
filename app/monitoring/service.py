@@ -103,7 +103,10 @@ class RegulatoryMonitor:
                     continue
                 status = DiscoveryStatus.NEW if previous is None else DiscoveryStatus.MODIFIED
                 version_number = 1 if previous is None else previous.version + 1
-                document_id, chunk_ids = self.processor(document, text, version_number) if self.processor else (None, [])
+                document_id, chunk_ids = (
+                    self.processor(document, text, version_number, raw_html=self.fetcher.raw_html(document))
+                    if self.processor else (None, [])
+                )
                 # Apply the observed lifecycle after processing. A changed RBI page
                 # can create a new document record, and that latest record—not the
                 # prior snapshot—must receive the current status evidence.

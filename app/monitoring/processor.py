@@ -10,17 +10,21 @@ class MonitoringDocumentProcessor:
     def __init__(self, ingestion: IngestionService) -> None:
         self.ingestion = ingestion
 
-    def __call__(self, document: DiscoveredDocument, text: str, version: int) -> tuple[str | None, list[str]]:
+    def __call__(
+        self, document: DiscoveredDocument, text: str, version: int, raw_html: str | None = None,
+    ) -> tuple[str | None, list[str]]:
         # A curated source may have been deliberately loaded before monitoring was enabled.
         # Adopt that evidence for its initial monitored version instead of creating a duplicate.
         existing = self.ingestion.manifest.get_by_source_url(document.canonical_url)
         if existing and version == 1:
             chunks = self.ingestion.vector_store.get_by_document_id(existing.document_id)
             return existing.document_id, [chunk.chunk_id for chunk in chunks]
+        # Prefer the fetched page: the same extractor runs on it at ingestion, and the
+        # stored HTML keeps headings, tables and status markup for later parsing.
         response = self.ingestion.ingest_content(
-            content=text.encode("utf-8"),
+            content=(raw_html or text).encode("utf-8"),
             source_url=document.canonical_url,
-            file_name="rbi_monitor_source.txt",
+            file_name="rbi_page.html" if raw_html else "rbi_monitor_source.txt",
             title=document.title,
             publication_date=document.publication_date,
             document_version=version,
