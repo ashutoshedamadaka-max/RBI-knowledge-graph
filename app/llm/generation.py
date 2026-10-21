@@ -44,7 +44,8 @@ class AnswerGenerationError(RuntimeError):
 
 class AnswerGenerator(ABC):
     @abstractmethod
-    def generate(self, query: str, evidence: list[ChunkMetadata]) -> GenerationResult:
+    def generate(self, query: str, evidence: list[ChunkMetadata],
+                 sections: dict[str, str] | None = None) -> GenerationResult:
         raise NotImplementedError
 
 
@@ -170,7 +171,8 @@ def deterministic_research(query: str, evidence: list[ChunkMetadata]) -> Structu
 class DeterministicAnswerGenerator(AnswerGenerator):
     """Evidence-only response composer used when no model is configured."""
 
-    def generate(self, query: str, evidence: list[ChunkMetadata]) -> GenerationResult:
+    def generate(self, query: str, evidence: list[ChunkMetadata],
+                 sections: dict[str, str] | None = None) -> GenerationResult:
         research = deterministic_research(query, evidence)
         return GenerationResult(answer=research_to_markdown(research), model="deterministic", research=research)
 
@@ -192,9 +194,12 @@ class OpenAIAnswerGenerator(AnswerGenerator):
         self.timeout_seconds = timeout_seconds
         self.max_output_tokens = max_output_tokens
 
-    def generate(self, query: str, evidence: list[ChunkMetadata]) -> GenerationResult:
+    def generate(self, query: str, evidence: list[ChunkMetadata],
+                 sections: dict[str, str] | None = None) -> GenerationResult:
         context = "\n\n".join(
             f"CHUNK {chunk.chunk_id} | {chunk.document_title} | lifecycle {chunk.lifecycle.value} | passage {chunk.chunk_index + 1}\n{chunk.text}"
+            + (f"\nSECTION CONTEXT (to understand the passage; cite only the CHUNK id above):\n{sections[chunk.chunk_id]}"
+               if sections and chunk.chunk_id in sections else "")
             for chunk in evidence
         )
         prompt = (

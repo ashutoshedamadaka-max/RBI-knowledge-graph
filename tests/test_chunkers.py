@@ -91,3 +91,39 @@ def test_ingestion_uses_the_configured_chunker(tmp_path) -> None:
 
     assert {chunk.chunker for chunk in structure.vector_store.get_by_document_id(document.document_id)} == {"structure"}
     assert legacy.document_id == document.document_id  # same document, chunked differently
+
+
+# Enough words to keep each paragraph above the 100-token minimum, so they stay separate chunks.
+FILLER = (" It shall be applied uniformly to all borrowers in the same category, without discrimination,"
+          " and the policy shall be reviewed by the Board of the NBFC at least once in every financial year.") * 3
+
+
+def test_the_answer_step_receives_the_whole_section_of_a_retrieved_paragraph(tmp_path) -> None:
+    from unittest.mock import Mock, patch
+
+    from app.llm.generation import OpenAIAnswerGenerator
+    from app.retrieval.vector_store import LocalVectorStore
+
+    text = ("Chapter III – Responsible Lending Conduct\nB. Penal Charges\n"
+            "9. Penal charges, if any, shall be levied only for non-compliance with material terms of the loan "
+            "contract and shall not be capitalised." + FILLER + "\n"
+            "10. The quantum and reason for penal charges shall be clearly disclosed in the Key Facts Statement "
+            "and loan agreement, and displayed on the NBFC's website." + FILLER + "\n"
+            "C. Recovery\n11. Recovery agents shall not harass borrowers at odd hours.\n")
+    chunks = chunk_structure(_document(), [text])
+    store = LocalVectorStore(tmp_path / "vectors.json")
+    store.upsert(chunks)
+    ninth = next(chunk for chunk in chunks if chunk.paragraph_ref.startswith("9"))
+
+    sections = store.sections([ninth])
+    assert "10. The quantum and reason for penal charges" in sections[ninth.chunk_id]
+    assert "Recovery agents" not in sections[ninth.chunk_id]  # a different section
+    eleventh = next(chunk for chunk in chunks if chunk.paragraph_ref.startswith("11"))
+    assert store.sections([eleventh]) == {}  # a one-paragraph section adds nothing
+
+    response = Mock()
+    response.json.return_value = {"choices": [{"message": {"content": "{}"}}], "usage": {}}
+    with patch("app.llm.generation.httpx.post", return_value=response) as post:
+        OpenAIAnswerGenerator("k", "m", 0.15, 0.6, 12, 450).generate("Penal charges?", [ninth], sections)
+    prompt = post.call_args.kwargs["json"]["messages"][1]["content"]
+    assert "SECTION CONTEXT" in prompt and "10. The quantum and reason" in prompt and f"CHUNK {ninth.chunk_id}" in prompt

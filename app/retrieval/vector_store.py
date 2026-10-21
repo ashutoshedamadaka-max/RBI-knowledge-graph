@@ -100,6 +100,34 @@ class LocalVectorStore:
             matches.append(VectorSearchResult(**chunk, similarity_score=round(relevance_score, 6)))
         return sorted(matches, key=lambda result: result.similarity_score, reverse=True)[:top_k]
 
+    def sections(self, chunks: list[ChunkMetadata], max_tokens: int = 1500) -> dict[str, str]:
+        """For each chunk with a parent section, the whole section's text (capped): small chunks are
+        retrieved, the section around them is what the answer step reads. Citations stay on the chunk."""
+        from app.ingestion.chunkers import count_tokens
+
+        wanted = {chunk.parent_id for chunk in chunks if chunk.parent_id}
+        if not wanted:
+            return {}
+        members: dict[str, list[dict]] = {}
+        for row in self._read():
+            if row["chunk"].get("parent_id") in wanted:
+                members.setdefault(row["chunk"]["parent_id"], []).append(row["chunk"])
+        out = {}
+        for chunk in chunks:
+            siblings = sorted(members.get(chunk.parent_id, []), key=lambda item: item["chunk_index"])
+            if len(siblings) < 2:
+                continue
+            heading = f"[{chunk.heading_path}]\n" if chunk.heading_path else ""
+            text, used = heading, count_tokens(heading)
+            for sibling in siblings:
+                body = sibling["text"].removeprefix(heading)
+                cost = count_tokens(body)
+                if used + cost > max_tokens:
+                    break
+                text, used = text + body + "\n", used + cost
+            out[chunk.chunk_id] = text.strip()
+        return out
+
     def get_by_ids(self, chunk_ids: list[str]) -> list[ChunkMetadata]:
         wanted = set(chunk_ids)
         return [ChunkMetadata.model_validate(row["chunk"]) for row in self._read() if row["chunk"]["chunk_id"] in wanted]
