@@ -24,3 +24,18 @@ master_directions:
     - Peer to Peer Lending
     - Credit Cards
     - Managing Risks in Outsourcing     # includes recovery agents
+
+# Withdrawn circulars from RBI's register (app/monitoring/withdrawn_register.py), kept as the
+# history of the rules above: the predecessors that successor links and the replay need.
+withdrawn_circulars:
+  issued_since: 2021-10-21          # about five years before the corpus was built
+  include_title_keywords: [loan, lend, credit, borrow, NBFC, Non-Banking, KYC, Know Your Customer, penal,
+                           "interest rate on advances", advances, co-lend, securiti, wilful, stressed,
+                           fair practice, recovery, microfinance, gold, provisioning, asset classification,
+                           income recognition, scale based, key facts, defaulter, EMI]
+  exclude_title_keywords: [deposit, Interest Equalization, Basel, ECAI, Credit Rating, share capital,
+                           Branch Authorisation, derivative, Gold Monetization, Interest Rate Risk in Banking Book,
+                           Compliance Function, Core Financial Services, Prompt Corrective Action, Fraud Risk,
+                           Account Aggregator, Penal Interest on Shortfall in CRR, Bank Finance to Non-Banking,
+                           Exposures of Scheduled Commercial Banks, Risk Weights, Security Receipts,
+                           Declaration of Dividends, Housing Loan Limits, Individual Housing Loans]

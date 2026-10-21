@@ -86,3 +86,23 @@ def apply_register(ingestion: IngestionService, entries: list[RegisterEntry], ch
         )
         withdrawn.append(document.document_id)
     return withdrawn
+
+
+def select_predecessors(entries: list[RegisterEntry], rule: dict) -> list[tuple[RegisterEntry, bool, str]]:
+    """Apply the written rule (config/corpus/inclusion.yaml: withdrawn_circulars) with a reason per row."""
+    decisions = []
+    for entry in entries:
+        title = entry.title.lower()
+        excluded = next((word for word in rule["exclude_title_keywords"] if word.lower() in title), None)
+        included = next((word for word in rule["include_title_keywords"] if word.lower() in title), None)
+        if not entry.issued or entry.issued < rule["issued_since"]:
+            decisions.append((entry, False, f"issued before {rule['issued_since']}"))
+        elif excluded:
+            decisions.append((entry, False, f"title names an excluded topic '{excluded}'"))
+        elif not included:
+            decisions.append((entry, False, "title names no lending topic"))
+        elif not entry.page_url:
+            decisions.append((entry, False, "register gives no RBI page to fetch"))
+        else:
+            decisions.append((entry, True, f"lending topic '{included}'"))
+    return decisions

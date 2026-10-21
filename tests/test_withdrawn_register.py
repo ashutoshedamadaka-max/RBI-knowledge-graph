@@ -6,7 +6,7 @@ from pathlib import Path
 from app.config.settings import Settings
 from app.ingestion.service import IngestionService
 from app.models.documents import DocumentLifecycle
-from app.monitoring.withdrawn_register import REGISTER_URL, apply_register, parse_register
+from app.monitoring.withdrawn_register import REGISTER_URL, apply_register, parse_register, select_predecessors
 
 PAGE = (Path(__file__).parent / "fixtures" / "rbi_withdrawn_register.html").read_text(encoding="utf-8")
 NOW = datetime(2026, 10, 21, 9, tzinfo=UTC)
@@ -84,3 +84,15 @@ def test_a_routine_page_check_does_not_undo_a_register_withdrawal(tmp_path) -> N
     )
 
     assert service.get(penal).lifecycle is DocumentLifecycle.WITHDRAWN
+
+
+def test_predecessors_follow_the_written_rule_with_a_reason_each() -> None:
+    import yaml
+
+    rule = yaml.safe_load((Path(__file__).resolve().parents[1] / "config" / "corpus" / "inclusion.yaml")
+                          .read_text(encoding="utf-8"))["withdrawn_circulars"]
+    decisions = {entry.title: (included, reason) for entry, included, reason in select_predecessors(parse_register(PAGE), rule)}
+
+    assert decisions["Fair Lending Practice - Penal Charges in Loan Accounts"] == (True, "lending topic 'loan'")
+    assert decisions["Guidelines on Digital Lending"][0] is True
+    assert all(reason.startswith(("lending topic", "issued before", "title names", "register gives")) for _, reason in decisions.values())
