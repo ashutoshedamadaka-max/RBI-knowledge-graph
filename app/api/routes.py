@@ -1,3 +1,4 @@
+from dataclasses import asdict
 import asyncio
 import json
 import os
@@ -27,6 +28,7 @@ from app.llm.generation import AnswerGenerationError
 from app.monitoring.runner import run_due_monitoring
 from app.monitoring.link_store import LinkStore
 from app.monitoring.linking import LinkingService
+from app.monitoring.paragraph_map import map_paragraphs
 from app.models.links import DocumentLink, LinkReviewRequest
 from app.monitoring.registry import RegulatorySourceRegistry
 
@@ -115,6 +117,25 @@ def approve_lifecycle(
 def document_links(request: Request) -> list[DocumentLink]:
     """Every successor link with its quoted RBI evidence and trust decision."""
     return LinkStore(request.app.state.settings.runtime_dir / "document_links.json").all()
+
+
+@router.get("/document-links/{link_id}/paragraph-map")
+def paragraph_map(request: Request, link_id: str) -> dict[str, object]:
+    """Each paragraph of the replaced document beside the closest paragraph of its successor."""
+    settings = request.app.state.settings
+    link = LinkStore(settings.runtime_dir / "document_links.json").get(link_id)
+    if link is None:
+        raise HTTPException(status_code=404, detail="Document link not found.")
+
+    def pages(document_id: str) -> list[str]:
+        processed = settings.processed_dir / f"{document_id}.json"
+        if not processed.exists():
+            raise HTTPException(status_code=404, detail="Stored text for a linked document is missing.")
+        return [page["text"] for page in json.loads(processed.read_text(encoding="utf-8"))["pages"]]
+
+    matches = map_paragraphs(pages(link.old_document_id), pages(link.new_document_id))
+    return {"link_id": link_id, "method": "lexical similarity (rung 0); accuracy not yet measured",
+            "matches": [asdict(match) for match in matches]}
 
 
 @router.get("/admin/links/review-queue", response_model=list[DocumentLink])

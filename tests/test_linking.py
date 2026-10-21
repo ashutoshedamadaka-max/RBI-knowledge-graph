@@ -286,3 +286,16 @@ def test_a_bank_rule_is_not_offered_an_nbfc_replacement() -> None:
     assert _other_entity("Small Value Loans - Primary (Urban) Co-operative Banks (UCBs)", nbfc)
     assert _other_entity("Master Circular - Management of Advances - UCBs", nbfc)
     assert not _other_entity("Fair Lending Practice - Penal Charges in Loan Accounts", nbfc)
+
+
+def test_paragraph_map_pairs_each_old_paragraph_with_its_closest_successor_paragraph() -> None:
+    from app.monitoring.paragraph_map import map_paragraphs
+
+    old = ["1. Cooling-off period: a borrower may exit a digital loan within three days without penalty.\n"
+           "2. Grievance redressal: lenders must appoint a nodal grievance officer for digital lending complaints.\n"]
+    new = ["5. Grievance redressal\nThe lender shall appoint a nodal grievance redressal officer for complaints.\n"
+           "6. Cooling-off period\nThe borrower may exit the loan within the cooling-off period without penalty.\n"]
+
+    matches = {match.old_paragraph: match.new_paragraph for match in map_paragraphs(old, new)}
+
+    assert matches == {"1": "6", "2": "5"}
