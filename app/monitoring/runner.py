@@ -1,5 +1,9 @@
 from dataclasses import asdict
 
+import httpx
+
+from app import clock
+
 from app.config.settings import Settings
 from app.ingestion.service import IngestionService
 from app.monitoring.fetcher import RbiHttpFetcher
@@ -8,6 +12,7 @@ from app.monitoring.processor import MonitoringDocumentProcessor
 from app.monitoring.registry import RegulatorySourceRegistry
 from app.monitoring.service import RegulatoryMonitor
 from app.monitoring.store import MonitoringStore
+from app.monitoring.withdrawn_register import REGISTER_URL, apply_register, parse_register
 
 
 def run_due_monitoring(settings: Settings) -> dict[str, object]:
@@ -29,5 +34,18 @@ def run_due_monitoring(settings: Settings) -> dict[str, object]:
             "updates": [update.update_id for update in updates],
             "error": check.error,
         })
+    register = check_withdrawn_register(ingestion)
     linking = LinkingService(ingestion, settings).reconcile()
-    return {"runs": runs, "sources_checked": len(runs), "linking": asdict(linking)}
+    return {"runs": runs, "sources_checked": len(runs), "withdrawn_register": register, "linking": asdict(linking)}
+
+
+def check_withdrawn_register(ingestion: IngestionService) -> dict[str, object]:
+    """Withdraw corpus documents listed in RBI's register; a failed fetch is reported, not fatal."""
+    try:
+        response = httpx.get(REGISTER_URL, follow_redirects=True, timeout=90)
+        response.raise_for_status()
+    except httpx.HTTPError as exc:
+        return {"status": "SOURCE_UNAVAILABLE", "error": str(exc)}
+    entries = parse_register(response.text)
+    withdrawn = apply_register(ingestion, entries, clock.now())
+    return {"status": "CHECKED", "entries": len(entries), "documents_withdrawn": withdrawn}

@@ -144,6 +144,14 @@ class DocumentManifest:
         self.path.write_text(json.dumps([item.model_dump(mode="json") for item in remaining], indent=2))
 
     @staticmethod
+    def source_key(value: str) -> str:
+        """An RBI page address compared without www, letter case or parameter order."""
+        parts = urlsplit(value)
+        host = parts.netloc.lower().removeprefix("www.")
+        query = urlencode(sorted(parse_qsl(parts.query, keep_blank_values=True)))
+        return urlunsplit((parts.scheme.lower() or "https", host, parts.path.lower(), query, ""))
+
+    @staticmethod
     def _canonical_url(value: str) -> str:
         parsed = urlsplit(value)
         query = urlencode(sorted(parse_qsl(parsed.query, keep_blank_values=True)))

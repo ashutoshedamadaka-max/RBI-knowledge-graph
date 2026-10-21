@@ -6,7 +6,7 @@ from app.monitoring.metadata import extract_rbi_document_facts
 
 
 # Statuses set from evidence a check cannot re-read: a reviewer's approval or a trusted successor link.
-PERSISTENT_METHODS = {"ADMIN_REVIEW", "AUTO_SUCCESSOR"}
+PERSISTENT_METHODS = {"ADMIN_REVIEW", "AUTO_SUCCESSOR", "RBI_WITHDRAWN_REGISTER"}
 OFFICIAL_NEGATIVE = {DocumentLifecycle.WITHDRAWN, DocumentLifecycle.REPEALED, DocumentLifecycle.SUPERSEDED}
 
 
@@ -47,7 +47,8 @@ class MonitoringDocumentProcessor:
         if (
             existing
             and resolution.lifecycle not in OFFICIAL_NEGATIVE
-            and existing.lifecycle in {DocumentLifecycle.ACTIVE, DocumentLifecycle.AMENDED, DocumentLifecycle.SUPERSEDED}
+            and existing.lifecycle in {DocumentLifecycle.ACTIVE, DocumentLifecycle.AMENDED, DocumentLifecycle.SUPERSEDED,
+                                       DocumentLifecycle.WITHDRAWN}
             and existing.status_resolution_method in PERSISTENT_METHODS
         ):
             # A status from a reviewer or a trusted successor link rests on evidence this check

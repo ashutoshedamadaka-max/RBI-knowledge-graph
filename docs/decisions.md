@@ -180,3 +180,11 @@ Only the chunk index moves to PostgreSQL now (`VECTOR_BACKEND=postgres`, `DATABA
 **Alternatives rejected:** Docker (cannot start on this machine without firmware changes). A second Supabase project (network latency, account setup; kept as fallback if pgserver stops being maintained). pgvector's float4 column for rung 0 (would shift scores in the sixth decimal and could reorder near-ties).
 
 **Trade-off:** Search still scans every chunk (fine at about 10,000 chunks); the dense rungs in Phase 3 add a pgvector column and indexed search. pgserver ships an older pgvector than Supabase; evaluation manifests will record the version. The legacy extraction repair, which restores `vectors.json` on failure, is skipped with a log line when the backend is PostgreSQL.
+
+## ADR-020: RBI's register of withdrawn circulars is automatic withdrawal evidence
+
+**Decision:** Each scheduled run reads RBI's register of withdrawn circulars (`NotificationUserWithdrawnCircular.aspx`, HTML, no CAPTCHA): 9,458 circulars withdrawn by the Department of Regulation (including the 9,445 of the 28 November 2025 consolidation, RBI/2025-26/100) and 628 by the Department of Supervision, as of 21 October 2026. A corpus document whose printed number or RBI page address is listed becomes WITHDRAWN, quoting its register row. Documents already withdrawn, repealed or superseded keep their own evidence. Like a reviewer's approval, this status survives routine page checks that find no watermark; an unreachable register is reported in the run result, never treated as "no withdrawals".
+
+**Why:** It is RBI's own list, so it is the strongest withdrawal evidence available, and automation may remove trust on official evidence. It also gives the replay an official answer key for withdrawal detection that does not come from our code.
+
+**Limits:** The register says what was withdrawn, not what replaced it, so it creates no successor links. 3,312 rows carry a parseable number and 3,298 a page link; the rest use older numbering (all rows issued since 2021 parse). The older "RRA 2.0" table, which has no numbers, is not read.

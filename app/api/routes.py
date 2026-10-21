@@ -2,7 +2,6 @@ import asyncio
 import json
 import os
 from pathlib import Path
-from urllib.parse import parse_qsl, urlencode, urlsplit, urlunsplit
 
 from fastapi import APIRouter, Header, HTTPException, Request, Response
 from fastapi.concurrency import run_in_threadpool
@@ -11,6 +10,7 @@ from starlette.background import BackgroundTask
 
 from app import clock
 from app.ingestion.exceptions import IngestionError
+from app.ingestion.manifest import DocumentManifest
 from app.ingestion.service import OfficialStatusError
 from app.models.documents import DocumentLifecycle, DocumentListResponse, IngestRequest, IngestResponse, LifecycleReviewRequest
 from app.models.chunks import VectorSearchResult
@@ -38,12 +38,7 @@ def _require_secret(received: str | None, expected: str | None, label: str) -> N
         raise HTTPException(status_code=401, detail="Unauthorized.")
 
 
-def _source_key(value: str) -> str:
-    """Normalize RBI URL presentation without weakening document identity."""
-    parts = urlsplit(value)
-    host = parts.netloc.lower().removeprefix("www.")
-    query = urlencode(sorted(parse_qsl(parts.query, keep_blank_values=True)))
-    return urlunsplit((parts.scheme.lower() or "https", host, parts.path.lower(), query, ""))
+_source_key = DocumentManifest.source_key
 
 router = APIRouter()
 
