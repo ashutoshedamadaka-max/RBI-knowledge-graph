@@ -27,6 +27,7 @@ from app.ingestion.manifest import DocumentManifest  # noqa: E402
 from app.models.documents import DocumentLifecycle  # noqa: E402
 from app.monitoring.link_store import LinkStore  # noqa: E402
 from app.monitoring.linking import _reissued_later  # noqa: E402
+from app.monitoring.successors import _ANNEX_HEADING  # noqa: E402
 
 GOLD = ROOT / "data" / "evaluation" / "gold" / "phase1_labels.json"
 
@@ -43,6 +44,17 @@ def show(label: str, text: str) -> None:
     print(textwrap.fill(f"{label}: {text}", width=100, subsequent_indent="    "))
 
 
+def annex_heading(data_dir: Path, document_id: str, quote: str) -> str | None:
+    """The repeal-list heading printed above a quoted table row, if the quote is such a row."""
+    processed = data_dir / "processed" / f"{document_id}.json"
+    if not processed.exists():
+        return None
+    text = "\n".join(page["text"] for page in json.loads(processed.read_text(encoding="utf-8"))["pages"])
+    position = text.find(quote)
+    headings = [match for match in _ANNEX_HEADING.finditer(text) if position != -1 and match.start() < position]
+    return headings[-1].group(0).strip() if headings else None
+
+
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--data-dir", type=Path, required=True)
@@ -52,21 +64,31 @@ def main() -> None:
     documents = DocumentManifest(runtime / "documents.json").all()
     by_id = {item.document_id: item for item in documents}
     links = LinkStore(runtime / "document_links.json").all()
-    gold = json.loads(GOLD.read_text(encoding="utf-8")) if GOLD.exists() else {
-        "directions_in_force": {}, "successors": {}, "explicit_links": {}}
+    def load() -> dict:
+        return json.loads(GOLD.read_text(encoding="utf-8")) if GOLD.exists() else {
+            "directions_in_force": {}, "successors": {}, "explicit_links": {}}
 
-    def save() -> None:
-        gold["updated_at"] = datetime.now(UTC).isoformat()
+    def write(data: dict) -> None:
+        data["updated_at"] = datetime.now(UTC).isoformat()
         GOLD.parent.mkdir(parents=True, exist_ok=True)
-        GOLD.write_text(json.dumps(gold, indent=2), encoding="utf-8")
+        GOLD.write_text(json.dumps(data, indent=2), encoding="utf-8")
+
+    def record(part: str, key: str, value) -> None:
+        """Re-read the file and change only this answer, so edits made elsewhere are never lost."""
+        data = load()
+        data[part][key] = value
+        write(data)
+        gold[part][key] = value
 
     if args.forget:
-        cleared = [(part, key) for part, answers in gold.items() if isinstance(answers, dict)
+        data = load()
+        cleared = [(part, key) for part, answers in data.items() if isinstance(answers, dict)
                    for key in answers if args.forget in key]
         for part, key in cleared:
-            del gold[part][key]
-        save()
+            del data[part][key]
+        write(data)
         print(f"Cleared {len(cleared)} answer(s) containing '{args.forget}'; you will be asked again.")
+    gold = load()
 
     # The current directions are the hand-downloaded set, not every old Master Direction page.
     current = {row["page_url"] for row in json.loads(
@@ -81,9 +103,8 @@ def main() -> None:
         show("RBI page", item.source_url)
         answer = ask("  In force on RBI's site today? [y = yes, n = no, ? = not sure, q = quit] ", lambda a: a in {"y", "n", "?", "q"})
         if answer == "q":
-            return save()
-        gold["directions_in_force"][item.source_url] = {"y": True, "n": False, "?": None}[answer]
-        save()
+            return
+        record("directions_in_force", item.source_url, {"y": True, "n": False, "?": None}[answer])
 
     explicit = [link for link in links if link.method != "candidate_content_match"]
     print(f"\nPart 2 of 3: {len(explicit)} statements read from RBI's own text.")
@@ -94,13 +115,15 @@ def main() -> None:
             continue
         print()
         show("RBI text, from", f"{new.title} ({new.source_url})")
+        heading = annex_heading(args.data_dir, new.document_id, link.evidence_quote)
+        if heading:
+            show("From the RBI list headed", heading)
         show("Quoted", link.evidence_quote)
         show("Document", f"{old.title}, issued {old.publication_date} ({old.source_url})")
         answer = ask("  Does the quoted text repeal or replace this document? [y/n/?/q] ", lambda a: a in {"y", "n", "?", "q"})
         if answer == "q":
-            return save()
-        gold["explicit_links"][key] = {"y": True, "n": False, "?": None}[answer]
-        save()
+            return
+        record("explicit_links", key, {"y": True, "n": False, "?": None}[answer])
 
     # Every withdrawn rule (latest version of a re-issued title), not only those the system made a
     # suggestion for: otherwise replacements the system missed could never be counted.
@@ -122,19 +145,17 @@ def main() -> None:
                                                          for p in a.split(",")),
         )
         if answer == "q":
-            return save()
+            return
         if answer == "l":
             for number, choice in enumerate(directions, start=1):
                 print(f"  {number:>2}. {choice.title}")
             answer = ask("  Number(s), 0, ? or q: ", lambda a: a in {"0", "?", "q"} or all(
                 p.strip().isdigit() and 1 <= int(p) <= len(directions) for p in a.split(",")))
             if answer == "q":
-                return save()
-        gold["successors"][item.source_url] = None if answer == "?" else [] if answer == "0" else [
-            directions[int(p) - 1].source_url for p in answer.split(",")]
-        save()
+                return
+        record("successors", item.source_url, None if answer == "?" else [] if answer == "0" else [
+            directions[int(p) - 1].source_url for p in answer.split(",")])
     print(f"\nDone. Saved to {GOLD.relative_to(ROOT)}.")
-    save()
 
 
 if __name__ == "__main__":
