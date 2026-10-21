@@ -1,0 +1,364 @@
+{
+  "generated_at": "2026-10-21T12:13:57.769444+00:00",
+  "questions": 92,
+  "gold_sentences": 105,
+  "includes_unreviewed_drafts": true,
+  "question_word_overlap_median": 0.364,
+  "retriever": "rung 0 (hashing + keyword blend), status filter off, top 10",
+  "results": {
+    "legacy": {
+      "chunks": 1272,
+      "median_tokens": 482.0,
+      "boundary_accuracy": {
+        "value": 0.9429,
+        "numerator": 99,
+        "denominator": 105
+      },
+      "recall@5": {
+        "value": 0.4476,
+        "numerator": 47,
+        "denominator": 105
+      },
+      "recall@10": {
+        "value": 0.5524,
+        "numerator": 58,
+        "denominator": 105
+      },
+      "mrr": 0.3184,
+      "by_type": {
+        "applies_to": {
+          "recall@5": {
+            "value": 0.25,
+            "numerator": 5,
+            "denominator": 20
+          },
+          "recall@10": {
+            "value": 0.25,
+            "numerator": 5,
+            "denominator": 20
+          },
+          "mrr": 0.1875
+        },
+        "change_over_time": {
+          "recall@5": {
+            "value": 0.6471,
+            "numerator": 11,
+            "denominator": 17
+          },
+          "recall@10": {
+            "value": 0.8235,
+            "numerator": 14,
+            "denominator": 17
+          },
+          "mrr": 0.4784
+        },
+        "false_premise": {
+          "recall@5": {
+            "value": 0.5455,
+            "numerator": 6,
+            "denominator": 11
+          },
+          "recall@10": {
+            "value": 0.8182,
+            "numerator": 9,
+            "denominator": 11
+          },
+          "mrr": 0.3326
+        },
+        "multi_hop": {
+          "recall@5": {
+            "value": 0.4231,
+            "numerator": 11,
+            "denominator": 26
+          },
+          "recall@10": {
+            "value": 0.5,
+            "numerator": 13,
+            "denominator": 26
+          },
+          "mrr": 0.3084
+        },
+        "single_fact": {
+          "recall@5": {
+            "value": 0.4516,
+            "numerator": 14,
+            "denominator": 31
+          },
+          "recall@10": {
+            "value": 0.5484,
+            "numerator": 17,
+            "denominator": 31
+          },
+          "mrr": 0.3186
+        }
+      }
+    },
+    "fixed": {
+      "chunks": 1977,
+      "median_tokens": 500,
+      "boundary_accuracy": {
+        "value": 0.9619,
+        "numerator": 101,
+        "denominator": 105
+      },
+      "recall@5": {
+        "value": 0.5048,
+        "numerator": 53,
+        "denominator": 105
+      },
+      "recall@10": {
+        "value": 0.6095,
+        "numerator": 64,
+        "denominator": 105
+      },
+      "mrr": 0.325,
+      "by_type": {
+        "applies_to": {
+          "recall@5": {
+            "value": 0.4,
+            "numerator": 8,
+            "denominator": 20
+          },
+          "recall@10": {
+            "value": 0.4,
+            "numerator": 8,
+            "denominator": 20
+          },
+          "mrr": 0.2642
+        },
+        "change_over_time": {
+          "recall@5": {
+            "value": 0.4118,
+            "numerator": 7,
+            "denominator": 17
+          },
+          "recall@10": {
+            "value": 0.5882,
+            "numerator": 10,
+            "denominator": 17
+          },
+          "mrr": 0.235
+        },
+        "false_premise": {
+          "recall@5": {
+            "value": 0.7273,
+            "numerator": 8,
+            "denominator": 11
+          },
+          "recall@10": {
+            "value": 0.9091,
+            "numerator": 10,
+            "denominator": 11
+          },
+          "mrr": 0.447
+        },
+        "multi_hop": {
+          "recall@5": {
+            "value": 0.6154,
+            "numerator": 16,
+            "denominator": 26
+          },
+          "recall@10": {
+            "value": 0.6538,
+            "numerator": 17,
+            "denominator": 26
+          },
+          "mrr": 0.392
+        },
+        "single_fact": {
+          "recall@5": {
+            "value": 0.4516,
+            "numerator": 14,
+            "denominator": 31
+          },
+          "recall@10": {
+            "value": 0.6129,
+            "numerator": 19,
+            "denominator": 31
+          },
+          "mrr": 0.3142
+        }
+      }
+    },
+    "recursive": {
+      "chunks": 2581,
+      "median_tokens": 443,
+      "boundary_accuracy": {
+        "value": 0.9524,
+        "numerator": 100,
+        "denominator": 105
+      },
+      "recall@5": {
+        "value": 0.5048,
+        "numerator": 53,
+        "denominator": 105
+      },
+      "recall@10": {
+        "value": 0.5714,
+        "numerator": 60,
+        "denominator": 105
+      },
+      "mrr": 0.371,
+      "by_type": {
+        "applies_to": {
+          "recall@5": {
+            "value": 0.2,
+            "numerator": 4,
+            "denominator": 20
+          },
+          "recall@10": {
+            "value": 0.25,
+            "numerator": 5,
+            "denominator": 20
+          },
+          "mrr": 0.15
+        },
+        "change_over_time": {
+          "recall@5": {
+            "value": 0.5294,
+            "numerator": 9,
+            "denominator": 17
+          },
+          "recall@10": {
+            "value": 0.6471,
+            "numerator": 11,
+            "denominator": 17
+          },
+          "mrr": 0.3235
+        },
+        "false_premise": {
+          "recall@5": {
+            "value": 0.8182,
+            "numerator": 9,
+            "denominator": 11
+          },
+          "recall@10": {
+            "value": 0.8182,
+            "numerator": 9,
+            "denominator": 11
+          },
+          "mrr": 0.6591
+        },
+        "multi_hop": {
+          "recall@5": {
+            "value": 0.5769,
+            "numerator": 15,
+            "denominator": 26
+          },
+          "recall@10": {
+            "value": 0.6154,
+            "numerator": 16,
+            "denominator": 26
+          },
+          "mrr": 0.3974
+        },
+        "single_fact": {
+          "recall@5": {
+            "value": 0.5161,
+            "numerator": 16,
+            "denominator": 31
+          },
+          "recall@10": {
+            "value": 0.6129,
+            "numerator": 19,
+            "denominator": 31
+          },
+          "mrr": 0.4154
+        }
+      }
+    },
+    "structure": {
+      "chunks": 2754,
+      "median_tokens": 282.0,
+      "boundary_accuracy": {
+        "value": 1.0,
+        "numerator": 105,
+        "denominator": 105
+      },
+      "recall@5": {
+        "value": 0.5143,
+        "numerator": 54,
+        "denominator": 105
+      },
+      "recall@10": {
+        "value": 0.5714,
+        "numerator": 60,
+        "denominator": 105
+      },
+      "mrr": 0.359,
+      "by_type": {
+        "applies_to": {
+          "recall@5": {
+            "value": 0.25,
+            "numerator": 5,
+            "denominator": 20
+          },
+          "recall@10": {
+            "value": 0.3,
+            "numerator": 6,
+            "denominator": 20
+          },
+          "mrr": 0.1842
+        },
+        "change_over_time": {
+          "recall@5": {
+            "value": 0.5294,
+            "numerator": 9,
+            "denominator": 17
+          },
+          "recall@10": {
+            "value": 0.7059,
+            "numerator": 12,
+            "denominator": 17
+          },
+          "mrr": 0.3757
+        },
+        "false_premise": {
+          "recall@5": {
+            "value": 0.8182,
+            "numerator": 9,
+            "denominator": 11
+          },
+          "recall@10": {
+            "value": 0.8182,
+            "numerator": 9,
+            "denominator": 11
+          },
+          "mrr": 0.6818
+        },
+        "multi_hop": {
+          "recall@5": {
+            "value": 0.5769,
+            "numerator": 15,
+            "denominator": 26
+          },
+          "recall@10": {
+            "value": 0.6154,
+            "numerator": 16,
+            "denominator": 26
+          },
+          "mrr": 0.2955
+        },
+        "single_fact": {
+          "recall@5": {
+            "value": 0.5161,
+            "numerator": 16,
+            "denominator": 31
+          },
+          "recall@10": {
+            "value": 0.5484,
+            "numerator": 17,
+            "denominator": 31
+          },
+          "mrr": 0.4014
+        }
+      }
+    }
+  },
+  "run_manifest": {
+    "git_commit": "5cedfdc9d4d30c6916a1322ed83fecde96cd9c86",
+    "working_tree_dirty": false,
+    "corpus_fingerprint": "fdd3cc18a569c6777c191f9b5733d4c80c100c4107aab087a1274cbdd90f3808",
+    "dev_questions_sha256": "15867eb25dc08e6166045edd9e01bb7cfcc1985370b92524413f4eeb8688571f"
+  }
+}
