@@ -168,3 +168,15 @@ On a trusted link the successor becomes active, the old rule's `in_force_to` is 
 **Why:** It keeps every document official and every check automatic except the one step RBI reserves for people.
 
 **Trade-off:** Switching to an updated or new PDF-only direction waits for a manual download. The replay report shows that delay separately from automatic detection.
+
+## ADR-019: Local PostgreSQL without Docker; only the chunk index moves for now (amends ADR-011)
+
+**Decision:** Development and evaluation use `pgserver` (Apache 2.0; bundles PostgreSQL 16.2 and pgvector 0.6.2), installed from `requirements-dev.txt` and never deployed. `scripts/dev_database.py` starts it with data in `data/runtime/postgres`. Approved by Ashu on 21 October 2026 after Docker Desktop could not start (firmware virtualization off, WSL missing).
+
+Only the chunk index moves to PostgreSQL now (`VECTOR_BACKEND=postgres`, `DATABASE_URL`). `PostgresVectorStore` subclasses the file store and changes only how rows are read and written: one row per chunk, metadata as jsonb, the rung-0 hashing embedding as a float8 array. Search and scoring are inherited, so rankings are identical (tested on six search modes, plus an exact embedding round-trip). The document manifest, links and monitoring history stay in JSON files: they stay small at 300 documents.
+
+**Why:** The chunk index is the store that breaks at scale (rewritten in full on every write). Moving only it is the smallest change that fixes that, and keeping rung-0 scores identical respects "one change at a time".
+
+**Alternatives rejected:** Docker (cannot start on this machine without firmware changes). A second Supabase project (network latency, account setup; kept as fallback if pgserver stops being maintained). pgvector's float4 column for rung 0 (would shift scores in the sixth decimal and could reorder near-ties).
+
+**Trade-off:** Search still scans every chunk (fine at about 10,000 chunks); the dense rungs in Phase 3 add a pgvector column and indexed search. pgserver ships an older pgvector than Supabase; evaluation manifests will record the version. The legacy extraction repair, which restores `vectors.json` on failure, is skipped with a log line when the backend is PostgreSQL.

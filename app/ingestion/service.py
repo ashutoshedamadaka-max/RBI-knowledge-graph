@@ -17,7 +17,7 @@ from app.ingestion.manifest import DocumentManifest
 from app.ingestion.parser import parse_document
 from app.graph.service import GraphIngestionService
 from app.models.documents import DocumentLifecycle, DocumentMetadata, IngestRequest, IngestResponse, IngestStatus
-from app.retrieval.vector_store import LocalVectorStore
+from app.retrieval.vector_store import open_vector_store
 
 logger = logging.getLogger(__name__)
 
@@ -34,7 +34,7 @@ class IngestionService:
         settings.raw_dir.mkdir(parents=True, exist_ok=True)
         settings.processed_dir.mkdir(parents=True, exist_ok=True)
         self.manifest = DocumentManifest(settings.runtime_dir / "documents.json")
-        self.vector_store = LocalVectorStore(settings.runtime_dir / "vectors.json")
+        self.vector_store = open_vector_store(settings)
         self.graph_service = GraphIngestionService(settings)
 
     def ingest(self, request: IngestRequest) -> IngestResponse:

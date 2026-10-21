@@ -1,0 +1,3 @@
+-r requirements.txt
+# Local PostgreSQL with pgvector for development and evaluation, without Docker (ADR-019). Never deployed.
+pgserver==0.1.4

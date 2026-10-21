@@ -14,6 +14,10 @@ CHROME = re.compile(r"skip to main content|not pressed|search the website", re.I
 
 
 def repair_legacy_notifications(service) -> int:
+    if not hasattr(service.vector_store, "path"):
+        # The repair rolls back by restoring vectors.json; it only exists for legacy file-store data.
+        logger.info("legacy_extraction_repair_skipped reason=vector_backend_is_not_filesystem")
+        return 0
     repaired = 0
     for document in service.manifest.all():
         url = urlsplit(document.source_url or "")

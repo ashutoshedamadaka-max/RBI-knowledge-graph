@@ -2,13 +2,13 @@ from datetime import date
 
 from app.config.settings import Settings
 from app.models.chunks import VectorSearchResult
-from app.retrieval.vector_store import LocalVectorStore
+from app.retrieval.vector_store import open_vector_store
 
 
 class VectorRetrievalService:
     def __init__(self, settings: Settings) -> None:
         self.settings = settings
-        self.store = LocalVectorStore(settings.runtime_dir / "vectors.json")
+        self.store = open_vector_store(settings)
 
     def retrieve_vector(self, query: str, top_k: int | None = None, current_only: bool = True,
                         as_of: date | None = None) -> list[VectorSearchResult]:

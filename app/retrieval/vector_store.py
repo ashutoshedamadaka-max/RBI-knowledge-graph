@@ -145,3 +145,75 @@ class LocalVectorStore:
             return
         rows = [row for row in self._read() if row["chunk"]["document_id"] not in document_ids]
         self.path.write_text(json.dumps(rows, indent=2))
+
+
+class PostgresVectorStore(LocalVectorStore):
+    """The same index in PostgreSQL: one row per chunk, so a write touches only its own rows.
+
+    Search and scoring are inherited unchanged, so rankings are identical to the file
+    store (rung 0 of the retrieval ladder). Embeddings are stored as float8 arrays, not
+    pgvector's float4, so scores match exactly; the dense rungs add a pgvector column.
+    """
+
+    def __init__(self, database_url: str, embedder: HashingEmbedder | None = None) -> None:
+        self.database_url = database_url
+        self.embedder = embedder or HashingEmbedder()
+        with self._connect() as connection:
+            connection.execute(
+                "CREATE TABLE IF NOT EXISTS chunks (chunk_id text PRIMARY KEY, document_id text NOT NULL, "
+                "chunk jsonb NOT NULL, embedding double precision[] NOT NULL)"
+            )
+            connection.execute("CREATE INDEX IF NOT EXISTS chunks_document_id ON chunks (document_id)")
+
+    def _connect(self):
+        import psycopg
+
+        return psycopg.connect(self.database_url, autocommit=True)
+
+    def _read(self) -> list[dict]:
+        # ponytail: full scan per search, like the file store; the dense rungs add indexed search.
+        with self._connect() as connection:
+            rows = connection.execute("SELECT chunk, embedding FROM chunks ORDER BY chunk_id").fetchall()
+        return [{"chunk": chunk, "embedding": embedding} for chunk, embedding in rows]
+
+    def upsert(self, chunks: list[ChunkMetadata]) -> None:
+        with self._connect() as connection, connection.cursor() as cursor:
+            cursor.executemany(
+                "INSERT INTO chunks (chunk_id, document_id, chunk, embedding) VALUES (%s, %s, %s::jsonb, %s) "
+                "ON CONFLICT (chunk_id) DO UPDATE SET document_id = EXCLUDED.document_id, chunk = EXCLUDED.chunk, "
+                "embedding = EXCLUDED.embedding",
+                [(chunk.chunk_id, chunk.document_id, chunk.model_dump_json(), self.embedder.embed(chunk.text))
+                 for chunk in chunks],
+            )
+
+    def _patch(self, document_id: str, fields: dict) -> None:
+        with self._connect() as connection:
+            connection.execute("UPDATE chunks SET chunk = chunk || %s::jsonb WHERE document_id = %s",
+                               (json.dumps(fields), document_id))
+
+    def mark_document_current(self, document_id: str) -> None:
+        self._patch(document_id, {"is_current": True, "valid_to": None})
+
+    def mark_document_not_current(self, document_id: str, valid_to: str) -> None:
+        self._patch(document_id, {"is_current": False, "valid_to": valid_to})
+
+    def set_in_force(self, document_id: str, start: date | None, end: date | None) -> None:
+        self._patch(document_id, {"in_force_from": start.isoformat() if start else None,
+                                  "in_force_to": end.isoformat() if end else None})
+
+    def apply_lifecycle(self, document_id: str, lifecycle: str) -> None:
+        self._patch(document_id, {"lifecycle": lifecycle, "authority_current": lifecycle in {"ACTIVE", "AMENDED"}})
+
+    def remove_document_ids(self, document_ids: set[str]) -> None:
+        if document_ids:
+            with self._connect() as connection:
+                connection.execute("DELETE FROM chunks WHERE document_id = ANY(%s)", (list(document_ids),))
+
+
+def open_vector_store(settings) -> LocalVectorStore:
+    """The chunk index selected by VECTOR_BACKEND: "filesystem" (default) or "postgres" (DATABASE_URL)."""
+    if settings.vector_backend == "postgres":
+        if not settings.database_url:
+            raise ValueError("VECTOR_BACKEND=postgres requires DATABASE_URL.")
+        return PostgresVectorStore(settings.database_url)
+    return LocalVectorStore(settings.runtime_dir / "vectors.json")
