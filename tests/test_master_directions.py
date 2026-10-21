@@ -32,3 +32,34 @@ def test_inclusion_follows_the_written_rule_with_a_reason_for_each_entry() -> No
     assert decisions["12957"].included and "Credit Facilities" in decisions["12957"].reason
     assert not decisions["12931"].included and "no lending topic" in decisions["12931"].reason
     assert not decisions["13149"].included and "outside the corpus scope" in decisions["13149"].reason
+
+
+def _entry(**overrides):
+    from app.monitoring.master_directions import IndexEntry
+
+    values = dict(page_id="12948", title="Reserve Bank of India (Non-Banking Financial Companies – Income Recognition, "
+                  "Asset Classification and Provisioning) Directions, 2025 (updated as on October 01, 2026)",
+                  pdf_url="https://rbidocs.rbi.org.in/rdocs/notification/PDFs/356MD.PDF", size_kb=395.0,
+                  updated_as_on=date(2026, 10, 1))
+    return IndexEntry(**{**values, **overrides})
+
+
+# First-page text as the PDF prints it, including its line break inside the update date.
+PRINTED = ("RESERVE BANK OF INDIA RBI/DOR/2025-26/356 DOR.STR.REC.No.275/21.04.048/2025-26 November 28, 2025\n"
+           "Reserve Bank of India (Non-Banking Financial Companies – Income Recognition, Asset Classification and\n"
+           "Provisioning) Directions, 2025 (updated\nas on October 01, 2026)\nTable of Contents")
+
+
+def test_a_renamed_copy_of_the_current_version_is_recognised() -> None:
+    from app.monitoring.master_directions import match_pdf
+
+    assert match_pdf(PRINTED, 395.4, [_entry()]).page_id == "12948"
+
+
+def test_an_older_version_or_a_different_file_is_not_recognised() -> None:
+    from app.monitoring.master_directions import match_pdf
+
+    older = PRINTED.replace("October 01, 2026", "July 01, 2026")
+    assert match_pdf(older, 395.4, [_entry()]) is None
+    assert match_pdf(PRINTED, 520.0, [_entry()]) is None  # size far from RBI's listing
+    assert match_pdf("Some other RBI document", 395.4, [_entry()]) is None

@@ -24,7 +24,7 @@ _ROW = re.compile(r"<tr>\s*<td>\s*<a[^>]*href=[\"']?\s*BS_ViewMasDirections\.asp
                   re.IGNORECASE | re.DOTALL)
 _PDF = re.compile(r"href=[\"']([^\"']+\.pdf)[\"']", re.IGNORECASE)
 _SIZE = re.compile(r">\s*([\d.]+)\s*kb\s*<", re.IGNORECASE)
-_UPDATED = re.compile(r"\((?:updated|as updated) as on ([^)]+)\)", re.IGNORECASE)
+_UPDATED = re.compile(r"\((?:as\s+)?updated\s+as\s+on\s+([^)]+)\)", re.IGNORECASE)
 
 
 @dataclass(frozen=True)
@@ -78,3 +78,36 @@ def decide_inclusion(entries: list[IndexEntry], rule_path: Path) -> list[Inclusi
         else:
             decisions.append(InclusionDecision(entry, True, f"{entity}: lending topic '{topic}'"))
     return decisions
+
+
+def _normalised(value: str) -> str:
+    value = value.replace("–", "-").replace("—", "-")
+    return re.sub(r"\s+", " ", value).strip().lower()
+
+
+def core_title(title: str) -> str:
+    """The title without RBI's "(Updated as on ...)" suffix, normalised for comparison."""
+    return _normalised(_UPDATED.sub("", title))
+
+
+def match_pdf(first_pages_text: str, size_kb: float, entries: list[IndexEntry], size_tolerance: float = 0.03
+              ) -> IndexEntry | None:
+    """The index entry a hand-downloaded PDF is a copy of, or None when not exactly one fits.
+
+    The printed title, the file size and the "Updated as on" date must all agree, so a
+    renamed file is recognised but an older version of the direction is not.
+    """
+    text = _normalised(first_pages_text)
+    printed_update = _UPDATED.search(first_pages_text)
+    printed_date = parse_date(printed_update.group(1)) if printed_update else None
+    fits = [
+        entry for entry in entries
+        if core_title(entry.title) in text
+        and entry.size_kb and abs(size_kb - entry.size_kb) <= entry.size_kb * size_tolerance
+        and printed_date == entry.updated_as_on
+    ]
+    # A shorter title can sit inside a longer one; prefer the longest exact title.
+    fits.sort(key=lambda entry: -len(core_title(entry.title)))
+    if len(fits) > 1 and len(core_title(fits[0].title)) == len(core_title(fits[1].title)):
+        return None
+    return fits[0] if fits else None
