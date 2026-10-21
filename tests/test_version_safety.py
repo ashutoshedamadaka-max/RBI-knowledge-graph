@@ -128,5 +128,6 @@ def test_in_force_dates_come_from_the_header_and_reach_the_chunks(tmp_path: Path
 
     service.apply_monitoring_metadata(document.source_url, extract_rbi_document_facts(text), datetime.now(UTC))
 
-    assert service.manifest.all()[0].in_force_from == date(2025, 11, 1)  # effective date wins over May 8 issue date
-    assert {c.in_force_from for c in service.vector_store.get_by_document_id(document.document_id)} == {date(2025, 11, 1)}
+    # "shall come into force immediately except for para 6": the document is in force on issue.
+    assert service.manifest.all()[0].in_force_from == date(2025, 5, 8)
+    assert {c.in_force_from for c in service.vector_store.get_by_document_id(document.document_id)} == {date(2025, 5, 8)}

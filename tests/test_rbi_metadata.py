@@ -12,7 +12,8 @@ FIXTURES = Path(__file__).parent / "fixtures" / "rbi_headers"
 
 CASES = [
     ("digital_lending_directions_2025", ["RBI/2025-26/36", "DOR.STR.REC.19/21.07.001/2025-26"],
-     date(2025, 5, 8), date(2025, 11, 1), "DOR", "directions", "Reserve Bank of India (Digital Lending) Directions, 2025"),
+     # "These Directions shall come into force immediately except for para 6 ..." -> in force on issue.
+     date(2025, 5, 8), None, "DOR", "directions", "Reserve Bank of India (Digital Lending) Directions, 2025"),
     ("penal_charges_2023", ["RBI/2023-24/53", "DOR.MCS.REC.28/01.01.001/2023-24"],
      date(2023, 8, 18), date(2024, 1, 1), "DOR", "circular", "Fair Lending Practice - Penal Charges in Loan Accounts"),
     ("property_documents_release", ["RBI/2023-24/60", "DOR.MCS.REC.38/01.01.001/2023-24"],
@@ -94,3 +95,19 @@ def test_dates_in_rbi_formats() -> None:
     assert parse_date("February 09, 2026") == date(2026, 2, 9)
     assert parse_date("24.06.2020") == date(2020, 6, 24)  # repeal annex tables are day first
     assert parse_date("31.02.2020") is None
+
+
+def test_the_effective_date_comes_only_from_the_document_commencement_clause() -> None:
+    def effective(sentence: str):
+        return extract_rbi_document_facts(f"RBI/2025-26/1\nMay 1, 2025\n{sentence}").effective_date
+
+    assert effective("These Directions shall come into effect from November 1, 2025.") == date(2025, 11, 1)
+    assert effective("These instructions shall come into effect from January 1, 2024.") == date(2024, 1, 1)
+    # Paragraph dates and provision dates are not the document's date (real RBI wording).
+    assert effective("These Directions shall come into force immediately except for para 6, which shall come "
+                     "into effect from November 1, 2025.") is None
+    assert effective("These Directions shall come into effect on the day it is placed on the official website of "
+                     "the Reserve Bank. Provided that, the Directions under Part B shall come into force from "
+                     "January 1, 2026.") is None
+    assert effective("This provision is effective from November 15, 2024.") is None
+    assert effective("In case of existing loans, the switchover shall be applicable from June 30, 2024.") is None

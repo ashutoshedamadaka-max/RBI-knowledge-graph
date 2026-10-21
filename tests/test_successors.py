@@ -209,3 +209,17 @@ def test_a_repeal_sentence_wrapped_over_two_lines_is_still_read_whole() -> None:
     links = find_forward_links(text)
 
     assert [item.target_references for item in links] == [["DOR.CRE.REC.66/21.07.001/2022-23"]]
+
+
+def test_the_circular_that_announced_a_repeal_is_not_its_target() -> None:
+    # Real wording from the NBFC Responsible Business Conduct Directions, 2025 (paragraph 106).
+    text = (
+        "106.With the issue of these Directions, the existing Directions, instructions, and \n"
+        "guidelines relating to Responsible Business Conduct as applicable to Non-\n"
+        "Banking Financial Companies stand repealed, as communicated vide circular \n"
+        "DOR.RRC.REC.302/33-01-010/2025-26 dated November 28, 2025. The \n"
+        "Directions, instructions, and guidelines repealed prior to the issuance of these \n"
+        "Directions shall continue to remain repealed.\n"
+    )
+
+    assert find_forward_links(text) == []

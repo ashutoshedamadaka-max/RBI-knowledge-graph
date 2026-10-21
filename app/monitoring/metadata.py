@@ -19,6 +19,25 @@ _DATE_LINE = re.compile(
 )
 _SIZE_MARKER = re.compile(r"\s*\(\s*\d+(?:\.\d+)?\s*kb\s*\)\s*", re.IGNORECASE)
 _FAQ_TITLE = re.compile(r"^\s*(FAQs? on\b.{5,200}?)\s*$", re.MULTILINE)
+# "These Directions / instructions / This circular shall come into force ...": the subject must
+# be the document itself, so a sentence about one provision ("This provision is effective from")
+# or about loans ("applicable from June 30, 2024") is never read as the document's date.
+_COMMENCEMENT = re.compile(
+    r"\b(?:these|this|the)\s+(?:revised\s+)?(?:amendment\s+)?(?:master\s+)?"
+    r"(?:directions?|instructions|circular|guidelines|framework|regulations)\b[^.]{0,60}?"
+    r"\bshall\s+(?:come\s+into\s+(?:force|effect)|be(?:come)?\s+effective|be\s+applicable)\b(?P<rest>[^.]{0,80})",
+    re.IGNORECASE,
+)
+_IMMEDIATE = re.compile(
+    r"\s*(?:with\s+)?immediate(?:ly|\s+effect)"
+    r"|\s*on\s+the\s+(?:day|date)\s+(?:of\s+(?:issue|this)|(?:it|they)\s+(?:is|are)\s+placed)",
+    re.IGNORECASE,
+)
+_DATED = re.compile(
+    r"\s*(?:from|on|with\s+effect\s+from)\s+(January|February|March|April|May|June|July|August|September|October|"
+    r"November|December)\s+(\d{1,2}),?\s+(\d{4})",
+    re.IGNORECASE,
+)
 
 
 @dataclass(frozen=True)
@@ -34,18 +53,7 @@ class RbiDocumentFacts:
 
 def extract_rbi_document_facts(text: str) -> RbiDocumentFacts:
     own = _own_references(text)
-    normalized = " ".join(text.split())
-    effective = re.search(
-        r"(?:come into effect|effective|applicable).{0,60}?\b(?:from|on)\s+([A-Z][a-z]+\s+\d{1,2},\s+\d{4})",
-        normalized,
-        flags=re.IGNORECASE,
-    )
-    effective_date = None
-    if effective:
-        try:
-            effective_date = datetime.strptime(effective.group(1), "%B %d, %Y").date()
-        except ValueError:
-            pass
+    effective_date = _commencement_date(" ".join(text.split()))
     title = _title(text, own)
     rbi_numbers = [item.key for item in own if item.kind == "rbi"]
     return RbiDocumentFacts(
@@ -58,6 +66,26 @@ def extract_rbi_document_facts(text: str) -> RbiDocumentFacts:
         title=title,
         document_type=document_type(title),
     )
+
+
+def _commencement_date(normalized: str) -> date | None:
+    """The date the document as a whole comes into force, read from its commencement clause only.
+
+    "These Directions shall come into force immediately except for para 6, which shall come
+    into effect from November 1, 2025" is in force on issue: a paragraph's date is not the
+    document's. Immediate commencement returns None, so the issue date applies.
+    """
+    for clause in _COMMENCEMENT.finditer(normalized):
+        rest = clause.group("rest")
+        if _IMMEDIATE.match(rest):
+            return None
+        dated = _DATED.match(rest)
+        if dated:
+            try:
+                return datetime.strptime(" ".join(dated.groups()), "%B %d %Y").date()
+            except ValueError:
+                return None
+    return None
 
 
 def document_type(title: str | None) -> str | None:

@@ -35,6 +35,11 @@ _PARTIAL = re.compile(
     re.IGNORECASE,
 )
 _NEW_PARAGRAPH = re.compile(r"\s*\d+\.\s+[A-Z]")
+_MESSENGER = re.compile(
+    r"\b(?:communicated|notified|announced|conveyed|advised)\s+(?:vide|in|through|by)\s+(?:the\s+)?(?:RBI\s+)?"
+    r"(?:circular|notification|press\s+release)?\s*(?:no\.?)?\s*$",
+    re.IGNORECASE,
+)
 _WINDOW_LINES = 4
 
 _BACKWARD = re.compile(
@@ -147,8 +152,13 @@ def _repeal_sentences(text: str, own_references: frozenset[str]) -> list[LinkPro
         window_start = lines[first_line][0]
         window_stop = lines[window_end - 1][0] + len(lines[window_end - 1][1])
         window = text[window_start:window_stop]
-        # The document's own header numbers are not targets of its repeal sentence.
-        references = [item for item in find_references(window) if item.key not in own_references]
+        # The document's own header numbers are not targets of its repeal sentence, and nor is
+        # a circular that only announced the repeal ("stand repealed, as communicated vide
+        # circular DOR.RRC.REC.302/...").
+        references = [
+            item for item in find_references(window)
+            if item.key not in own_references and not _MESSENGER.search(window[max(0, item.start - 60):item.start])
+        ]
         if not references:
             continue
         before_first = window[max(0, references[0].start - 120):references[0].start]

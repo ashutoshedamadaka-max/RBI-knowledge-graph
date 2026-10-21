@@ -76,9 +76,11 @@
 
 **Decision:** A document is in force from its stated effective date, or from its issue date when it states none. Between a new rule's issue date and its effective date, current answers come from the rule in force today. The answer also quotes the new rule and states that it "takes effect from <date>". Trust in a successor is still decided by the brief's rule (official domain, later issue date, explicit link).
 
-**Why:** RBI often issues rules months ahead of their effective date (Digital Lending Directions, 2025: issued 8 May 2025, effective 1 November 2025). Answering from the new rule early would describe an obligation that does not yet apply. Hiding the new rule would leave the analyst unprepared. Decided by Ashu on 20 October 2026.
+**Why:** RBI often issues rules months ahead of their effective date (for example the penal-charges circular: issued 18 August 2023, effective 1 January 2024). Answering from the new rule early would describe an obligation that does not yet apply. Hiding the new rule would leave the analyst unprepared. Decided by Ashu on 20 October 2026.
 
 **Trade-off:** Two dates per document must be extracted reliably. When the effective date cannot be parsed, the issue date is used and the answer says so.
+
+**Correction (21 October 2026):** this record first gave the Digital Lending Directions, 2025 as "effective 1 November 2025". That was wrong: they came into force immediately on issue (8 May 2025), except paragraphs 6 and 17. The parser had read a paragraph's date as the document's; it now reads only the document's commencement clause. Paragraph-level start dates are modelled from Phase 2, when paragraphs are separate units.
 
 ## ADR-011: PostgreSQL with pgvector for documents, links and chunks
 

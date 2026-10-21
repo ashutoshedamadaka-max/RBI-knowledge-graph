@@ -1,7 +1,10 @@
 """Successor linking and switch-over, end to end.
 
-The successor is the real Digital Lending Directions, 2025 text (header and repeal section).
-The documents it replaces or cites are synthetic pages in RBI's header format.
+The successor is the real Digital Lending Directions, 2025 text (header and repeal section),
+with one synthetic change: its commencement clause says the whole Directions take effect on
+1 November 2025. (The real clause makes them effective immediately, except paragraphs 6 and
+17.) That lets these tests cover a successor issued before it takes effect. The documents it
+replaces or cites are synthetic pages in RBI's header format.
 """
 
 from datetime import UTC, date, datetime
@@ -45,8 +48,15 @@ def at(day: date):
     return clock.simulated(lambda: datetime(day.year, day.month, day.day, 9, tzinfo=UTC))
 
 
+REAL_COMMENCEMENT = ("ii. These Directions shall come into force immediately except for para 6, which shall come into "
+                     "effect from November 1, 2025, and para 17, which shall come into effect from June 15, 2025.")
+
+
 def new_text() -> str:
-    return (FIXTURES / "digital_lending_directions_2025.txt").read_text(encoding="utf-8") + \
+    header = (FIXTURES / "digital_lending_directions_2025.txt").read_text(encoding="utf-8")
+    assert REAL_COMMENCEMENT in header
+    header = header.replace(REAL_COMMENCEMENT, "ii. These Directions shall come into effect from November 1, 2025.")
+    return header + \
         (FIXTURES / "digital_lending_repeal_section.txt").read_text(encoding="utf-8") + \
         "\nDigital loans shall be disbursed directly into the bank account of the borrower under these Directions.\n"
 
