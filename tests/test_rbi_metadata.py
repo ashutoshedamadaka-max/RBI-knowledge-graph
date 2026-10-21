@@ -111,3 +111,10 @@ def test_the_effective_date_comes_only_from_the_document_commencement_clause() -
                      "January 1, 2026.") is None
     assert effective("This provision is effective from November 15, 2024.") is None
     assert effective("In case of existing loans, the switchover shall be applicable from June 30, 2024.") is None
+
+
+def test_a_four_digit_second_year_gets_the_same_key() -> None:
+    # Both forms appear in RBI's register of withdrawn circulars.
+    assert [r.key for r in find_references("DoR.SPE.REC.No.51/13.03.00/2024-2025")] == ["DOR.SPE.REC.51/13.03.00/2024-25"]
+    assert [r.key for r in find_references("RBI/2024-2025/12")] == ["RBI/2024-25/12"]
+    assert [r.key for r in find_references("RBI/2024-25/12")] == ["RBI/2024-25/12"]

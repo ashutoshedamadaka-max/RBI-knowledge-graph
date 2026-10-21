@@ -14,8 +14,8 @@ from dataclasses import dataclass
 from datetime import date, datetime
 import re
 
-RBI_NUMBER = re.compile(r"\bRBI\s*/\s*(?:([A-Z]{2,6})\s*/\s*)?(\d{4}-\d{2})\s*/\s*(\d+)\b")
-_DEPARTMENT_TAIL = re.compile(r"\s*/\s*(\d{2}[.-]\d{2}[.-]\d{2,3}(?:[.-]\d{1,3})?)\s*/\s*(\d{4}-\d{2})\b")
+RBI_NUMBER = re.compile(r"\bRBI\s*/\s*(?:([A-Z]{2,6})\s*/\s*)?(\d{4}-(?:\d{4}|\d{2}))\s*/\s*(\d+)\b")
+_DEPARTMENT_TAIL = re.compile(r"\s*/\s*(\d{2}[.-]\d{2}[.-]\d{2,3}(?:[.-]\d{1,3})?)\s*/\s*(\d{4}-(?:\d{4}|\d{2}))\b")
 _PREFIX_START = re.compile(r"(?:[A-Z]{2,6}|Do[A-Z])(?=[.(\s])")
 _PREFIX_BODY = re.compile(r"[A-Za-z0-9.()&\s/-]*(?:S-?)?\d+")
 _PREFIX_WINDOW = 45
@@ -49,12 +49,17 @@ class Reference:
         return "FED" if self.kind in {"fema_notification", "ap_dir_circular"} else None
 
 
+def short_year(value: str) -> str:
+    """RBI writes financial years as 2024-25 or 2024-2025; keys use 2024-25."""
+    return re.sub(r"\b(\d{4})-\d{2}(\d{2})\b", r"\1-\2", value)
+
+
 def normalise_department_reference(value: str) -> str:
     """``DOR.CRE.REC .No. 66 / 21.07.001 / 2022-23`` -> ``DOR.CRE.REC.66/21.07.001/2022-23``."""
     # A "No." segment may follow a dot, a bracket or a space ("RPCD No.Plan.BC92").
     without_no = re.sub(r"[.\s]*\bNo\.\s*", ".", value, flags=re.IGNORECASE)
     compact = re.sub(r"\s+", "", without_no).upper()
-    return re.sub(r"\.{2,}", ".", compact)
+    return short_year(re.sub(r"\.{2,}", ".", compact))
 
 
 def find_references(text: str) -> list[Reference]:
@@ -62,6 +67,7 @@ def find_references(text: str) -> list[Reference]:
     found: list[Reference] = []
     for match in RBI_NUMBER.finditer(text):
         department, year, serial = match.groups()
+        year = short_year(year)
         key = f"RBI/{department}/{year}/{serial}" if department else f"RBI/{year}/{serial}"
         found.append(Reference(match.group(0), key, "rbi", match.start(), match.end()))
     for tail in _DEPARTMENT_TAIL.finditer(text):
