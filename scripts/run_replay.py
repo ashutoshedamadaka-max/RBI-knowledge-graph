@@ -66,7 +66,7 @@ def main() -> None:
                         auto_trust_enabled=args.auto_trust == "on")
     report["withdrawal_detection"] = withdrawal_detection(documents, register)
     commit = subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip()
-    dirty = bool(subprocess.run(["git", "status", "--porcelain", "--", "app", "scripts", "config"], cwd=ROOT,
+    dirty = bool(subprocess.run(["git", "status", "--porcelain", "--untracked-files=no", "--", "app", "scripts", "config"], cwd=ROOT,
                                 capture_output=True, text=True).stdout.strip())
     report["run_manifest"] = {
         "git_commit": commit, "working_tree_dirty": dirty,
