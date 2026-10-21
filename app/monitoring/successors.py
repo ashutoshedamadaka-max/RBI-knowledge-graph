@@ -47,6 +47,12 @@ _BACKWARD = re.compile(
     r"\b(?:superseded|replaced)\s+(?:by|with)\b(?P<tail>[^\n]{0,300})",
     re.IGNORECASE,
 )
+# RBI's banner on a repealed page: "The Circular has been repealed. Please refer to <title> dated <date>."
+_REPEAL_BANNER = re.compile(
+    r"\b(?:the|this)\s+(?:circular|master\s+circular|master\s+direction|directions?|notification)\s+has\s+been\s+"
+    r"(?:repealed|withdrawn|superseded)\.?\s*please\s+refer\s+to\s+(?P<tail>[^\n]{0,300})",
+    re.IGNORECASE,
+)
 _REISSUE = re.compile(r"Please refer to the Master Circular\b", re.IGNORECASE)
 _AMENDMENT_BASE = re.compile(r"Please refer to\s+(?:the\s+)?(?P<title>[^\n]{10,300}?)\s*\(hereinafter[^)\n]*\)", re.IGNORECASE)
 _UPDATED_SUFFIX = re.compile(r"\s*\((?:updated|as updated)[^)]*\)\s*$", re.IGNORECASE)
@@ -66,19 +72,23 @@ def find_forward_links(text: str, own_references: frozenset[str] = frozenset()) 
 def find_backward_links(text: str) -> list[LinkProposal]:
     """Links read from the old page, which names its own replacement."""
     proposals = []
-    for match in _BACKWARD.finditer(text):
+    matches = sorted([*_BACKWARD.finditer(text), *_REPEAL_BANNER.finditer(text)], key=lambda match: match.start())
+    for match in matches:
         tail = match.group("tail")
         tail_start = match.start("tail")
         references = find_references(tail)
         if not references and not tail.strip():
             continue
-        end = tail_start + (references[-1].end if references else len(tail.split(".")[0]))
+        named = re.split(r"\.\s|\.$", tail)[0]
+        end = tail_start + (references[-1].end if references else len(named))
+        # "Reserve Bank of India (Digital Lending) Directions, 2025 dated May 8, 2025"
+        title, _, dated = named.partition(" dated ")
         proposals.append(LinkProposal(
             relation=LinkRelation.SUPERSEDES, scope=LinkScope.WHOLE, method="superseded_by_statement",
             evidence_quote=text[match.start():end].strip(), evidence_in="old",
             target_references=[item.key for item in references],
-            target_date=_date_after(tail, references[0]) if references else None,
-            target_title=None if references else tail.strip(" .:;")[:200] or None,
+            target_date=_date_after(tail, references[0]) if references else parse_date(dated),
+            target_title=None if references else title.strip(" .:;")[:200] or None,
         ))
     return proposals
 

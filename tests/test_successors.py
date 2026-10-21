@@ -211,3 +211,17 @@ def test_the_circular_that_announced_a_repeal_is_not_its_target() -> None:
     )
 
     assert find_forward_links(text) == []
+
+
+def test_rbi_repeal_banner_on_an_old_page_is_a_backward_link() -> None:
+    # Real banner on https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=12382 (Guidelines on Digital Lending).
+    text = ("Guidelines on Digital Lending\n"
+            "The Circular has been repealed. Please refer to Reserve Bank of India (Digital Lending) Directions, 2025 "
+            "dated May 8, 2025.\nRBI/2022-23/111\n DOR.CRE.REC.66/21.07.001/2022-23\nSeptember 02, 2022\n")
+
+    (link,) = find_backward_links(text)
+
+    assert link.evidence_in == "old" and link.method == "superseded_by_statement"
+    assert link.target_title == "Reserve Bank of India (Digital Lending) Directions, 2025"
+    assert link.target_date == date(2025, 5, 8)
+    assert link.evidence_quote in text and link.evidence_quote.startswith("The Circular has been repealed")
