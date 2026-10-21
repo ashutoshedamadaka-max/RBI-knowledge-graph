@@ -1,0 +1,7 @@
+-r requirements-dev.txt
+# Open-source embedding and re-ranking models for the Phase 3 comparison only (D5). Never deployed.
+--extra-index-url https://download.pytorch.org/whl/cpu
+torch==2.14.1+cpu
+sentence-transformers==6.2.0
+transformers==5.20.2
+numpy==2.4.6

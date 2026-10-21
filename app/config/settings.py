@@ -18,6 +18,7 @@ class Settings(BaseSettings):
     extraction_provider: str = "deterministic"
     answer_provider: str = "deterministic"
     openai_api_key: str | None = None
+    cohere_api_key: str | None = None  # evaluation only (Phase 3 re-ranking rung)
     openai_extraction_model: str = "gpt-4o-mini"
     openai_answer_model: str = "gpt-4o-mini"
     openai_input_cost_per_million: float = 0.15

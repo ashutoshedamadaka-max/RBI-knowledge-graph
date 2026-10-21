@@ -27,6 +27,7 @@ from app import clock  # noqa: E402
 from app.config.settings import Settings  # noqa: E402
 from app.ingestion.parser import parse_document  # noqa: E402
 from app.ingestion.service import IngestionService  # noqa: E402
+from app.models.documents import DocumentLifecycle  # noqa: E402
 from app.models.monitoring import DiscoveredDocument, RegulatorySource, SourceType  # noqa: E402
 from app.monitoring.fetcher import RbiHttpFetcher  # noqa: E402
 from app.monitoring.linking import LinkingService  # noqa: E402
@@ -42,6 +43,8 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--data-dir", type=Path, required=True)
     parser.add_argument("--register-file", type=Path, help="Saved copy of the register page instead of fetching it.")
+    parser.add_argument("--approvals", type=Path, help="Ashu's labels (phase1_labels.json): directions confirmed in force "
+                        "are approved through the same review path an admin uses.")
     args = parser.parse_args()
     settings = Settings(_env_file=None, data_dir=args.data_dir)
     ingestion = IngestionService(settings)
@@ -86,6 +89,14 @@ def main() -> None:
         print(f"predecessor {number}/{len(selected)} {check.status.value}", flush=True)
 
     withdrawn_by_register = apply_register(ingestion, entries, clock.now())
+    approved = []
+    if args.approvals:
+        confirmed = {url for url, ok in json.loads(args.approvals.read_text(encoding="utf-8"))["directions_in_force"].items() if ok}
+        for item in ingestion.list_documents():
+            if item.source_url in confirmed and item.lifecycle is DocumentLifecycle.REVIEW_REQUIRED:
+                ingestion.approve_lifecycle(item.document_id, DocumentLifecycle.ACTIVE, item.source_url,
+                                            "Reviewer confirmed the direction is in force on RBI's site.", clock.now())
+                approved.append(item.document_id)
     linking = LinkingService(ingestion, settings).reconcile()
     documents = ingestion.list_documents()
     report = {
@@ -96,6 +107,7 @@ def main() -> None:
         "directions_from_pdfs": len(directions),
         "predecessors_selected": len(selected),
         "withdrawn_by_register": len(withdrawn_by_register),
+        "approved_by_reviewer": len(approved),
         "linking": asdict(linking),
         "failures": failures,
         "register_decisions": [{"number": entry.number, "title": entry.title, "issued": str(entry.issued),
