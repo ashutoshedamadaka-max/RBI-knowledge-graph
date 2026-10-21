@@ -26,6 +26,7 @@ from app.evaluation.retrieval_metrics import boundary_kept, first_hit_rank, summ
 from app.ingestion.chunkers import count_tokens  # noqa: E402
 from app.ingestion.chunking import chunk_document  # noqa: E402
 from app.ingestion.manifest import DocumentManifest  # noqa: E402
+from app.ingestion.parser import parse_document  # noqa: E402
 from app.retrieval.vector_store import LocalVectorStore  # noqa: E402
 
 CHUNKERS = ["legacy", "fixed", "recursive", "structure"]
@@ -51,9 +52,11 @@ def main() -> None:
     if not questions:
         sys.exit("No reviewed dev questions with gold sentences yet: run scripts/review_questions.py first.")
     documents = DocumentManifest(args.corpus_dir / "runtime" / "documents.json").all()
-    pages = {document.document_id: [page["text"] for page in json.loads(
-        (args.corpus_dir / "processed" / f"{document.document_id}.json").read_text(encoding="utf-8"))["pages"]]
-        for document in documents}
+    # Re-parse each stored original with the current parser, so a parser fix is always measured.
+    def parse(document):
+        raw = next((args.corpus_dir / "raw").glob(f"{document.document_id}.*"))
+        return parse_document(raw, document.mime_type).pages
+    pages = {document.document_id: parse(document) for document in documents}
 
     results = {}
     for name in CHUNKERS:

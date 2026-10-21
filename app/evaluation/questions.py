@@ -48,7 +48,8 @@ class Paragraph:
 
 
 def normalise(text: str) -> str:
-    return re.sub(r"\s+", " ", text).strip().lower()
+    """Compare text without whitespace differences, letter case or footnote markers ([^3])."""
+    return re.sub(r"\s+", " ", re.sub(r"\[\^\d{1,3}\]", "", text)).strip().lower()
 
 
 def word_overlap(question: str, span: str) -> float:

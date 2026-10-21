@@ -35,6 +35,7 @@ _CONTENTS = re.compile(r"\s*(?:table\s+of\s+contents|contents|index)\s*", re.IGN
 _TABLE_CELL_CHARS, _TABLE_MIN_RUN = 40, 6
 _LIST_MARKER = re.compile(r"\s*\((?:\d{1,3}|[ivxlc]{1,6}|[a-z])\)\s*")
 _CELL_VALUE = re.compile(r"\s*(?:\d{1,3}\.?|\d{1,2}[./-]\d{1,2}[./-]\d{2,4}|[\d,.]+%?)\s*")
+_FOOTNOTE = re.compile(r"\s*\[\^(\d{1,3})\]:")  # written by the PDF parser at the end of a page
 _TOC_LEADER = re.compile(r"\.{4,}\s*\d+\s*$")
 
 
@@ -119,6 +120,14 @@ def segment(pages: list[str]) -> list[Unit]:
             units[-1].lines.append(stripped)
             current = None
             continue
+        footnote = _FOOTNOTE.match(line)
+        if footnote:
+            # Attach the footnote (RBI's amendment history) to the paragraph that carries its marker.
+            marker = f"[^{footnote.group(1)}]"
+            owner = next((unit for unit in reversed(units) if any(marker in text for text in unit.lines)), current)
+            if owner is not None:
+                owner.lines.append(stripped)
+                continue
         if _TOC_LEADER.search(line):  # a table-of-contents entry, not the heading itself
             if current is None:
                 current = Unit(label="text", heading_path=path(), page=page)
@@ -243,8 +252,18 @@ def chunk_structure(document: DocumentMetadata, pages: list[str]) -> list[ChunkM
         if count_tokens("\n".join(unit.lines)) <= limit:
             pieces.append((unit, "", unit.lines))
             continue
+        # Each footnote joins the block that carries its marker before packing, so it counts
+        # toward the size limit and stays beside the text it annotates.
+        blocks = _blocks([line for line in unit.lines if not _FOOTNOTE.match(line)])
+        for note in (line for line in unit.lines if _FOOTNOTE.match(line)):
+            marker = note.split(":", 1)[0].strip()
+            found = next(((block, index) for block in blocks for index, line in enumerate(block) if marker in line), None)
+            if found:  # right after the marked line, so a split cannot separate them
+                found[0].insert(found[1] + 1, note)
+            else:
+                blocks[-1].append(note)
         part, packed = 1, []
-        for block in (piece for block in _blocks(unit.lines) for piece in _fit(block, limit)):
+        for block in (piece for block in blocks for piece in _fit(block, limit)):
             if packed and count_tokens("\n".join(packed + block)) > limit:
                 pieces.append((unit, f"part{part}", packed))
                 part, packed = part + 1, []

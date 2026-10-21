@@ -127,3 +127,21 @@ def test_the_answer_step_receives_the_whole_section_of_a_retrieved_paragraph(tmp
         OpenAIAnswerGenerator("k", "m", 0.15, 0.6, 12, 450).generate("Penal charges?", [ninth], sections)
     prompt = post.call_args.kwargs["json"]["messages"][1]["content"]
     assert "SECTION CONTEXT" in prompt and "10. The quantum and reason" in prompt and f"CHUNK {ninth.chunk_id}" in prompt
+
+
+SBR_PDF = Path(__file__).resolve().parents[1] / "data" / "source_pdfs" / "339MD7166A79E96D64572B378949D3972DBD1.PDF"
+
+
+def test_pdf_footnotes_become_amendment_notes_on_the_paragraph_that_marks_them() -> None:
+    import re
+
+    pages = parse_document(SBR_PDF, "application/pdf").pages
+    page = pages[6]
+
+    assert "[^1]" in page and not re.search(r"(?<!\[\^)\b1\[", page)  # the marker, not a stray digit
+    assert "[^1]: Inserted with effect from July 01, 2026 vide Reserve Bank of India" in page
+    assert not any(re.fullmatch(r"\s*\d{1,3}\s*", line) for line in page.splitlines()[-3:])  # no page number
+
+    chunks = chunk_structure(_document(), pages)
+    noted = next(chunk for chunk in chunks if "[^1]: Inserted with effect from July 01, 2026" in chunk.text)
+    assert "[^1]" in noted.text.split("[^1]:")[0]  # the footnote sits with the text that marks it
