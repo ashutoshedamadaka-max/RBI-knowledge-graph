@@ -1,0 +1,1380 @@
+{
+  "today": "2026-10-21",
+  "auto_trust_enabled": true,
+  "documents": 88,
+  "assumptions": [
+    "Register-listed rules issued before 2025-11-28 are withdrawn on that date (RBI/2025-26/100, 'with immediate effect'), unless an RBI-stated successor (Ashu: yes) ended them earlier.",
+    "Rules withdrawn but issued after the consolidation have no known withdrawal date: checked only today.",
+    "Ashu's 'in force' approvals of the 16 NBFC directions take effect on 2025-11-28 (no review delay).",
+    "Documents with an RBI-stated successor get no simulated watermark, so only successor linking retires them.",
+    "Questions are templated from each replaced rule's own title; answers are deterministic (no model)."
+  ],
+  "successor_links_from_rbi_text": {
+    "precision": {
+      "value": 1.0,
+      "numerator": 2,
+      "denominator": 2
+    },
+    "recall_over_rbi_statements_judged_true": {
+      "value": 1.0,
+      "numerator": 2,
+      "denominator": 2
+    },
+    "awaiting_answer": 0
+  },
+  "auto_trust_precision": {
+    "value": 1.0,
+    "numerator": 2,
+    "denominator": 2,
+    "auto_trusted": 2,
+    "awaiting_answer": 0
+  },
+  "candidate_suggestions": {
+    "accuracy": {
+      "value": 0.0,
+      "numerator": 0,
+      "denominator": 13
+    },
+    "suggestions": 47,
+    "note": "Scored only against Part 3 answers given so far; not yet measured until Part 3 is complete."
+  },
+  "stale_answer_rate": {
+    "evidence": {
+      "value": 0.0,
+      "numerator": 0,
+      "denominator": 142
+    },
+    "citations": {
+      "value": 0.0,
+      "numerator": 0,
+      "denominator": 142
+    }
+  },
+  "time_to_switch_days": {
+    "per_link": [
+      0,
+      0
+    ],
+    "max": 0,
+    "note": "Days from the successor's in-force date to the daily check that applied it."
+  },
+  "review_items_created": 50,
+  "withdrawn_documents_in_corpus": 72,
+  "answers": [
+    {
+      "day": "2025-05-08",
+      "about": "doc_d4defec557deb907",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "replaced",
+        "replaced"
+      ]
+    },
+    {
+      "day": "2025-05-08",
+      "about": "doc_1bb9cecb923e8dd8",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "replaced",
+        "replaced"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_8b67ba11a1702f5e",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_e107eae5d70b20a2",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_2da96e8f64c0d61b",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_f6e57299c951ba38",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_ff7306dea85abf20",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_4600280ee803cef4",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_c8ff68de2aea0f1a",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_55daa90065813af2",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_f2e0f5ac40ad3452",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_4f100a8ba9a2f633",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_68133a2f4aa64e36",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_df4ae23f0d26a974",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_11eb6c13f3667b3b",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_969d07e2ff1502f3",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_542d02e5b288bec3",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_f17f1508fe2f8535",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_d52ee989c553364d",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_3c2fe30639583479",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_1fa18654f4137cc6",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_0e7a0c666268fd4f",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_137c619686a21ce4",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_0f4c09539f8e1e3c",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_b85bc0fc69cabe92",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_06ba6521e5a40794",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_57220c505bf743ee",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_de3f29807b4fe04b",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_95b7536ab6f01ef5",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_93e71e91e577a84a",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_9b91bfa9af490e6a",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_74ba0d45f32c9cb0",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_3f51082c92aa64f3",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_8cdd61966302f32c",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_48b3685bc4d9d833",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_b63f2e439f0d44d6",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_97cab84dd7c99678",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_ba81268a00f9b5cc",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_6f4822d53cc437b8",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_d8d48cf3ac4746f2",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_ec7698694181bbad",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_44f67ce36bcccc95",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_1f1b73b333be725a",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_a21f6868a90aa0ce",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_be21da9e91410edc",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_7a0f003bf383bf94",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_17d78ad61c3a5e95",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_da1fce75e6357fe9",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_f137469a1abdb188",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_66304598763e6fdd",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_d692c801352f3027",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_091691efaee7f448",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_a771506f20e6adf4",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_4ab0f6e888a98417",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_f310c99f21430454",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_8688709389acde3b",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_ae6853ed7c4802b8",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_db9fc020468bcedc",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_137fb7699a8b8aa4",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_985e8dc08d2a9ff6",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_ae1820cb0ef52abd",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_b92aacf904d9c017",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_87c3115079e02d94",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_250c65e6c93f96b3",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_05a993b99face8e6",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_dc3eed1f4169b081",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_9881a0b08a0295c3",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_5ed553d6837e8afa",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_c7d2ea45f689b76c",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2025-11-28",
+      "about": "doc_b9535997475c4af0",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_74ee88acc07cdceb",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_fca5227c7a4e6211",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_8b67ba11a1702f5e",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_e107eae5d70b20a2",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_2da96e8f64c0d61b",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_f6e57299c951ba38",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_ff7306dea85abf20",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_4600280ee803cef4",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_c8ff68de2aea0f1a",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_55daa90065813af2",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_f2e0f5ac40ad3452",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_4f100a8ba9a2f633",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_68133a2f4aa64e36",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_df4ae23f0d26a974",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_11eb6c13f3667b3b",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_969d07e2ff1502f3",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_542d02e5b288bec3",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_f17f1508fe2f8535",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_d52ee989c553364d",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_3c2fe30639583479",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_1fa18654f4137cc6",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_0e7a0c666268fd4f",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_137c619686a21ce4",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_0f4c09539f8e1e3c",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_b85bc0fc69cabe92",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_06ba6521e5a40794",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_57220c505bf743ee",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_de3f29807b4fe04b",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_95b7536ab6f01ef5",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_93e71e91e577a84a",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_9b91bfa9af490e6a",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_74ba0d45f32c9cb0",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_3f51082c92aa64f3",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_8cdd61966302f32c",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_48b3685bc4d9d833",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_b63f2e439f0d44d6",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_97cab84dd7c99678",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_ba81268a00f9b5cc",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_6f4822d53cc437b8",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_d8d48cf3ac4746f2",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_ec7698694181bbad",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_44f67ce36bcccc95",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_1f1b73b333be725a",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_a21f6868a90aa0ce",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_be21da9e91410edc",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_7a0f003bf383bf94",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_d4defec557deb907",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_17d78ad61c3a5e95",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_da1fce75e6357fe9",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_f137469a1abdb188",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_66304598763e6fdd",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_d692c801352f3027",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_091691efaee7f448",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_a771506f20e6adf4",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_1bb9cecb923e8dd8",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_4ab0f6e888a98417",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_f310c99f21430454",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_8688709389acde3b",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_ae6853ed7c4802b8",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_db9fc020468bcedc",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_137fb7699a8b8aa4",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_985e8dc08d2a9ff6",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_ae1820cb0ef52abd",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_b92aacf904d9c017",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_87c3115079e02d94",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_250c65e6c93f96b3",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_05a993b99face8e6",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_dc3eed1f4169b081",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_9881a0b08a0295c3",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_5ed553d6837e8afa",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_c7d2ea45f689b76c",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    },
+    {
+      "day": "2026-10-21",
+      "about": "doc_b9535997475c4af0",
+      "stale_evidence": [],
+      "stale_citations": [],
+      "notices": [
+        "withdrawn"
+      ]
+    }
+  ],
+  "failures": [],
+  "withdrawal_detection": {
+    "recall": {
+      "value": 1.0,
+      "numerator": 72,
+      "denominator": 72
+    },
+    "false_alarms": 0,
+    "listed_but_not_detected": [],
+    "note": "Predecessors were selected from the register, so every one is listed; recall tests the watermark detector, false alarms test the 16 current directions."
+  },
+  "run_manifest": {
+    "git_commit": "22f4c3079b91f2c627c4629b28069da8110d0ed2",
+    "working_tree_dirty": false,
+    "corpus_fingerprint": "fdd3cc18a569c6777c191f9b5733d4c80c100c4107aab087a1274cbdd90f3808",
+    "lifecycle_counts": {
+      "REVIEW_REQUIRED": 16,
+      "WITHDRAWN": 72
+    },
+    "labels_sha256": "ef91d5a391f7a7286e82223a4664076e553e4efc337db3e88b8645c64114756d",
+    "labels_answered": {
+      "directions_in_force": 16,
+      "successors": 14,
+      "explicit_links": 5
+    },
+    "register_sha256": "cf1249b3546ac7339de9d4d0a9a0e2b48867a1caee584185a1e351cf37e894e1",
+    "settings": {
+      "auto_trust_enabled": true,
+      "vector_backend": "filesystem",
+      "answer_provider": "deterministic",
+      "chunk_size": 900,
+      "chunk_overlap": 150,
+      "top_k": 5
+    }
+  }
+}
