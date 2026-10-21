@@ -10,6 +10,9 @@ Answers go to data/evaluation/gold/phase1_labels.json, keyed by RBI page address
 across re-ingestion). Gold labels never come from system output (brief rule 2).
 
     python scripts/label_phase1.py --data-dir data/runtime/corpus-v1
+
+To change an answer, clear it and you will be asked again, for example:
+    python scripts/label_phase1.py --data-dir data/runtime/corpus-v1 --forget "Id=12472"
 """
 import argparse
 import json
@@ -43,6 +46,7 @@ def show(label: str, text: str) -> None:
 def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--data-dir", type=Path, required=True)
+    parser.add_argument("--forget", metavar="TEXT", help="Clear answers whose RBI address contains TEXT, to answer again.")
     args = parser.parse_args()
     runtime = args.data_dir / "runtime"
     documents = DocumentManifest(runtime / "documents.json").all()
@@ -55,6 +59,14 @@ def main() -> None:
         gold["updated_at"] = datetime.now(UTC).isoformat()
         GOLD.parent.mkdir(parents=True, exist_ok=True)
         GOLD.write_text(json.dumps(gold, indent=2), encoding="utf-8")
+
+    if args.forget:
+        cleared = [(part, key) for part, answers in gold.items() if isinstance(answers, dict)
+                   for key in answers if args.forget in key]
+        for part, key in cleared:
+            del gold[part][key]
+        save()
+        print(f"Cleared {len(cleared)} answer(s) containing '{args.forget}'; you will be asked again.")
 
     # The current directions are the hand-downloaded set, not every old Master Direction page.
     current = {row["page_url"] for row in json.loads(
