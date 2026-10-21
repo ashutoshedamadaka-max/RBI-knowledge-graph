@@ -2,12 +2,14 @@
 
     python scripts/review_questions.py            dev questions first, then test
     python scripts/review_questions.py --split dev
+    python scripts/review_questions.py --sample 30    a fixed random sample of dev, to measure draft quality
 
 Each answer is saved straight away (stop with q and run again to resume). Only accepted or
 edited questions are used in evaluation.
 """
 import argparse
 import json
+import random
 import sys
 import textwrap
 from pathlib import Path
@@ -36,11 +38,21 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--split", choices=["dev", "test"])
     parser.add_argument("--folder", type=Path, default=FOLDER)
+    parser.add_argument("--sample", type=int, help="Review only a random sample of this many dev questions.")
     args = parser.parse_args()
+    sample = None
+    if args.sample:
+        # Drawn once (seed 3) and saved, so the sample is the same on every run and can be reported.
+        record = args.folder / "review-sample.json"
+        if not record.exists():
+            ids = sorted(json.loads(line)["id"] for line in (args.folder / "dev.jsonl").read_text(encoding="utf-8").splitlines() if line.strip())
+            record.write_text(json.dumps({"seed": 3, "ids": sorted(random.Random(3).sample(ids, args.sample))}, indent=2), encoding="utf-8")
+        sample = set(json.loads(record.read_text(encoding="utf-8"))["ids"])
+        args.split = "dev"
     for split in [args.split] if args.split else ["dev", "test"]:
         path = args.folder / f"{split}.jsonl"
         rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
-        pending = [row for row in rows if row["status"] == "drafted"]
+        pending = [row for row in rows if row["status"] == "drafted" and (sample is None or row["id"] in sample)]
         print(f"\n{split}: {len(rows) - len(pending)} of {len(rows)} reviewed.")
         for number, row in enumerate(pending, start=1):
             print(f"\n[{split} {number}/{len(pending)}] {row['id']} — {row['type'].replace('_', ' ')}")
