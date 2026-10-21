@@ -194,7 +194,8 @@ class RegulatoryQueryService:
                     evidence_excerpt=_link_quote(self.settings, old.document_id, successor.document_id),
                 ))
                 extra.extend(self.vector.store.search(query, top_k=2, as_of=day, document_ids={successor.document_id}))
-            elif old.lifecycle in NON_CURRENT and successor is None:
+            elif old.lifecycle in NON_CURRENT and successor is None and not any(n.kind == "withdrawn" for n in notices):
+                # One withdrawal notice per answer, for the best-ranked removed rule: more is noise.
                 notices.append(ChangeNotice(
                     kind="withdrawn", document_id=old.document_id,
                     text=(f"{old.title} is {old.lifecycle.value.lower()} (detected {_day(old.status_checked_at)}); "

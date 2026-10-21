@@ -129,7 +129,9 @@ def main() -> None:
     # suggestion for: otherwise replacements the system missed could never be counted.
     withdrawn = sorted((item for item in documents if item.lifecycle is DocumentLifecycle.WITHDRAWN
                         and not _reissued_later(item, documents)), key=lambda item: item.title)
-    print(f"\nPart 3 of 3: {len(withdrawn)} withdrawn rules. Which current NBFC direction now holds each one?")
+    print(f"\nPart 3 of 3: {len(withdrawn)} withdrawn rules. Which current NBFC direction now contains its requirements?")
+    print("  Answer by content, not title: the 2025 directions renamed and merged most old rules. Use 0 only if no "
+          "listed direction covers the rule (for example, it applied only to banks).")
     for number, item in enumerate(directions, start=1):
         print(f"  {number:>2}. {item.title}")
     for item in withdrawn:
@@ -139,7 +141,7 @@ def main() -> None:
         show("Withdrawn rule", f"{item.title}, issued {item.publication_date}")
         show("RBI page", item.source_url)
         answer = ask(
-            "  Number(s) of the direction(s) that now hold it, e.g. 7 or 3,7  [0 = none of these, ? = not sure, "
+            "  Number(s) of the direction(s) that now contain its requirements, e.g. 7 or 3,7  [0 = none covers it, ? = not sure, "
             "l = list again, q = quit] ",
             lambda a: a in {"0", "?", "q", "l"} or all(p.strip().isdigit() and 1 <= int(p) <= len(directions)
                                                          for p in a.split(",")),

@@ -164,13 +164,15 @@ def _report(documents, timeline, gold_successors, labels, links, link_first_seen
         old_url, new_url = key.split(" -> ")
         if value is not None and old_url in by_url and new_url in by_url:
             judged[(by_url[old_url], by_url[new_url])] = value
-    explicit = [link for link in links if link.method in EXPLICIT_METHODS]
-    explicit_judged = [link for link in explicit if (link.old_document_id, link.new_document_id) in judged]
-    correct = [link for link in explicit_judged if judged[(link.old_document_id, link.new_document_id)]]
-    found = {(link.old_document_id, link.new_document_id) for link in explicit}
+    # Scored per document pair: two RBI statements (a repeal list and a banner) about the same
+    # replacement are one link, not two.
+    explicit = {(link.old_document_id, link.new_document_id) for link in links if link.method in EXPLICIT_METHODS}
+    explicit_judged = [pair for pair in explicit if pair in judged]
+    correct = [pair for pair in explicit_judged if judged[pair]]
+    found = explicit
     true_pairs = [pair for pair, value in judged.items() if value]
-    auto = [link for link in links if link.trust is LinkTrust.AUTO_TRUSTED]
-    auto_judged = [link for link in auto if (link.old_document_id, link.new_document_id) in judged]
+    auto = {(link.old_document_id, link.new_document_id) for link in links if link.trust is LinkTrust.AUTO_TRUSTED}
+    auto_judged = [pair for pair in auto if pair in judged]
 
     successors_gold = labels.get("successors", {})
     candidate_hits = candidate_total = 0
@@ -210,7 +212,7 @@ def _report(documents, timeline, gold_successors, labels, links, link_first_seen
             "awaiting_answer": len(explicit) - len(explicit_judged),
         },
         "auto_trust_precision": {
-            **_ratio(sum(judged[(l.old_document_id, l.new_document_id)] for l in auto_judged), len(auto_judged)),
+            **_ratio(sum(judged[pair] for pair in auto_judged), len(auto_judged)),
             "auto_trusted": len(auto), "awaiting_answer": len(auto) - len(auto_judged),
         },
         "candidate_suggestions": {

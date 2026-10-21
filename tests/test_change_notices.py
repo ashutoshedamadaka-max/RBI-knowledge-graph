@@ -90,3 +90,16 @@ def test_no_notice_when_nothing_changed(corpus) -> None:
 
     assert response.notices == []
     assert not response.answer.startswith("### What changed")
+
+
+def test_an_answer_carries_at_most_one_withdrawal_notice(corpus) -> None:
+    from datetime import UTC, datetime
+
+    settings, service, old, kfs, new = corpus
+    with at(date(2025, 6, 2)):
+        for document in (old, kfs):  # two withdrawn rules, neither with a known replacement
+            service.set_lifecycle(document.document_id, DocumentLifecycle.WITHDRAWN, "https://www.rbi.org.in/x",
+                                  "Withdrawn watermark", datetime(2025, 6, 2, 9, tzinfo=UTC), "AUTOMATED")
+        response = RegulatoryQueryService(settings).query("What must lenders disclose to borrowers for digital loans?")
+
+    assert [item.kind for item in response.notices].count("withdrawn") == 1
