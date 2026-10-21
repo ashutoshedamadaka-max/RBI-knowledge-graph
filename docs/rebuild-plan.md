@@ -331,3 +331,5 @@ Enabling the pgvector extension on the production Supabase database and deployin
 - **The 47 inferred successor suggestions for the 2025 consolidation and labelling Part 3 are deferred.** Suggestion accuracy is reported as "not yet measured" until they are done.
 
 **Found during Phase 2 (21 October 2026), for Phase 3:** the "as of" filter still requires a document's *current* status to be operative, so a withdrawn rule asked about at a past date when it was in force cannot be retrieved. The Phase 3 status-filter step must judge eligibility by the in-force window on that date (with the withdrawal date bracketed by the scheduled checks, ADR-012). The Phase 2 chunker comparison runs with the status filter off for every chunker, so it is unaffected.
+
+**Phase 2 — approved by Ashu on 21 October 2026,** on the provisional chunker comparison (`data/evaluation/chunker-comparison-provisional.json`, commit `5cedfdc`): structure-aware chunking becomes the default (ADR-023). Deferred: a 30-question random review of the drafts (to measure their quality), and the full dev and test review before Phase 5.

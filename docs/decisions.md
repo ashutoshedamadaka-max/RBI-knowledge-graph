@@ -206,3 +206,11 @@ Only the chunk index moves to PostgreSQL now (`VECTOR_BACKEND=postgres`, `DATABA
 **Measured on the 88-document corpus (21 October 2026):** fixed 1,977 chunks, recursive 2,583, structure 2,753 (median 282 tokens, none over 600, 134 under 100 where a section ends). Paragraph numbering is recovered in order on the NBFC directions (for example paragraphs 1–109 with no gaps in Responsible Business Conduct). Contents pages, with or without dot leaders, are kept out of the heading paths.
 
 **Limits, stated rather than hidden:** Tables are detected from extracted text (one cell per line), not from layout: 569 tables found, about 1% of them prose lists that only look like tables. Footnotes: since 21 October 2026 the PDF parser reads font sizes, writes superscript markers as `[^n]` and moves footnotes to the end of the page as `[^n]: text`; the structure chunker places each footnote right after the line that marks it (70 of 72 in the 16 NBFC directions, the other 2 at the end of their paragraph). These footnotes are RBI's amendment history ("Inserted / Substituted / Deleted with effect from ... vide ... Amendment Directions"). Printed page numbers in the margins are dropped. Only numbered footer lines whose marker appears on the same page count as footnotes, so small-print table rows stay in place. Paragraph-level effective dates (ADR-010) are not yet modelled.
+
+## ADR-023: Structure-aware chunking is the default
+
+**Decision:** `CHUNKER` defaults to `structure` (was `legacy`). Decided by Ashu at the Phase 2 gate on 21 October 2026.
+
+**Why:** On 92 provisional dev questions (105 gold sentences, model-drafted and not yet reviewed), the three new chunkers tied on recall@5 (50–51%, against 45% for legacy; the uncertainty is about ±10 points), and structure-aware was the only one that never cut a gold sentence (105/105). It also carries RBI's paragraph numbers, heading paths, amendment footnotes and parent sections, which citations, the graph and the "what changed" view need. Report: `data/evaluation/chunker-comparison-provisional.json`.
+
+**Trade-off:** The decision rests on unreviewed questions. A 30-question review sample, and the full review before Phase 5, may revise it. Existing indexes keep their old chunks until they are rebuilt.

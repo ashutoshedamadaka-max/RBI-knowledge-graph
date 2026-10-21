@@ -25,8 +25,8 @@ class Settings(BaseSettings):
     openai_timeout_seconds: float = 45.0
     openai_max_output_tokens: int = 900
     chunk_size: int = 900
-    # "legacy" (word windows, chunk_size/chunk_overlap), or a Phase 2 chunker: fixed, recursive, structure.
-    chunker: str = "legacy"
+    # structure (default since the Phase 2 gate, ADR-023), fixed, recursive, or legacy (word windows, chunk_size/chunk_overlap).
+    chunker: str = "structure"
     chunk_overlap: int = 150
     vector_top_k: int = 5
     log_level: str = "INFO"
