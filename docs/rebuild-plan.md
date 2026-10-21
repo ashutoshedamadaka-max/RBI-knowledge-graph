@@ -321,3 +321,11 @@ A phase that reaches its cap stops and reports. It does not continue.
 
 D1, D2, D3 and D6 are decided, so nothing in Phase 1 is blocked. On Ashu's go: Phase 1 step 1a (environment, then CI if agreed), then 1b onwards in order.
 Enabling the pgvector extension on the production Supabase database and deploying are separate steps, and need Ashu's confirmation at the time.
+
+---
+
+## 11. Gate log
+
+**Phase 1 — approved by Ashu on 21 October 2026.** Replay report `data/evaluation/replay-report.json` (commit `22f4c30`): withdrawal detection 72/72 with 0 false alarms; successor-link precision and recall 2/2; auto-trust precision 2/2 (auto-trust stays on); stale answers 0/142; switch-over within 0 days. Decisions at the gate:
+- **Corpus scope stays NBFC-only** (88 documents, below the 200–300 target). README and portfolio copy must state this scope plainly.
+- **The 47 inferred successor suggestions for the 2025 consolidation and labelling Part 3 are deferred.** Suggestion accuracy is reported as "not yet measured" until they are done.
