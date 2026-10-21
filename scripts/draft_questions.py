@@ -1,6 +1,6 @@
 """Draft the Phase 2 question set for Ashu to review (ADR-021).
 
-    set OPENAI_API_KEY=...            (never committed; read from the environment only)
+    OPENAI_API_KEY in .env or the environment (.env is git-ignored; never commit a key)
     python scripts/draft_questions.py --corpus-dir data/runtime/corpus-v1
     python scripts/draft_questions.py --corpus-dir data/runtime/corpus-v1 --offline   (no model, for testing)
 
@@ -10,7 +10,6 @@ Drafts whose evidence is not an exact quote of the source paragraph are discarde
 """
 import argparse
 import json
-import os
 import sys
 from collections import Counter
 from datetime import UTC, datetime
@@ -37,10 +36,10 @@ def main() -> None:
     settings = Settings()
     if args.offline:
         drafter = OfflineDrafter()
-    elif not os.environ.get("OPENAI_API_KEY"):
-        sys.exit("Set OPENAI_API_KEY in the environment, or use --offline.")
+    elif not settings.openai_api_key:
+        sys.exit("Put OPENAI_API_KEY in .env (or the environment), or use --offline.")
     else:
-        drafter = OpenAIDrafter(os.environ["OPENAI_API_KEY"], settings.openai_extraction_model)
+        drafter = OpenAIDrafter(settings.openai_api_key, settings.openai_extraction_model)
         drafter.model = settings.openai_extraction_model
 
     current = {row["page_url"] for row in json.loads((ROOT / "data" / "source_pdfs" / "manifest.json")
