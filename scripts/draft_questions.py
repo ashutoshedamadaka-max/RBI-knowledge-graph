@@ -55,7 +55,8 @@ def main() -> None:
         except Exception as exc:  # report and continue
             discarded[f"{entry['type']}: drafting failed ({type(exc).__name__})"] += 1
             continue
-        tokens.update({key: draft.pop("usage", {}).get(key, 0) for key in ("prompt_tokens", "completion_tokens")})
+        usage = draft.pop("usage", {})  # read once: popping per key lost completion_tokens
+        tokens.update({key: usage.get(key, 0) for key in ("prompt_tokens", "completion_tokens")})
         item = to_item(number, entry, draft, drafter.model)
         if item is None:
             discarded[f"{entry['type']}: evidence not an exact quote"] += 1

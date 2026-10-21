@@ -1,0 +1,1 @@
+{"at": "2026-10-21T11:47:32.894951+00:00", "phase": 2, "task": "draft questions", "model": "gpt-4o-mini", "prompt_tokens": 81312, "completion_tokens": null, "estimated_cost_usd": 0.0121968, "note": "completion tokens not recorded (bug, fixed in the next commit); estimated_cost_usd covers input only. Check OpenAI's usage page for the true total."}
