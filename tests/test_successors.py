@@ -6,7 +6,7 @@ from pathlib import Path
 from app.corpus.identifiers import find_references
 from app.models.documents import DocumentMetadata
 from app.models.links import LinkRelation, LinkScope
-from app.monitoring.successors import candidate_successors, find_backward_links, find_forward_links, match_documents
+from app.monitoring.successors import find_backward_links, find_forward_links, match_documents
 
 FIXTURES = Path(__file__).parent / "fixtures" / "rbi_headers"
 OWN = frozenset({"RBI/2025-26/36", "DOR.STR.REC.19/21.07.001/2025-26"})
@@ -174,18 +174,6 @@ def test_a_title_target_needs_an_exact_title_match() -> None:
     (link,) = find_forward_links(text)
 
     assert match_documents(link, [near, base]) == [base]
-
-
-def test_candidates_need_same_department_later_date_and_a_similar_title() -> None:
-    old = _document("old", "Fair Lending Practice - Penal Charges in Loan Accounts", [], date(2023, 8, 18))
-    good = _document("good", "Penal Charges in Loan Accounts - Fair Lending Practice Directions", [], date(2025, 6, 1))
-    earlier = _document("earlier", "Fair Lending Practice - Penal Charges in Loan Accounts", [], date(2022, 1, 1))
-    other_department = _document("other", "Fair Lending Practice - Penal Charges in Loan Accounts", [], date(2025, 6, 1), "FIDD")
-    unrelated = _document("unrelated", "Cyber Resilience Framework", [], date(2025, 6, 1))
-
-    found = candidate_successors(old, [good, earlier, other_department, unrelated])
-
-    assert [item.document_id for item, _ in found] == ["good"]
 
 
 def test_a_citation_in_the_next_list_item_is_not_swept_into_a_repeal_sentence() -> None:

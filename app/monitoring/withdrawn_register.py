@@ -57,7 +57,7 @@ def parse_register(page: str) -> list[RegisterEntry]:
             number = _text(cells[1])
             entries.append(RegisterEntry(
                 section=_text(section), number=number, title=_text(cells[2]), issued=parse_date(_text(cells[3])),
-                page_url=html.unescape(link.group(1)) if link else None,
+                page_url=html.unescape(link.group(1)).split("#", 1)[0] if link else None,
                 keys=tuple(item.key for item in find_references(number)),
             ))
     return entries

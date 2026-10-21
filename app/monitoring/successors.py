@@ -259,11 +259,6 @@ def _master_circular_reissue(text: str) -> list[LinkProposal]:
     )]
 
 
-def _title_tokens(title: str) -> set[str]:
-    ignored = {"the", "of", "and", "for", "on", "in", "to", "directions", "direction", "master", "circular", "reserve", "bank", "india"}
-    return {token for token in re.findall(r"[a-z]{3,}", title.lower()) if token not in ignored}
-
-
 def match_documents(proposal: LinkProposal, documents: list[DocumentMetadata]) -> list[DocumentMetadata]:
     """Corpus documents a proposal refers to: by any printed number, else by exact title."""
     if proposal.target_references:
@@ -273,26 +268,3 @@ def match_documents(proposal: LinkProposal, documents: list[DocumentMetadata]) -
         wanted_tokens = re.findall(r"[a-z0-9]+", proposal.target_title.lower())
         return [item for item in documents if re.findall(r"[a-z0-9]+", item.title.lower()) == wanted_tokens]
     return []
-
-
-def candidate_successors(old: DocumentMetadata, documents: list[DocumentMetadata], minimum_similarity: float = 0.5
-                         ) -> list[tuple[DocumentMetadata, float]]:
-    """Possible replacements with no explicit statement: same department, later issue date, similar title.
-
-    These are suggestions for a reviewer and are never trusted automatically.
-    """
-    if not old.issuing_department or not old.publication_date:
-        return []
-    old_tokens = _title_tokens(old.title)
-    scored = []
-    for item in documents:
-        if item.document_id == old.document_id or item.issuing_department != old.issuing_department:
-            continue
-        if not item.publication_date or item.publication_date <= old.publication_date:
-            continue
-        new_tokens = _title_tokens(item.title)
-        union = old_tokens | new_tokens
-        similarity = len(old_tokens & new_tokens) / len(union) if union else 0.0
-        if similarity >= minimum_similarity:
-            scored.append((item, round(similarity, 3)))
-    return sorted(scored, key=lambda pair: -pair[1])

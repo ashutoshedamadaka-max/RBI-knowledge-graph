@@ -242,3 +242,26 @@ def test_review_endpoints_require_the_admin_key_and_apply_a_decision(corpus, mon
     assert approved.status_code == 200 and approved.json()["trust"] == "APPROVED"
     assert [item["trust"] for item in client.get("/document-links").json()] == ["APPROVED"]
     assert IngestionService(settings).get(old.document_id).lifecycle is DocumentLifecycle.SUPERSEDED
+
+
+def test_a_withdrawn_rule_with_no_stated_successor_gets_a_reviewable_current_candidate(corpus) -> None:
+    settings, service, old, kfs, new = corpus
+    with at(date(2025, 6, 2)):
+        service.set_lifecycle(kfs.document_id, DocumentLifecycle.WITHDRAWN, KFS_URL, "Withdrawn watermark", clock.now(), "AUTOMATED")
+        LinkingService(service, settings).reconcile()
+
+    (candidate,) = LinkingService(service, settings).store.for_old(kfs.document_id)
+    assert candidate.new_document_id == new.document_id and candidate.trust is LinkTrust.REVIEW_REQUIRED
+    assert candidate.method == "candidate_content_match"
+    assert "Key Fact" in candidate.evidence_quote  # the matching passage of the new document, quoted
+
+
+def test_a_withdrawn_document_is_never_suggested_as_a_replacement(corpus) -> None:
+    settings, service, old, kfs, new = corpus
+    with at(date(2025, 6, 2)):
+        for document in (kfs, new):
+            service.set_lifecycle(document.document_id, DocumentLifecycle.WITHDRAWN, KFS_URL, "Withdrawn watermark",
+                                  clock.now(), "AUTOMATED")
+        LinkingService(service, settings).reconcile()
+
+    assert LinkingService(service, settings).store.for_old(kfs.document_id) == []

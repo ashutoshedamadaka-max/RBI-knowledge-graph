@@ -19,7 +19,7 @@ from app.ingestion.service import IngestionService, NON_OPERATIVE, OfficialStatu
 from app.models.documents import DocumentLifecycle, DocumentMetadata
 from app.models.links import DocumentLink, LinkProposal, LinkRelation, LinkScope, LinkTrust
 from app.monitoring.link_store import LinkStore, link_id_for
-from app.monitoring.successors import candidate_successors, find_backward_links, find_forward_links, match_documents
+from app.monitoring.successors import find_backward_links, find_forward_links, match_documents
 from app.monitoring.trust import decide_trust
 
 logger = logging.getLogger(__name__)
@@ -101,10 +101,10 @@ class LinkingService:
                              summary=summary)
         # A replaced document with no explicit statement gets reviewable suggestions only.
         if document.lifecycle in NON_OPERATIVE and not self.store.for_old(document.document_id):
-            for new, similarity in candidate_successors(document, documents)[:3]:
+            for new, passage in self._candidates(document, documents):
                 proposal = LinkProposal(
-                    relation=LinkRelation.CANDIDATE, scope=LinkScope.WHOLE, method="candidate_title_similarity",
-                    evidence_quote=f"Same department, issued later, title similarity {similarity}: “{document.title}” → “{new.title}”",
+                    relation=LinkRelation.CANDIDATE, scope=LinkScope.WHOLE, method="candidate_content_match",
+                    evidence_quote=_matching_sentence(passage.text, document.title),
                 )
                 self._record(proposal, old=document, new=new, matched_old_count=1, summary=summary)
 
@@ -132,6 +132,30 @@ class LinkingService:
                 link.link_id, old.document_id, old.title, new.document_id, new.title,
                 link.relation.value, link.evidence_quote, link.trust.value,
             )
+
+    def _candidates(self, old: DocumentMetadata, documents: list[DocumentMetadata], limit: int = 2):
+        """Possible current replacements for a withdrawn document that names none (brief rule 3).
+
+        Same department, issued later, not itself withdrawn, ranked by how well the old title
+        matches the new document's passages. The best passage is the quoted evidence. Never
+        trusted automatically: a reviewer decides.
+        """
+        if not old.issuing_department or not old.publication_date:
+            return []
+        eligible = {
+            item.document_id: item for item in documents
+            if item.document_id != old.document_id and item.lifecycle not in NON_OPERATIVE
+            and item.issuing_department == old.issuing_department
+            and item.publication_date and item.publication_date > old.publication_date
+        }
+        if not eligible:
+            return []
+        best: dict[str, object] = {}
+        for passage in self.ingestion.vector_store.search(old.title, top_k=50, current_only=False,
+                                                          document_ids=set(eligible)):
+            if passage.similarity_score > 0:
+                best.setdefault(passage.document_id, passage)
+        return [(eligible[document_id], passage) for document_id, passage in list(best.items())[:limit]]
 
     # Switching over
 
@@ -195,3 +219,16 @@ class LinkingService:
         if processed.exists():
             return "\n".join(page["text"] for page in json.loads(processed.read_text(encoding="utf-8"))["pages"])
         return "\n".join(chunk.text for chunk in self.ingestion.vector_store.get_by_document_id(document.document_id))
+
+
+def _matching_sentence(text: str, title: str) -> str:
+    """The sentence of a passage sharing the most words with a title: the evidence a reviewer reads."""
+    import re
+
+    from app.retrieval.vector_store import LocalVectorStore
+
+    wanted = LocalVectorStore._keywords(title)
+    # Chunks are stored as one line, so split on sentence ends rather than line breaks.
+    lines = [line.strip() for line in re.split(r"(?<=[.;:])\s+", text) if line.strip()] or [text]
+    best = max(lines, key=lambda line: len(wanted & LocalVectorStore._keywords(line)))
+    return best[:400]
