@@ -5,6 +5,15 @@ from app.models.chunks import ChunkMetadata
 from app.models.documents import DocumentLifecycle, DocumentMetadata
 
 
+def chunk_document(document: DocumentMetadata, pages: list[str], settings) -> list[ChunkMetadata]:
+    """Chunk with the method selected by settings.chunker (legacy unless a comparison changes it)."""
+    if settings.chunker == "legacy":
+        return chunk_pages(document, pages, settings.chunk_size, settings.chunk_overlap)
+    from app.ingestion.chunkers import CHUNKERS
+
+    return CHUNKERS[settings.chunker](document, pages)
+
+
 def chunk_pages(document: DocumentMetadata, pages: list[str], chunk_size: int, overlap: int) -> list[ChunkMetadata]:
     """Split page text on word boundaries; chunks never cross a source page."""
 

@@ -11,7 +11,7 @@ import httpx
 
 from app import clock
 from app.config.settings import Settings
-from app.ingestion.chunking import chunk_pages
+from app.ingestion.chunking import chunk_document
 from app.ingestion.exceptions import IngestionError
 from app.ingestion.manifest import DocumentManifest
 from app.ingestion.parser import parse_document
@@ -94,12 +94,7 @@ class IngestionService:
             valid_from=clock.now(),
         )
         self.manifest.save(metadata)
-        chunks = chunk_pages(
-            metadata,
-            parsed.pages,
-            chunk_size=self.settings.chunk_size,
-            overlap=self.settings.chunk_overlap,
-        )
+        chunks = chunk_document(metadata, parsed.pages, self.settings)
         self.vector_store.upsert(chunks)
         try:
             self.graph_service.index_chunks(chunks)

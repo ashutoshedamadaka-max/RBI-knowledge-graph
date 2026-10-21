@@ -20,6 +20,12 @@ class ChunkMetadata(BaseModel):
     valid_to: datetime | None = None
     in_force_from: date | None = None
     in_force_to: date | None = None
+    # Set by the Phase 2 chunkers; empty for chunks made by the legacy word chunker.
+    chunker: str = "legacy"
+    heading_path: str | None = None
+    paragraph_ref: str | None = None
+    token_count: int | None = None
+    parent_id: str | None = None  # chunks sharing it form one section, passed whole to the answer step
 
 
 class VectorSearchResult(ChunkMetadata):

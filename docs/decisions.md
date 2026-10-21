@@ -188,3 +188,21 @@ Only the chunk index moves to PostgreSQL now (`VECTOR_BACKEND=postgres`, `DATABA
 **Why:** It is RBI's own list, so it is the strongest withdrawal evidence available, and automation may remove trust on official evidence. It also gives the replay an official answer key for withdrawal detection that does not come from our code.
 
 **Limits:** The register says what was withdrawn, not what replaced it, so it creates no successor links. 3,312 rows carry a parseable number and 3,298 a page link; the rest use older numbering (all rows issued since 2021 parse). The older "RRA 2.0" table, which has no numbers, is not read.
+
+## ADR-021: The question set is drafted by a model and verified by Ashu
+
+**Decision:** Phase 2 questions are drafted by a language model from randomly sampled RBI paragraphs; the gold answer is the source paragraph (from the document, not from the system under test). Ashu accepts, edits or rejects each draft. Decided by Ashu on 21 October 2026, relaxing the brief's "Ashu writes the questions" to save several hours of writing.
+
+**Why:** It keeps gold labels document-derived and human-checked while cutting Ashu's work to a quick review per question.
+
+**Risks and controls:** Drafted questions tend to reuse the paragraph's words, which inflates retrieval scores; the prompt asks for an analyst's own phrasing, and every report states the average word overlap between question and gold paragraph. The drafting model never sees retrieval results. The report says the questions were model-drafted.
+
+## ADR-022: Three chunkers behind one setting; legacy stays the default until measured
+
+**Decision:** `CHUNKER` selects `legacy` (the original word windows, still the default), `fixed` (500 tokens, 50 overlap), `recursive` (headings, then lines, then sentences, up to 500 tokens) or `structure` (one chunk per RBI numbered paragraph with its heading path prepended, 100–600 tokens, tables kept whole when they fit and split with their caption repeated when they do not). Token counts use `tiktoken` cl100k_base (the tokenizer of text-embedding-3-small; MIT licence). Structure chunks carry `paragraph_ref`, `heading_path`, `token_count` and `parent_id` (the section, for passing the parent to the answer step). IDs are built from document, page and paragraph (or position), so re-chunking the same document gives the same IDs.
+
+**Why:** One change at a time: the default changes only if the Phase 2 comparison on the dev questions says so.
+
+**Measured on the 88-document corpus (21 October 2026):** fixed 1,977 chunks, recursive 2,583, structure 2,753 (median 282 tokens, none over 600, 134 under 100 where a section ends). Paragraph numbering is recovered in order on the NBFC directions (for example paragraphs 1–109 with no gaps in Responsible Business Conduct). Contents pages, with or without dot leaders, are kept out of the heading paths.
+
+**Limits, stated rather than hidden:** Tables are detected from extracted text (one cell per line), not from layout: 569 tables found, about 1% of them prose lists that only look like tables. Footnotes are not yet separated and attached to their paragraph (they stay in the page text where they print). Paragraph-level effective dates (ADR-010) are not yet modelled.
