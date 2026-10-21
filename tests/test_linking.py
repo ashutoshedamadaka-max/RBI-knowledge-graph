@@ -15,7 +15,7 @@ import pytest
 from app import clock
 from app.config.settings import Settings
 from app.ingestion.service import IngestionService, OfficialStatusError
-from app.models.documents import DocumentLifecycle
+from app.models.documents import DocumentLifecycle, DocumentMetadata
 from app.models.links import LinkTrust
 from app.monitoring.linking import LinkingService
 from app.monitoring.metadata import extract_rbi_document_facts
@@ -265,3 +265,24 @@ def test_a_withdrawn_document_is_never_suggested_as_a_replacement(corpus) -> Non
         LinkingService(service, settings).reconcile()
 
     assert LinkingService(service, settings).store.for_old(kfs.document_id) == []
+
+
+def test_only_the_latest_version_of_a_reissued_circular_asks_for_a_replacement() -> None:
+    from app.monitoring.linking import _reissued_later
+
+    def document(document_id, title, issued):
+        return DocumentMetadata(document_id=document_id, title=title, content_hash=document_id, file_name="p",
+                                mime_type="text/html", ingested_at=datetime.now(UTC), publication_date=issued)
+    older = document("a", "Master Circular - Management of Advances - UCBs", date(2023, 7, 25))
+    latest = document("b", "Master Circular - Management of Advances - UCBs", date(2025, 4, 1))
+
+    assert _reissued_later(older, [older, latest]) and not _reissued_later(latest, [older, latest])
+
+
+def test_a_bank_rule_is_not_offered_an_nbfc_replacement() -> None:
+    from app.monitoring.linking import _other_entity
+
+    nbfc = "Reserve Bank of India (Non-Banking Financial Companies – Credit Facilities) Directions, 2025"
+    assert _other_entity("Small Value Loans - Primary (Urban) Co-operative Banks (UCBs)", nbfc)
+    assert _other_entity("Master Circular - Management of Advances - UCBs", nbfc)
+    assert not _other_entity("Fair Lending Practice - Penal Charges in Loan Accounts", nbfc)

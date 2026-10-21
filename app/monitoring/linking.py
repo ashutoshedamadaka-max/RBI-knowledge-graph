@@ -9,6 +9,7 @@ SUPERSEDED, its chunks leave current answers, and it remains stored for history.
 """
 
 import json
+import re
 import logging
 from dataclasses import dataclass, field
 from datetime import date
@@ -100,7 +101,8 @@ class LinkingService:
                 self._record(proposal, old=document, new=new, matched_old_count=1 if len(targets) == 1 else len(targets),
                              summary=summary)
         # A replaced document with no explicit statement gets reviewable suggestions only.
-        if document.lifecycle in NON_OPERATIVE and not self.store.for_old(document.document_id):
+        if (document.lifecycle in NON_OPERATIVE and not self.store.for_old(document.document_id)
+                and not _reissued_later(document, documents)):
             for new, passage in self._candidates(document, documents):
                 proposal = LinkProposal(
                     relation=LinkRelation.CANDIDATE, scope=LinkScope.WHOLE, method="candidate_content_match",
@@ -133,7 +135,7 @@ class LinkingService:
                 link.relation.value, link.evidence_quote, link.trust.value,
             )
 
-    def _candidates(self, old: DocumentMetadata, documents: list[DocumentMetadata], limit: int = 2):
+    def _candidates(self, old: DocumentMetadata, documents: list[DocumentMetadata], limit: int = 1):
         """Possible current replacements for a withdrawn document that names none (brief rule 3).
 
         Same department, issued later, not itself withdrawn, ranked by how well the old title
@@ -147,6 +149,7 @@ class LinkingService:
             if item.document_id != old.document_id and item.lifecycle not in NON_OPERATIVE
             and item.issuing_department == old.issuing_department
             and item.publication_date and item.publication_date > old.publication_date
+            and not _other_entity(old.title, item.title)
         }
         if not eligible:
             return []
@@ -232,3 +235,25 @@ def _matching_sentence(text: str, title: str) -> str:
     lines = [line.strip() for line in re.split(r"(?<=[.;:])\s+", text) if line.strip()] or [text]
     best = max(lines, key=lambda line: len(wanted & LocalVectorStore._keywords(line)))
     return best[:400]
+
+
+def _title_stem(title: str) -> str:
+    return re.sub(r"[^a-z]+", " ", title.lower()).strip()
+
+
+def _reissued_later(document: DocumentMetadata, documents: list[DocumentMetadata]) -> bool:
+    """A yearly re-issue chain needs a current replacement only for its latest version."""
+    stem = _title_stem(document.title)
+    return any(item.document_id != document.document_id and _title_stem(item.title) == stem
+               and item.publication_date and document.publication_date
+               and item.publication_date > document.publication_date for item in documents)
+
+
+_BANK_ENTITIES = re.compile(r"\bUCBs?\b|co-operative bank|commercial bank|small finance bank|regional rural bank",
+                            re.IGNORECASE)
+
+
+def _other_entity(old_title: str, new_title: str) -> bool:
+    """A rule addressed to banks is not replaced by a direction for NBFCs (and vice versa)."""
+    new_is_nbfc = "non-banking financial compan" in new_title.lower()
+    return new_is_nbfc and bool(_BANK_ENTITIES.search(old_title))
