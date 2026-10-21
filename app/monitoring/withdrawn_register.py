@@ -20,6 +20,8 @@ from app.models.documents import DocumentLifecycle
 
 REGISTER_URL = "https://www.rbi.org.in/Scripts/NotificationUserWithdrawnCircular.aspx"
 METHOD = "RBI_WITHDRAWN_REGISTER"
+# RBI/2025-26/100 withdrew the circulars in its annex "with immediate effect" on this date.
+CONSOLIDATION = date(2025, 11, 28)
 
 _SECTION = re.compile(r"<h3[^>]*>\s*(Circulars Withdrawn by the Department of [^<]+?)\s*</h3>(.*?)</table>",
                       re.IGNORECASE | re.DOTALL)
@@ -73,18 +75,24 @@ def apply_register(ingestion: IngestionService, entries: list[RegisterEntry], ch
     by_url = {DocumentManifest.source_key(entry.page_url): entry for entry in entries if entry.page_url}
     withdrawn = []
     for document in ingestion.list_documents():
-        if document.lifecycle in NON_OPERATIVE:
-            continue
         entry = next((by_key[key] for key in document.circular_numbers if key in by_key), None)
         if entry is None and document.source_url:
             entry = by_url.get(DocumentManifest.source_key(document.source_url))
         if entry is None:
             continue
-        ingestion.set_lifecycle(
-            document.document_id, DocumentLifecycle.WITHDRAWN, REGISTER_URL,
-            f"Listed in RBI's register of withdrawn circulars. {entry.quote}", checked_at, METHOD,
-        )
-        withdrawn.append(document.document_id)
+        if document.lifecycle not in NON_OPERATIVE:
+            ingestion.set_lifecycle(
+                document.document_id, DocumentLifecycle.WITHDRAWN, REGISTER_URL,
+                f"Listed in RBI's register of withdrawn circulars. {entry.quote}", checked_at, METHOD,
+            )
+            withdrawn.append(document.document_id)
+        # Issued before the consolidation: in force no later than 28 November 2025. Never extend a
+        # window that a successor or an earlier withdrawal already closed sooner.
+        issued = document.publication_date
+        if issued and issued < CONSOLIDATION:
+            current = ingestion.get(document.document_id)
+            if current.in_force_to is None or current.in_force_to > CONSOLIDATION:
+                ingestion.set_in_force(document.document_id, current.in_force_from, CONSOLIDATION)
     return withdrawn
 
 

@@ -127,6 +127,7 @@ class IngestionService:
         if updated:
             self.vector_store.apply_lifecycle(updated.document_id, updated.lifecycle.value)
             self.graph_service.apply_document_lifecycle(updated)
+            updated = self._close_window(updated, checked_at)
         return updated
 
     def apply_monitoring_metadata(self, source_url: str, facts, checked_at: datetime) -> DocumentMetadata | None:
@@ -151,7 +152,17 @@ class IngestionService:
         if updated:
             self.vector_store.apply_lifecycle(document_id, updated.lifecycle.value)
             self.graph_service.apply_document_lifecycle(updated)
+            updated = self._close_window(updated, checked_at)
         return updated
+
+    def _close_window(self, document: DocumentMetadata, checked_at: datetime) -> DocumentMetadata:
+        """A withdrawn rule was in force no later than when the withdrawal was seen (ADR-012).
+
+        A successor link or RBI's register can set an earlier, better-known end; this is the fallback.
+        """
+        if document.lifecycle in NON_OPERATIVE and document.in_force_to is None:
+            return self.set_in_force(document.document_id, document.in_force_from, checked_at.date()) or document
+        return document
 
     def mark_document_current(self, document_id: str) -> DocumentMetadata | None:
         updated = self.manifest.set_fields(document_id, is_current=True, valid_to=None)

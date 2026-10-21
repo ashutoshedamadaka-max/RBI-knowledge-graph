@@ -15,8 +15,22 @@ def in_force_on(chunk: dict, day: date) -> bool:
 
 
 def is_current_guidance(chunk: dict, day: date) -> bool:
-    """Operative status, the latest version of its page, and in force on ``day``."""
-    return bool(chunk.get("authority_current", False)) and chunk.get("is_current", True) is not False and in_force_on(chunk, day)
+    """Whether a chunk's rule applied on ``day``.
+
+    Today or later: operative status, the latest version of its page, and in force. A past day:
+    in force on that day by its in-force window, even if it was withdrawn or replaced since, as
+    long as its status was ever established (not "review required") and its page version was
+    not yet retired then.
+    """
+    if day >= clock.now().date():
+        return bool(chunk.get("authority_current", False)) and chunk.get("is_current", True) is not False \
+            and in_force_on(chunk, day)
+    retired = chunk.get("valid_to")
+    return chunk.get("lifecycle") not in UNSETTLED and in_force_on(chunk, day) \
+        and (not retired or day < date.fromisoformat(str(retired)[:10]))
+
+
+UNSETTLED = {"REVIEW_REQUIRED", "UNKNOWN"}  # status never established: not a rule on any date
 
 
 def is_upcoming(chunk: dict, day: date) -> bool:

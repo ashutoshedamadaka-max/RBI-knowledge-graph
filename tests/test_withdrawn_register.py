@@ -96,3 +96,55 @@ def test_predecessors_follow_the_written_rule_with_a_reason_each() -> None:
     assert decisions["Fair Lending Practice - Penal Charges in Loan Accounts"] == (True, "lending topic 'loan'")
     assert decisions["Guidelines on Digital Lending"][0] is True
     assert all(reason.startswith(("lending topic", "issued before", "title names", "register gives")) for _, reason in decisions.values())
+
+
+def test_a_listed_rule_issued_before_the_consolidation_ended_on_28_november_2025(tmp_path) -> None:
+    from app import clock
+
+    service = _service(tmp_path)
+    penal = _add(service, "https://rbi.org.in/Scripts/NotificationUser.aspx?Id=12527&Mode=0",
+                 ["DOR.MCS.REC.28/01.01.001/2023-24"])
+    service.manifest.set_fields(penal, publication_date=date(2023, 8, 18))
+    service.set_in_force(penal, date(2024, 1, 1), None)
+
+    with clock.simulated(lambda: NOW):
+        apply_register(service, parse_register(PAGE), NOW)
+        assert service.get(penal).in_force_to == date(2025, 11, 28)  # not the day we noticed it
+
+        def found(day):
+            return penal in {item.document_id for item in service.vector_store.search("penal", top_k=5, as_of=day)}
+
+        assert found(date(2025, 6, 1))  # the rule in force then, although withdrawn since
+        assert not found(date(2023, 12, 1)) and not found(date(2025, 11, 28)) and not found(NOW.date())
+
+
+def test_the_register_never_reopens_a_window_a_successor_closed_sooner(tmp_path) -> None:
+    service = _service(tmp_path)
+    penal = _add(service, "https://rbi.org.in/Scripts/NotificationUser.aspx?Id=12527&Mode=0",
+                 ["DOR.MCS.REC.28/01.01.001/2023-24"], DocumentLifecycle.SUPERSEDED)
+    service.manifest.set_fields(penal, publication_date=date(2023, 8, 18))
+    service.set_in_force(penal, date(2024, 1, 1), date(2025, 5, 8))
+
+    apply_register(service, parse_register(PAGE), NOW)
+
+    assert service.get(penal).in_force_to == date(2025, 5, 8)
+
+
+def test_a_withdrawal_without_a_known_end_closes_the_window_when_it_was_seen(tmp_path) -> None:
+    service = _service(tmp_path)
+    rule = _add(service, "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=1&Mode=0", ["RBI/2025-26/1"])
+
+    service.set_lifecycle(rule, DocumentLifecycle.WITHDRAWN, "https://www.rbi.org.in/x", "Withdrawn watermark.", NOW, "RBI_WATERMARK")
+
+    assert service.get(rule).in_force_to == NOW.date()
+
+
+def test_a_rule_whose_status_was_never_settled_is_not_answered_from_on_any_date(tmp_path) -> None:
+    from app import clock
+
+    service = _service(tmp_path)
+    rule = _add(service, "https://www.rbi.org.in/Scripts/NotificationUser.aspx?Id=1&Mode=0", ["RBI/2025-26/1"],
+                DocumentLifecycle.REVIEW_REQUIRED)
+
+    with clock.simulated(lambda: NOW):
+        assert rule not in {item.document_id for item in service.vector_store.search("Text", top_k=5, as_of=date(2025, 6, 1))}

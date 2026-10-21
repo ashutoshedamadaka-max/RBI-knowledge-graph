@@ -214,3 +214,16 @@ Only the chunk index moves to PostgreSQL now (`VECTOR_BACKEND=postgres`, `DATABA
 **Why:** On 92 provisional dev questions (105 gold sentences, model-drafted and not yet reviewed), the three new chunkers tied on recall@5 (50–51%, against 45% for legacy; the uncertainty is about ±10 points), and structure-aware was the only one that never cut a gold sentence (105/105). It also carries RBI's paragraph numbers, heading paths, amendment footnotes and parent sections, which citations, the graph and the "what changed" view need. Report: `data/evaluation/chunker-comparison-provisional.json`.
 
 **Trade-off:** The decision rests on unreviewed questions. A 30-question review sample, and the full review before Phase 5, may revise it. Existing indexes keep their old chunks until they are rebuilt.
+
+## ADR-024: Questions about a past date answer from the rules in force on that date
+
+**Decision:** For today or a future date, a passage is eligible only if its document is operative, its page version is the latest, and it is in force (unchanged). For a past date, a passage is eligible if its document was in force on that date, even if it has been withdrawn or replaced since. Two exceptions: documents whose status was never settled (review required or unknown) are never eligible, and a page version is not eligible after the date it was replaced. A withdrawal's in-force window ends on the best-known date:
+1. The successor's start date, when a successor link exists.
+2. 28 November 2025, for documents in RBI's register of withdrawn circulars that were issued before that date. RBI/2025-26/100 withdrew them "with immediate effect" on that day.
+3. Otherwise, the date we detected the withdrawal. This is an upper bound, not RBI's date.
+
+An earlier end date is never replaced by a later one.
+
+**Why:** Previously the as-of filter used the document's status today. A question dated 2024 therefore skipped every rule that has since been withdrawn, which is almost every rule that applied in 2024.
+
+**Trade-off:** For withdrawals detected only by the watermark, the window can run past RBI's actual withdrawal date, by up to one check interval for new withdrawals. Answers for those dates still state the detection date (D7).

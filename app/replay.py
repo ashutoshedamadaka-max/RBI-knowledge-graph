@@ -27,9 +27,8 @@ from app.models.documents import DocumentLifecycle, DocumentMetadata
 from app.models.links import LinkTrust
 from app.monitoring.linking import LinkingService
 from app.monitoring.trust import EXPLICIT_METHODS
+from app.monitoring.withdrawn_register import CONSOLIDATION
 from app.retrieval.query_service import RegulatoryQueryService
-
-CONSOLIDATION = date(2025, 11, 28)  # RBI/2025-26/100: listed circulars withdrawn "with immediate effect"
 
 
 @dataclass
