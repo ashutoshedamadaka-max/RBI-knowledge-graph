@@ -53,7 +53,8 @@ def main() -> None:
         path = args.folder / f"{split}.jsonl"
         rows = [json.loads(line) for line in path.read_text(encoding="utf-8").splitlines() if line.strip()]
         pending = [row for row in rows if row["status"] == "drafted" and (sample is None or row["id"] in sample)]
-        print(f"\n{split}: {len(rows) - len(pending)} of {len(rows)} reviewed.")
+        scope = [row for row in rows if sample is None or row["id"] in sample]
+        print(f"\n{split}{' sample' if sample else ''}: {len(scope) - len(pending)} of {len(scope)} reviewed.")
         for number, row in enumerate(pending, start=1):
             print(f"\n[{split} {number}/{len(pending)}] {row['id']} — {row['type'].replace('_', ' ')}")
             show("Question", row["question"])
