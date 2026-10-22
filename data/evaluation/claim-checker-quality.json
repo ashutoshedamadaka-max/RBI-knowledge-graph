@@ -1,0 +1,30 @@
+{
+  "generated_at": "2026-10-22T08:42:47.700146+00:00",
+  "answers": "answers-dev-gpt-4o-mini.json",
+  "by_source": {
+    "model-drafted (Claude)": {
+      "claims": 50,
+      "exact_agreement": {
+        "numerator": 29,
+        "denominator": 50
+      },
+      "unsupported_caught (recall)": {
+        "numerator": 6,
+        "denominator": 21
+      },
+      "flags_correct (precision)": {
+        "numerator": 6,
+        "denominator": 10
+      },
+      "confusion (checker -> label)": {
+        "not_supported -> not_supported": 1,
+        "not_supported -> partially_supported": 1,
+        "partially_supported -> not_supported": 1,
+        "partially_supported -> partially_supported": 3,
+        "partially_supported -> supported": 4,
+        "supported -> partially_supported": 15,
+        "supported -> supported": 25
+      }
+    }
+  }
+}

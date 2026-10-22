@@ -102,7 +102,7 @@ def main() -> None:
     parser.add_argument("action", choices=["make", "read", "score"])
     parser.add_argument("--answers", type=Path)
     parser.add_argument("--filled", type=Path, default=FILL)
-    parser.add_argument("--source", default="hand", choices=["hand", "model-drafted, reviewed by Ashu"])
+    parser.add_argument("--source", default="hand", choices=["hand", "model-drafted, reviewed by Ashu", "model-drafted (Claude)"])
     args = parser.parse_args()
     if args.action == "read":
         read(args.filled, args.source)

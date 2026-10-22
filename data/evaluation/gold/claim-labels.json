@@ -1,0 +1,255 @@
+{
+  "seed": 8,
+  "labels": {
+    "q007/1/9548e144": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.295945+00:00"
+    },
+    "q007/6/945e176e": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.295945+00:00"
+    },
+    "q010/1/1b24ef3e": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.295945+00:00"
+    },
+    "q014/2/5fb80a91": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.297110+00:00"
+    },
+    "q014/5/8dc67d17": {
+      "label": "not_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.297110+00:00"
+    },
+    "q022/2/871da4f3": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.297110+00:00"
+    },
+    "q023/1/e9bb40dc": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.297110+00:00"
+    },
+    "q023/2/8def0280": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.297110+00:00"
+    },
+    "q024/1/620a43fa": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.297110+00:00"
+    },
+    "q025/4/eba10e43": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.297110+00:00"
+    },
+    "q026/3/73646e5f": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.297110+00:00"
+    },
+    "q028/3/a878face": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.297110+00:00"
+    },
+    "q032/1/0c73f7df": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.297110+00:00"
+    },
+    "q046/3/8cdead33": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.297110+00:00"
+    },
+    "q051/2/4387e0f7": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.297110+00:00"
+    },
+    "q053/2/f4026d21": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.297110+00:00"
+    },
+    "q054/1/fa9bdb5d": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.298156+00:00"
+    },
+    "q054/2/57900632": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.298156+00:00"
+    },
+    "q056/3/545a6c39": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.298156+00:00"
+    },
+    "q059/1/f6bb301b": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.298156+00:00"
+    },
+    "q060/1/2fec5210": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.298156+00:00"
+    },
+    "q076/2/4c178124": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.298156+00:00"
+    },
+    "q087/5/89eda835": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.298156+00:00"
+    },
+    "q091/3/598f5427": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.298156+00:00"
+    },
+    "q092/1/71da0a6b": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.298156+00:00"
+    },
+    "q092/2/e82259b3": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.298156+00:00"
+    },
+    "q092/5/54c0bf6f": {
+      "label": "not_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.298156+00:00"
+    },
+    "q093/2/e491fb80": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.298156+00:00"
+    },
+    "q094/3/0060a4fc": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.299220+00:00"
+    },
+    "q095/1/5816d41d": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.299220+00:00"
+    },
+    "q100/1/29cff135": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.299220+00:00"
+    },
+    "q109/3/52b997b4": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.299220+00:00"
+    },
+    "q112/3/df4af141": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.299220+00:00"
+    },
+    "q117/3/06d5711d": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.299220+00:00"
+    },
+    "q122/2/dfc72e42": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.299220+00:00"
+    },
+    "q124/1/f8221df0": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.299220+00:00"
+    },
+    "q126/2/37b4dd9a": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.299220+00:00"
+    },
+    "q126/3/35d3fc40": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.299220+00:00"
+    },
+    "q128/1/570e2837": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.300243+00:00"
+    },
+    "q129/2/c8ea027a": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.300243+00:00"
+    },
+    "q140/3/de253217": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.300243+00:00"
+    },
+    "q151/3/4a0469a2": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.300243+00:00"
+    },
+    "q157/2/059f1eef": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.300243+00:00"
+    },
+    "q159/1/6f53c7ec": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.300243+00:00"
+    },
+    "q160/2/29b79284": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.300243+00:00"
+    },
+    "q160/3/b98b1542": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.300243+00:00"
+    },
+    "q170/3/b3c37dfb": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.300243+00:00"
+    },
+    "q175/3/f2019c1a": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.300243+00:00"
+    },
+    "q181/2/9deee9e2": {
+      "label": "partially_supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.301241+00:00"
+    },
+    "q188/2/812fb9e1": {
+      "label": "supported",
+      "source": "model-drafted (Claude)",
+      "labelled_at": "2026-10-22T08:42:47.301241+00:00"
+    }
+  }
+}
