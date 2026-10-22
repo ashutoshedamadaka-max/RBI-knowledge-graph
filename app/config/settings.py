@@ -18,7 +18,7 @@ class Settings(BaseSettings):
     extraction_provider: str = "deterministic"
     answer_provider: str = "deterministic"
     openai_api_key: str | None = None
-    cohere_api_key: str | None = None  # evaluation only (Phase 3 re-ranking rung)
+    cohere_api_key: str | None = None  # re-ranking and the abstention score (ADR-026)
     openai_extraction_model: str = "gpt-4o-mini"
     openai_answer_model: str = "gpt-4o-mini"
     openai_input_cost_per_million: float = 0.15
@@ -30,6 +30,8 @@ class Settings(BaseSettings):
     chunker: str = "structure"
     chunk_overlap: int = 150
     vector_top_k: int = 5
+    rerank_candidates: int = 30
+    abstain_below: float = 0.34  # Cohere top relevance score; tuned on dev (ADR-026)
     log_level: str = "INFO"
     # Switch off to send every successor to review (the replay report decides whether it stays on).
     auto_trust_enabled: bool = True

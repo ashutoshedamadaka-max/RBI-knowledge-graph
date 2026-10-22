@@ -15,9 +15,9 @@ def test_query_stream_emits_actual_lifecycle_events_and_result() -> None:
     assert response.status_code == 200
     assert "event: progress" in response.text
     assert '"stage": "understanding_question"' in response.text
-    assert '"stage": "searching_regulatory_relationships"' not in response.text
+    assert '"stage": "searching_regulatory_relationships"' not in response.text  # the old graph step is gone (ADR-027)
     result_payload = response.text.split("event: result\ndata: ", 1)[1].split("\n\n", 1)[0]
-    assert json.loads(result_payload)["research"]["status"] == "out_of_scope"
+    assert json.loads(result_payload)["research"]["status"] != "grounded"  # nothing indexed answers it (ADR-026)
 
 
 def test_reads_do_not_sync_and_stream_syncs_after_generation(tmp_path, monkeypatch):

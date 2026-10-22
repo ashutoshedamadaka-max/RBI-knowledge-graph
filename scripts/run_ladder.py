@@ -94,7 +94,7 @@ def main() -> None:
             print(f"{kind}: {len(texts)} chunks embedded ({embedders[kind].tokens} new tokens)", flush=True)
     corpus_tokens = {kind: embedder.tokens for kind, embedder in embedders.items()}
     if "cohere" in rerank_needed:
-        rerankers["cohere"] = ladder.CohereReranker(settings.cohere_api_key)
+        rerankers["cohere"] = ladder.CohereReranker(settings.cohere_api_key, waits=(0, 10, 20, 40, 60, 60))
     if "bge" in rerank_needed:
         rerankers["bge"] = ladder.BgeReranker()
 

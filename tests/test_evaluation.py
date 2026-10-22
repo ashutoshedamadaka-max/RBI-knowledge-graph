@@ -26,7 +26,7 @@ def test_harness_reports_measured_source_recall(tmp_path: Path) -> None:
     report = EvaluationHarness(settings).run(cases)
 
     assert report.total_cases == 1
-    assert report.routing_accuracy == 1.0
+    # The query router was removed (ADR-026); the frozen legacy-v1 harness no longer measures routing.
     assert report.citation_validity == 1.0
 
 

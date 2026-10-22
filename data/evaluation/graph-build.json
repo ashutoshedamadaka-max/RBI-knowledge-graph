@@ -12,7 +12,7 @@
     "ISSUED_BY": 88,
     "SUPERSEDES": 4,
     "PART_OF": 1968,
-    "APPLIES_TO": 4785,
+    "APPLIES_TO": 2123,
     "REQUIRES": 5578,
     "REFERS_TO": 453,
     "DEFINES": 138,
@@ -29,18 +29,18 @@
       "APPLIES_TO:duplicate": 191,
       "REQUIRES:quote_not_in_provision": 340,
       "APPLIES_TO:quote_not_in_provision": 235,
+      "APPLIES_TO:not_named_in_provision_or_title": 2662,
       "APPLIES_TO:entity_not_on_list": 30,
       "REQUIRES:definitions_paragraph": 17,
       "REQUIRES:entity_not_on_list": 56
     }
   },
   "run_manifest": {
-    "built_at": "2026-10-22T05:23:07.641347+00:00",
-    "git_commit": "f03e2f30dbec2e7911bff278b56a6c43a36e89a7",
-    "working_tree_dirty": false,
+    "built_at": "2026-10-22T06:34:07.359832+00:00",
+    "git_commit": "7819c20924a01349a735c53372ffc19a0312f258",
+    "working_tree_dirty": true,
     "corpus_fingerprint": "d9a245a5cf6cf011846c13de4585b4fa7aeca2179994747b898f19083a54da18",
     "register_sha256": "508bd479f599ebda9579d995739f1e0dc32e5a03e054a833f7a56e677cbd9800",
     "llm_edges_sha256": "6775020a106d50a1e3289394def863fd4d72fed9d3ec6df84be35aad4f85d92d"
-  },
-  "nodes_note": "Recounted from the saved graph.json after the build (the build counted before adding LLM nodes; fixed in build_graph.py)."
+  }
 }

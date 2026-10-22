@@ -40,13 +40,13 @@ def test_query_returns_only_verifiable_evidence(tmp_path: Path) -> None:
     assert set(response.research.direct_answer.citation_ids).issubset({citation.chunk_id for citation in response.citations})
 
 
-def test_query_explains_the_rbi_lending_scope_for_unrelated_question(tmp_path: Path) -> None:
+def test_an_unrelated_question_gets_no_answer_and_no_citations(tmp_path: Path) -> None:
+    # ADR-026 removed the keyword scope guard; with nothing relevant indexed there is simply no evidence.
     response = RegulatoryQueryService(Settings(data_dir=tmp_path / "data")).query("What is the weather in Mumbai?")
 
-    assert not response.in_scope
     assert not response.retrieved_evidence
     assert not response.citations
-    assert "RBI lending guidelines" in response.answer
+    assert response.research.status.value != "grounded"
 
 
 def test_query_returns_a_clear_insufficient_evidence_state(tmp_path: Path) -> None:
@@ -129,55 +129,41 @@ def test_query_progress_reports_only_entered_backend_stages(tmp_path: Path) -> N
     RegulatoryQueryService(settings).query("What must lenders disclose about penal charges?", progress=stages.append)
 
     assert stages == [
-        "understanding_question", "searching_regulatory_relationships", "retrieving_official_evidence",
-        "checking_regulatory_validity", "selecting_authoritative_evidence", "building_grounded_answer",
+        "understanding_question", "retrieving_official_evidence", "checking_regulatory_validity",
+        "selecting_authoritative_evidence", "building_grounded_answer",
     ]
 
 
-def test_document_year_is_not_historical_intent():
-    for query in ["What do RBI amendments issued in 2026 change?", "What is covered by Digital Lending Directions, 2025?",
-                  "What consent is required before collecting borrower data?"]:
-        assert not RegulatoryQueryService._is_historical_query(query)
-    for query in ["What changed in RBI guidance?", "What were the lending rules in 2023?", "What applied as of 2024?",
-                  "What rules applied before the amendment?"]:
-        assert RegulatoryQueryService._is_historical_query(query)
+class _Reranker:
+    """Stands in for Cohere: keeps the order and reports a chosen top relevance score."""
+
+    score = 0.0
+
+    def __init__(self, *args, **kwargs) -> None:
+        self.top_score = 0.0
+
+    def rerank(self, query: str, texts: list[str]) -> list[int]:
+        self.top_score = _Reranker.score
+        return list(range(len(texts)))
 
 
-def test_graph_fallback_respects_explicit_historical_intent(tmp_path: Path):
-    from app.models.retrieval import GraphRetrievalResult, RetrievalRoute, RouteDecision
+def test_a_low_reranker_score_means_no_answer(tmp_path: Path, monkeypatch) -> None:
+    # ADR-026: refuse when Cohere's top relevance score is below 0.34, answer otherwise.
+    monkeypatch.setattr("app.retrieval.pipeline.CohereReranker", _Reranker)
     source = tmp_path / "rbi.txt"
     source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")
-    settings = Settings(data_dir=tmp_path / "data")
-    IngestionService(settings).ingest(IngestRequest(local_path=str(source), title="RBI penal charges"))
-    service = RegulatoryQueryService(settings)
-    service.router.route = lambda _: RouteDecision(route=RetrievalRoute.GRAPH)
-    service.graph.retrieve_graph = lambda _: GraphRetrievalResult(template=None)
-    current = service.query("What penal charges rules apply in 2026?")
-    historical = service.query("What changed in RBI penal charges rules?")
-    assert not current.retrieved_evidence
-    assert historical.retrieved_evidence
-    assert historical.pipeline.retrieval_method == "vector"
-    assert historical.research.graph_context is None
-
-
-def test_excluded_graph_provenance_is_not_shown_as_answer_evidence(tmp_path: Path):
-    from app.models.retrieval import GraphRetrievalResult, GraphEdgeEvidence, GraphNodeEvidence, RetrievalRoute, RouteDecision
-    source = tmp_path / "rbi.txt"
-    source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")
-    settings = Settings(data_dir=tmp_path / "data")
+    settings = Settings(data_dir=tmp_path / "data", cohere_api_key="test")
     ingest_verified_active(settings, source)
     service = RegulatoryQueryService(settings)
-    chunk = service.vector.retrieve_vector("penal charges")[0]
-    edge = GraphEdgeEvidence(source_id="a", target_id="b", relationship_type="REQUIRES",
-                             source_chunk_id=chunk.chunk_id, source_document_id=chunk.document_id, confidence=1)
-    graph = GraphRetrievalResult(template="test", nodes=[GraphNodeEvidence(node_id=i, name=i, entity_type="Regulation") for i in ("a", "b")], edges=[edge])
-    service.router.route = lambda _: RouteDecision(route=RetrievalRoute.GRAPH)
-    service.graph.retrieve_graph = lambda _: graph
-    response = service.query("What must lenders disclose about penal charges?")
-    assert response.research.graph_context.edges == [edge]
-    assert response.pipeline.retrieval_method == "graph"
-    service.vector.store.apply_lifecycle(chunk.document_id, DocumentLifecycle.WITHDRAWN.value)
-    response = service.query("What must lenders disclose about penal charges?")
-    assert not response.retrieved_evidence
-    assert response.research.graph_context is None
-    assert response.pipeline.retrieval_method == "none"
+
+    _Reranker.score = 0.1
+    refused = service.query("What must lenders disclose about penal charges?")
+    assert not refused.in_scope and not refused.citations and not refused.retrieved_evidence
+    assert refused.pipeline.answer_mode == "abstained"
+
+    _Reranker.score = 0.9
+    answered = service.query("What must lenders disclose about penal charges?")
+    assert answered.retrieved_evidence and answered.citations
+    assert answered.pipeline.retrieval_method == "bm25+in_force_filter+cohere_rerank"  # no OpenAI key, no graph built
+
+

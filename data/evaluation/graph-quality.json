@@ -1,7 +1,7 @@
 {
-  "generated_at": "2026-10-22T06:05:26.032988+00:00",
-  "labelled": 50,
-  "scored": 50,
+  "generated_at": "2026-10-22T06:35:38.667357+00:00",
+  "labelled": 70,
+  "scored": 70,
   "stale": [],
   "unit": "APPLIES_TO: entity ids per provision; the others: sentences per provision (micro-averaged)",
   "results": {
@@ -9,13 +9,13 @@
       "provisions": 23,
       "APPLIES_TO": {
         "precision": {
-          "value": 0.3582,
-          "numerator": 24,
-          "denominator": 67
+          "value": 0.7308,
+          "numerator": 19,
+          "denominator": 26
         },
         "recall": {
-          "value": 0.5217,
-          "numerator": 24,
+          "value": 0.413,
+          "numerator": 19,
           "denominator": 46
         }
       },
@@ -60,9 +60,9 @@
       "provisions": 27,
       "APPLIES_TO": {
         "precision": {
-          "value": 0.2192,
+          "value": 0.5161,
           "numerator": 16,
-          "denominator": 73
+          "denominator": 31
         },
         "recall": {
           "value": 0.4571,
@@ -106,11 +106,62 @@
           "denominator": 22
         }
       }
+    },
+    "fresh: model-drafted, reviewed by Ashu": {
+      "provisions": 20,
+      "APPLIES_TO": {
+        "precision": {
+          "value": 0.3333,
+          "numerator": 6,
+          "denominator": 18
+        },
+        "recall": {
+          "value": 0.2308,
+          "numerator": 6,
+          "denominator": 26
+        }
+      },
+      "REQUIRES": {
+        "precision": {
+          "value": 0.8333,
+          "numerator": 20,
+          "denominator": 24
+        },
+        "recall": {
+          "value": 0.6667,
+          "numerator": 20,
+          "denominator": 30
+        }
+      },
+      "DEFINES": {
+        "precision": {
+          "value": null,
+          "numerator": 0,
+          "denominator": 0
+        },
+        "recall": {
+          "value": 0.0,
+          "numerator": 0,
+          "denominator": 4
+        }
+      },
+      "REFERS_TO": {
+        "precision": {
+          "value": 1.0,
+          "numerator": 1,
+          "denominator": 1
+        },
+        "recall": {
+          "value": 0.0714,
+          "numerator": 1,
+          "denominator": 14
+        }
+      }
     }
   },
   "run_manifest": {
-    "git_commit": "d0e885102203bd3fa64573f916d4fe1ac9028d61",
-    "graph_sha256": "3a39cccf8e5b66e63794a5847761e556760b0ff6bd57a151ecfb70390c010fec",
-    "labels_sha256": "feea34fc39ff2da68284bb6765f804711663c947311971e5dd72299a4b035b09"
+    "git_commit": "7819c20924a01349a735c53372ffc19a0312f258",
+    "graph_sha256": "b3c81dbda4c6f52b7ec5c90d9cca50a1b059c68675d40219a149ab77370a3cc9",
+    "labels_sha256": "53f0243237cc2e48bc66ea4333a176981c8b9ecdaee9af0c555f8594109324fd"
   }
 }

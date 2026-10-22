@@ -49,7 +49,7 @@ class EvaluationHarness:
         for case in cases:
             # Compare retrieval methods under the same temporal eligibility rules.
             vector_evidence = self.vector_service.retrieve_vector(
-                case.question, top_k, current_only=not self.query_service._is_historical_query(case.question),
+                case.question, top_k, current_only=True,
             )
             response: QueryResponse = self.query_service.query(case.question, top_k)
             proposed_recall = self._recall(response.retrieved_evidence, case.expected_source_urls)
