@@ -7,6 +7,7 @@ built graph there is no expansion; the result says which steps ran.
 """
 import hashlib
 import logging
+import threading
 import time
 from dataclasses import dataclass, field
 from datetime import date
@@ -31,6 +32,7 @@ class Retrieved:
 # Indexes depend only on the chunk texts and the graph file, so every request shares them. The API creates a
 # query service per request; keeping the index on the instance rebuilt it (~15 s) for every question.
 _INDEXES: dict = {}
+_BUILD_LOCK = threading.Lock()
 
 
 class ApprovedRetriever:
@@ -46,6 +48,12 @@ class ApprovedRetriever:
                bool(self.settings.openai_api_key), graph_file.stat().st_mtime_ns if graph_file.exists() else None)
         if key in _INDEXES:
             return _INDEXES[key]
+        with _BUILD_LOCK:  # a question during the start-up warm-up waits for it rather than building twice
+            if key not in _INDEXES:
+                self._build_into(key, rows, texts, graph_file)
+        return _INDEXES[key]
+
+    def _build_into(self, key, rows: list[dict], texts: list[str], graph_file) -> None:
         bm25 = BM25(texts)
         dense = None
         if self.settings.openai_api_key:
@@ -60,7 +68,6 @@ class ApprovedRetriever:
             expansion = GraphExpansion(ontology.load(graph_file), [ChunkMetadata.model_validate(row) for row in rows])
         _INDEXES.clear()  # one corpus is served at a time; keep memory flat
         _INDEXES[key] = (bm25, dense, expansion)
-        return _INDEXES[key]
 
     def warm(self) -> None:
         """Build the indexes before the first question (called at start-up, in the background)."""

@@ -1,5 +1,6 @@
 import logging
 import threading
+import time
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -21,7 +22,9 @@ def _warm_retrieval(settings) -> None:
     try:
         from app.retrieval.query_service import RegulatoryQueryService
 
+        started = time.perf_counter()
         RegulatoryQueryService(settings).retriever.warm()
+        logging.getLogger(__name__).info("retrieval_warmed seconds=%.1f", time.perf_counter() - started)
     except Exception:  # a cold first question is slower, never broken
         logging.getLogger(__name__).exception("retrieval_warm_up_failed")
 
