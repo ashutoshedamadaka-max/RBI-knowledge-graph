@@ -16,6 +16,7 @@ from app.models.research import ResearchClaim, ResearchStatus, StructuredResearc
 from app.models.retrieval import RetrievalRoute
 from app.observability.costs import CostEvent, CostTracker, estimate_openai_cost
 from app.observability.events import QueryEvent, log_query_event
+from app.observability.errors import log_failure
 from app.retrieval.pipeline import ApprovedRetriever
 from app.retrieval.service import VectorRetrievalService
 from app.retrieval.vector_store import is_current_guidance
@@ -113,7 +114,7 @@ class RegulatoryQueryService:
                                                     self.settings.openai_input_cost_per_million,
                                                     self.settings.openai_output_cost_per_million)
             except Exception as exc:  # the answer stands; its claims simply carry no verdict
-                logger.warning("claim_check_failed error=%s", exc)
+                log_failure(logger, "claim_check_failed", exc)
         trace = {**retrieved.trace, "timings_ms": {**retrieved.trace.get("timings_ms", {}), "answer": answer_ms,
                  **({"claim_check": round((perf_counter() - check_started) * 1000, 1)} if checker_usage else {})},
                  "tokens": {"answer_input": generation.input_tokens, "answer_output": generation.output_tokens,

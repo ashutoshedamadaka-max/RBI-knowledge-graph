@@ -17,7 +17,8 @@ branch-backup step.
   `f16e1229fc17452ea871227c7e3f0ecdef87e0b014d4325f7b967acaa475fad1`.
 - Graph SHA-256 recorded by the held-out evaluation:
   `b3c81dbda4c6f52b7ec5c90d9cca50a1b059c68675d40219a149ab77370a3cc9`.
-- Python tests: 242 passed after schema isolation and the Supabase precision fix.
+- Python tests: 250 passed after schema isolation, the Supabase precision fix,
+  and credential-handling regression tests.
   The `web/` TypeScript check and production build also passed.
 
 ## Production preflight after keys were added
@@ -162,6 +163,15 @@ staged data. No active-table rename or destructive swap is needed. Cost events
 arriving after staging remain in public for later reconciliation.
 
 ## 4. Together: deploy the backend, then merge
+
+The first branch deployment (`682fc10`) reached live and served the 88-document
+corpus, but the paid smoke test failed: pasted provider keys contained trailing
+newlines. Provider exception messages also exposed authorization headers in logs.
+Both keys were revoked and replacements saved in Render without deploying.
+Deploy the subsequent credential-handling fix before another paid smoke test.
+It trims surrounding whitespace, rejects embedded whitespace, hides secrets in
+settings diagnostics, and records only failure types and HTTP statuses. Old log
+entries refer to revoked credentials; do not copy their contents into reports.
 
 - [ ] Confirm staging, tested backup, saved Vercel settings, keys and the exact
   pushed branch SHA. Render must select `/service/data`, PostgreSQL,

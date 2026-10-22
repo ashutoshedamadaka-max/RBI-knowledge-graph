@@ -13,6 +13,7 @@ from dataclasses import dataclass, field
 from datetime import date
 
 from app.config.settings import Settings
+from app.observability.errors import log_failure
 from app.models.chunks import ChunkMetadata, VectorSearchResult
 from app.retrieval.hybrid import BM25, CohereReranker, Dense, GraphExpansion, OpenAIEmbedder, corpus_embeddings, rrf
 from app.retrieval.vector_store import UNSETTLED, is_current_guidance
@@ -61,7 +62,7 @@ class ApprovedRetriever:
             try:
                 dense = Dense(embedder, corpus_embeddings(embedder, texts, self.settings.runtime_dir / "embedding-cache"))
             except Exception as exc:  # the answer still comes from BM25; the result records it
-                logger.warning("dense_index_unavailable error=%s", exc)
+                log_failure(logger, "dense_index_unavailable", exc)
         expansion = None
         if graph_file.exists():
             from app.graph import ontology
@@ -103,7 +104,7 @@ class ApprovedRetriever:
                 trace["candidates"]["fused"] = ids(order)
                 steps.append("openai_embeddings")
             except Exception as exc:
-                logger.warning("dense_query_failed error=%s", exc)
+                log_failure(logger, "dense_query_failed", exc)
             lap("openai_embeddings")
         if expansion is not None:
             order = expansion(order)
@@ -132,7 +133,7 @@ class ApprovedRetriever:
                                    for rank, index in enumerate(order[:TRACE_TOP], start=1)]
                 steps.append("cohere_rerank")
             except Exception as exc:  # keep the fused order; no abstention score this time
-                logger.warning("rerank_failed error=%s", exc)
+                log_failure(logger, "rerank_failed", exc)
             lap("cohere_rerank")
         results = [VectorSearchResult(**rows[index], similarity_score=round(1 / (rank + 1), 6))
                    for rank, index in enumerate(order[:limit])]

@@ -7,6 +7,7 @@ import httpx
 from pydantic import BaseModel
 
 from app.config.settings import Settings
+from app.observability.errors import log_failure
 from app.models.chunks import ChunkMetadata
 from app.models.research import ResearchClaim, ResearchSection, ResearchStatus, StructuredResearch
 
@@ -280,9 +281,10 @@ class OpenAIAnswerGenerator(AnswerGenerator):
                 response.raise_for_status()
                 body = response.json()
         except httpx.HTTPError as exc:
+            log_failure(logger, "answer_generation_failed", exc)
             raise AnswerGenerationError(
                 "The AI answer service is temporarily unavailable. Please retry in a moment."
-            ) from exc
+            ) from None
         usage = body.get("usage", {})
         input_tokens = usage.get("prompt_tokens", 0)
         output_tokens = usage.get("completion_tokens", 0)

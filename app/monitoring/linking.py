@@ -16,6 +16,7 @@ from datetime import date
 
 from app import clock
 from app.config.settings import Settings
+from app.observability.errors import log_failure
 from app.ingestion.service import IngestionService, NON_OPERATIVE, OfficialStatusError
 from app.models.documents import DocumentLifecycle, DocumentMetadata
 from app.models.links import DocumentLink, LinkProposal, LinkRelation, LinkScope, LinkTrust
@@ -51,8 +52,8 @@ class LinkingService:
             try:
                 self._link_document(document, documents, summary)
             except Exception as exc:  # one unreadable document must not stop the others
-                logger.exception("successor_linking_failed document_id=%s", document.document_id)
-                summary.failures.append(f"{document.document_id}: {exc}")
+                log_failure(logger, f"successor_linking_failed document_id={document.document_id}", exc, level=logging.ERROR)
+                summary.failures.append(f"{document.document_id}: {type(exc).__name__}")
         for link in self.store.all():
             if link.trust in TRUSTED and self._apply_switch(link):
                 summary.switches_applied += 1

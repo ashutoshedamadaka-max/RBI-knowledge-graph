@@ -16,6 +16,7 @@ from app.ingestion.repair import repair_legacy_notifications
 from app.monitoring.registry import RegulatorySourceRegistry
 from app.monitoring.store import MonitoringStore
 from app.persistence.runtime_state import DurableRuntimeState
+from app.observability.errors import log_failure
 
 
 def _warm_retrieval(settings) -> None:
@@ -25,8 +26,8 @@ def _warm_retrieval(settings) -> None:
         started = time.perf_counter()
         RegulatoryQueryService(settings).retriever.warm()
         logging.getLogger(__name__).info("retrieval_warmed seconds=%.1f", time.perf_counter() - started)
-    except Exception:  # a cold first question is slower, never broken
-        logging.getLogger(__name__).exception("retrieval_warm_up_failed")
+    except Exception as exc:  # a cold first question is slower, never broken
+        log_failure(logging.getLogger(__name__), "retrieval_warm_up_failed", exc, level=logging.ERROR)
 
 
 def create_app() -> FastAPI:
@@ -48,10 +49,10 @@ def create_app() -> FastAPI:
     application.state.ingestion_service = IngestionService(settings)
     try:
         repair_legacy_notifications(application.state.ingestion_service)
-    except Exception:
+    except Exception as exc:
         # The repair rolls indexes back. A failed repair must not take down the
         # service; leave the captured evidence intact for investigation.
-        logging.getLogger(__name__).exception("legacy_extraction_repair_failed")
+        log_failure(logging.getLogger(__name__), "legacy_extraction_repair_failed", exc, level=logging.ERROR)
     application.state.ingestion_service.cleanup_duplicate_sources()
     # Build the search indexes before the first question rather than during it (~15 s on the NBFC corpus).
     threading.Thread(target=_warm_retrieval, args=(settings,), daemon=True, name="warm-retrieval").start()

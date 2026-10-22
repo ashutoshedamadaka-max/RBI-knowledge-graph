@@ -11,6 +11,7 @@ import httpx
 
 from app import clock
 from app.config.settings import Settings
+from app.observability.errors import log_failure
 from app.ingestion.chunking import chunk_document
 from app.ingestion.exceptions import IngestionError
 from app.ingestion.manifest import DocumentManifest
@@ -98,8 +99,8 @@ class IngestionService:
         self.vector_store.upsert(chunks)
         try:
             self.graph_service.index_chunks(chunks)
-        except Exception:
-            logger.exception("graph_extraction_failed document_id=%s", document_id)
+        except Exception as exc:
+            log_failure(logger, f"graph_extraction_failed document_id={document_id}", exc, level=logging.ERROR)
         payload = {"document_id": document_id, "pages": [
             {"page_number": index + 1, "text": text} for index, text in enumerate(parsed.pages)
         ]}
