@@ -5,3 +5,6 @@
 {"at": "2026-10-22T04:31:08.069897+00:00", "phase": 4, "task": "graph edge extraction", "model": "gpt-4o-mini", "prompt_tokens": 23238, "completion_tokens": 3599, "provisions": 20, "estimated_cost_usd": 0.0056451}
 {"at": "2026-10-22T04:32:08.703597+00:00", "phase": 4, "task": "graph edge extraction", "model": "gpt-4o-mini", "prompt_tokens": 24509, "completion_tokens": 2901, "provisions": 20, "estimated_cost_usd": 0.00541695}
 {"at": "2026-10-22T04:45:27.127274+00:00", "phase": 3, "task": "ladder embeddings", "model": "text-embedding-3-small", "prompt_tokens": 5152, "estimated_cost_usd": 0.00010304}
+{"at": "2026-10-22T04:57:22.496716+00:00", "phase": 4, "task": "graph edge extraction", "model": "gpt-4o-mini", "prompt_tokens": 2218635, "completion_tokens": 414085, "provisions": 1948, "estimated_cost_usd": 0.58124625}
+{"at": "2026-10-22T05:02:04.460773+00:00", "phase": 3, "task": "ladder embeddings", "model": "text-embedding-3-small", "prompt_tokens": 2576, "estimated_cost_usd": 5.152e-05}
+{"at": "2026-10-22T05:02:04.460773+00:00", "phase": 3, "task": "ladder re-ranking", "model": "rerank-v3.5", "search_units": 118, "estimated_cost_usd": 0, "note": "Cohere trial key: no charge. Cost per query in the report uses the list price, as production would pay."}

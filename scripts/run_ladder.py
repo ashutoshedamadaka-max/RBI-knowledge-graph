@@ -115,7 +115,7 @@ def main() -> None:
         config = plan[name]
         before_tokens = {kind: embedder.tokens for kind, embedder in embedders.items()}
         before_units = {kind: reranker.search_units for kind, reranker in rerankers.items()}
-        ranks, ndcg, leaks, latencies = [], [], [], []
+        ranks, ndcg, leaks, latencies, per_question = [], [], [], [], []
         by_type = defaultdict(lambda: {"ranks": [], "ndcg": []})
         for question in questions:
             day = date_of(question) or today
@@ -129,6 +129,9 @@ def main() -> None:
             if config["rerank"] != "none":
                 order = [order[i] for i in rerankers[config["rerank"]].rerank(question["question"], [texts[i] for i in order])]
             latencies.append((time.perf_counter() - started) * 1000)
+            if config["rerank"] != "none":  # the re-ranker's top relevance score, for the abstention threshold
+                per_question.append({"id": question["id"], "type": question["type"], "answerable": bool(question["gold"]),
+                                     "top_score": round(float(rerankers[config["rerank"]].top_score), 5)})
             found = [chunks[index] for index in order]
             for gold in question["gold"]:
                 rank = first_hit_rank(found, gold)
@@ -153,11 +156,12 @@ def main() -> None:
             "latency_ms": {"p50": round(statistics.median(latencies), 1), "p95": round(cuts[18], 1)},
             "paid_usage": {"openai_query_tokens": tokens, "cohere_search_units": units},
             "cost_per_query_usd": round(cost / len(questions), 9),
+            **({"per_question": per_question} if per_question else {}),
             "by_type": {kind: {**summarise(value["ranks"]),
                                "ndcg@10": round(statistics.mean(value["ndcg"]), 4) if value["ndcg"] else None}
                         for kind, value in sorted(by_type.items())},
         }
-        print(name, json.dumps({key: value for key, value in results[name].items() if key != "by_type"}), flush=True)
+        print(name, json.dumps({key: value for key, value in results[name].items() if key not in {"by_type", "per_question"}}), flush=True)
 
     paid_tokens = sum(embedder.tokens for kind, embedder in embedders.items() if kind == "openai")
     paid_units = sum(reranker.search_units for kind, reranker in rerankers.items() if kind == "cohere")

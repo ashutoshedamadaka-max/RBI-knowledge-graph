@@ -20,7 +20,7 @@ from app.models.links import LinkRelation, LinkTrust
 
 NODE_TYPES = ("Document", "Provision", "RegulatedEntity", "Product", "Obligation", "DefinedTerm", "Authority")
 EDGE_TYPES = ("AMENDS", "SUPERSEDES", "WITHDRAWS", "PART_OF", "APPLIES_TO", "REQUIRES", "REFERS_TO", "DEFINES",
-              "ISSUED_BY")  # ISSUED_BY: decision D10 (recommended; awaiting Ashu's confirmation)
+              "ISSUED_BY")  # ISSUED_BY: decision D10, kept by Ashu (22 Oct 2026)
 
 _NUMBERED = re.compile(r"\d{1,3}")
 # "paragraph 5", "paragraphs 5 and 6", "para 12(b)"; "of the <other> Directions/Circular" makes it external.

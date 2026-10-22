@@ -1,0 +1,2544 @@
+{
+  "generated_at": "2026-10-22T05:09:36.303304+00:00",
+  "scores_from": "ladder-abstention-dev.json rung rerank-cohere (cohere/rerank-v3.5)",
+  "includes_unreviewed_drafts": true,
+  "chosen": {
+    "threshold": 0.81945,
+    "unanswerable_refused": {
+      "numerator": 13,
+      "denominator": 13
+    },
+    "answerable_refused": {
+      "numerator": 51,
+      "denominator": 92
+    },
+    "balanced_accuracy": 0.7228
+  },
+  "curve": [
+    {
+      "threshold": 0.0,
+      "unanswerable_refused": {
+        "numerator": 1,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 21,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.4243
+    },
+    {
+      "threshold": 0.04784,
+      "unanswerable_refused": {
+        "numerator": 1,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 21,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.4243
+    },
+    {
+      "threshold": 0.07736,
+      "unanswerable_refused": {
+        "numerator": 2,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 21,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.4628
+    },
+    {
+      "threshold": 0.1763,
+      "unanswerable_refused": {
+        "numerator": 3,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 21,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5013
+    },
+    {
+      "threshold": 0.2092,
+      "unanswerable_refused": {
+        "numerator": 4,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 21,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5397
+    },
+    {
+      "threshold": 0.24693,
+      "unanswerable_refused": {
+        "numerator": 5,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 21,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5782
+    },
+    {
+      "threshold": 0.3431,
+      "unanswerable_refused": {
+        "numerator": 5,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 21,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5782
+    },
+    {
+      "threshold": 0.39229,
+      "unanswerable_refused": {
+        "numerator": 6,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 21,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6166
+    },
+    {
+      "threshold": 0.45145,
+      "unanswerable_refused": {
+        "numerator": 6,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 22,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6112
+    },
+    {
+      "threshold": 0.4768,
+      "unanswerable_refused": {
+        "numerator": 6,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 23,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6058
+    },
+    {
+      "threshold": 0.49656,
+      "unanswerable_refused": {
+        "numerator": 6,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 24,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6003
+    },
+    {
+      "threshold": 0.63071,
+      "unanswerable_refused": {
+        "numerator": 6,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 25,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5949
+    },
+    {
+      "threshold": 0.63098,
+      "unanswerable_refused": {
+        "numerator": 7,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 25,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6334
+    },
+    {
+      "threshold": 0.64317,
+      "unanswerable_refused": {
+        "numerator": 7,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 26,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6279
+    },
+    {
+      "threshold": 0.65703,
+      "unanswerable_refused": {
+        "numerator": 7,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 27,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6225
+    },
+    {
+      "threshold": 0.66804,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 27,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.661
+    },
+    {
+      "threshold": 0.66908,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 28,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6555
+    },
+    {
+      "threshold": 0.67192,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 29,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6501
+    },
+    {
+      "threshold": 0.67296,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 30,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6446
+    },
+    {
+      "threshold": 0.67784,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 31,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6392
+    },
+    {
+      "threshold": 0.67886,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 32,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6338
+    },
+    {
+      "threshold": 0.68496,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 33,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6283
+    },
+    {
+      "threshold": 0.70239,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 33,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6283
+    },
+    {
+      "threshold": 0.71185,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 33,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6283
+    },
+    {
+      "threshold": 0.71257,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 33,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6283
+    },
+    {
+      "threshold": 0.71497,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 33,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6283
+    },
+    {
+      "threshold": 0.72582,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 34,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6229
+    },
+    {
+      "threshold": 0.73,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 35,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6175
+    },
+    {
+      "threshold": 0.75159,
+      "unanswerable_refused": {
+        "numerator": 9,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 35,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6559
+    },
+    {
+      "threshold": 0.75767,
+      "unanswerable_refused": {
+        "numerator": 9,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 36,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6505
+    },
+    {
+      "threshold": 0.75981,
+      "unanswerable_refused": {
+        "numerator": 9,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 36,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6505
+    },
+    {
+      "threshold": 0.76385,
+      "unanswerable_refused": {
+        "numerator": 9,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 37,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6451
+    },
+    {
+      "threshold": 0.76993,
+      "unanswerable_refused": {
+        "numerator": 10,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 37,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6835
+    },
+    {
+      "threshold": 0.77117,
+      "unanswerable_refused": {
+        "numerator": 10,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 37,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6835
+    },
+    {
+      "threshold": 0.77262,
+      "unanswerable_refused": {
+        "numerator": 10,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 38,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6781
+    },
+    {
+      "threshold": 0.77934,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 38,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7166
+    },
+    {
+      "threshold": 0.78513,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 39,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7111
+    },
+    {
+      "threshold": 0.78769,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 40,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7057
+    },
+    {
+      "threshold": 0.79293,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 41,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7003
+    },
+    {
+      "threshold": 0.7958,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 42,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6948
+    },
+    {
+      "threshold": 0.79713,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 43,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6894
+    },
+    {
+      "threshold": 0.79883,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 44,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6839
+    },
+    {
+      "threshold": 0.80145,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 45,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6785
+    },
+    {
+      "threshold": 0.80294,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 46,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6731
+    },
+    {
+      "threshold": 0.80405,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 46,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7115
+    },
+    {
+      "threshold": 0.80553,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 46,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7115
+    },
+    {
+      "threshold": 0.80589,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 47,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7061
+    },
+    {
+      "threshold": 0.80808,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 48,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7007
+    },
+    {
+      "threshold": 0.81097,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 49,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6952
+    },
+    {
+      "threshold": 0.81312,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 50,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6898
+    },
+    {
+      "threshold": 0.81348,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 51,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6844
+    },
+    {
+      "threshold": 0.81525,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 51,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6844
+    },
+    {
+      "threshold": 0.81945,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 51,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7228
+    },
+    {
+      "threshold": 0.82117,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 51,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7228
+    },
+    {
+      "threshold": 0.82357,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 52,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7174
+    },
+    {
+      "threshold": 0.82895,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 53,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.712
+    },
+    {
+      "threshold": 0.83258,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 54,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7065
+    },
+    {
+      "threshold": 0.83323,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 55,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7011
+    },
+    {
+      "threshold": 0.83388,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 56,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6957
+    },
+    {
+      "threshold": 0.8342,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 57,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6902
+    },
+    {
+      "threshold": 0.83485,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 58,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6848
+    },
+    {
+      "threshold": 0.8437,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 59,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6793
+    },
+    {
+      "threshold": 0.84463,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 60,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6739
+    },
+    {
+      "threshold": 0.84677,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 61,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6685
+    },
+    {
+      "threshold": 0.86024,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 61,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6685
+    },
+    {
+      "threshold": 0.86248,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 62,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.663
+    },
+    {
+      "threshold": 0.86524,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 62,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.663
+    },
+    {
+      "threshold": 0.86714,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 63,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6576
+    },
+    {
+      "threshold": 0.87034,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 64,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6522
+    },
+    {
+      "threshold": 0.87166,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 65,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6467
+    },
+    {
+      "threshold": 0.87349,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 65,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6467
+    },
+    {
+      "threshold": 0.87426,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 66,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6413
+    },
+    {
+      "threshold": 0.87681,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 67,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6359
+    },
+    {
+      "threshold": 0.87732,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 68,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6304
+    },
+    {
+      "threshold": 0.87957,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 69,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.625
+    },
+    {
+      "threshold": 0.88228,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 70,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6196
+    },
+    {
+      "threshold": 0.88564,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 71,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6141
+    },
+    {
+      "threshold": 0.88659,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 72,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6087
+    },
+    {
+      "threshold": 0.88682,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 73,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6033
+    },
+    {
+      "threshold": 0.88823,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 73,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6033
+    },
+    {
+      "threshold": 0.88869,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 73,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6033
+    },
+    {
+      "threshold": 0.88962,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 74,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5978
+    },
+    {
+      "threshold": 0.89502,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 75,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5924
+    },
+    {
+      "threshold": 0.89677,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 75,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5924
+    },
+    {
+      "threshold": 0.89934,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 76,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.587
+    },
+    {
+      "threshold": 0.89955,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 77,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5815
+    },
+    {
+      "threshold": 0.89977,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 78,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5761
+    },
+    {
+      "threshold": 0.91023,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 80,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5652
+    },
+    {
+      "threshold": 0.91119,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 81,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5598
+    },
+    {
+      "threshold": 0.91436,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 81,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5598
+    },
+    {
+      "threshold": 0.91454,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 82,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5543
+    },
+    {
+      "threshold": 0.91636,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 82,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5543
+    },
+    {
+      "threshold": 0.91707,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 83,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5489
+    },
+    {
+      "threshold": 0.92125,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 84,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5435
+    },
+    {
+      "threshold": 0.9231,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 85,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.538
+    },
+    {
+      "threshold": 0.92572,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 86,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5326
+    },
+    {
+      "threshold": 0.93057,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 88,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5217
+    },
+    {
+      "threshold": 0.93266,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 89,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5163
+    },
+    {
+      "threshold": 0.94084,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 89,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5163
+    },
+    {
+      "threshold": 0.94797,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 90,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5109
+    },
+    {
+      "threshold": 0.95045,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 90,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5109
+    },
+    {
+      "threshold": 0.95078,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 91,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5054
+    },
+    {
+      "threshold": 0.95345,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 92,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5
+    },
+    {
+      "threshold": 1.01,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 92,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5
+    }
+  ],
+  "scope_guard_alone": {
+    "threshold": 0.0,
+    "unanswerable_refused": {
+      "numerator": 1,
+      "denominator": 13
+    },
+    "answerable_refused": {
+      "numerator": 21,
+      "denominator": 92
+    },
+    "balanced_accuracy": 0.4243
+  },
+  "curve_without_scope_guard": [
+    {
+      "threshold": 0.0,
+      "unanswerable_refused": {
+        "numerator": 0,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 0,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5
+    },
+    {
+      "threshold": 0.04784,
+      "unanswerable_refused": {
+        "numerator": 0,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 0,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5
+    },
+    {
+      "threshold": 0.07736,
+      "unanswerable_refused": {
+        "numerator": 1,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 0,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5385
+    },
+    {
+      "threshold": 0.1763,
+      "unanswerable_refused": {
+        "numerator": 2,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 0,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5769
+    },
+    {
+      "threshold": 0.2092,
+      "unanswerable_refused": {
+        "numerator": 3,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 0,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6154
+    },
+    {
+      "threshold": 0.24693,
+      "unanswerable_refused": {
+        "numerator": 4,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 0,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6538
+    },
+    {
+      "threshold": 0.3431,
+      "unanswerable_refused": {
+        "numerator": 5,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 0,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6923
+    },
+    {
+      "threshold": 0.39229,
+      "unanswerable_refused": {
+        "numerator": 6,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 0,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7308
+    },
+    {
+      "threshold": 0.45145,
+      "unanswerable_refused": {
+        "numerator": 6,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 1,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7253
+    },
+    {
+      "threshold": 0.4768,
+      "unanswerable_refused": {
+        "numerator": 6,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 2,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7199
+    },
+    {
+      "threshold": 0.49656,
+      "unanswerable_refused": {
+        "numerator": 6,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 3,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7145
+    },
+    {
+      "threshold": 0.63071,
+      "unanswerable_refused": {
+        "numerator": 6,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 4,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.709
+    },
+    {
+      "threshold": 0.63098,
+      "unanswerable_refused": {
+        "numerator": 7,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 4,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7475
+    },
+    {
+      "threshold": 0.64317,
+      "unanswerable_refused": {
+        "numerator": 7,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 5,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7421
+    },
+    {
+      "threshold": 0.65703,
+      "unanswerable_refused": {
+        "numerator": 7,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 6,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7366
+    },
+    {
+      "threshold": 0.66804,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 6,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7751
+    },
+    {
+      "threshold": 0.66908,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 7,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7696
+    },
+    {
+      "threshold": 0.67192,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 8,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7642
+    },
+    {
+      "threshold": 0.67296,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 9,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7588
+    },
+    {
+      "threshold": 0.67784,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 10,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7533
+    },
+    {
+      "threshold": 0.67886,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 11,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7479
+    },
+    {
+      "threshold": 0.68496,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 12,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7425
+    },
+    {
+      "threshold": 0.70239,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 13,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.737
+    },
+    {
+      "threshold": 0.71185,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 14,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7316
+    },
+    {
+      "threshold": 0.71257,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 15,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7262
+    },
+    {
+      "threshold": 0.71497,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 16,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7207
+    },
+    {
+      "threshold": 0.72582,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 18,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7099
+    },
+    {
+      "threshold": 0.73,
+      "unanswerable_refused": {
+        "numerator": 8,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 19,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7044
+    },
+    {
+      "threshold": 0.75159,
+      "unanswerable_refused": {
+        "numerator": 9,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 19,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7429
+    },
+    {
+      "threshold": 0.75767,
+      "unanswerable_refused": {
+        "numerator": 9,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 20,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7375
+    },
+    {
+      "threshold": 0.75981,
+      "unanswerable_refused": {
+        "numerator": 9,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 21,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.732
+    },
+    {
+      "threshold": 0.76385,
+      "unanswerable_refused": {
+        "numerator": 9,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 22,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7266
+    },
+    {
+      "threshold": 0.76993,
+      "unanswerable_refused": {
+        "numerator": 10,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 22,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7651
+    },
+    {
+      "threshold": 0.77117,
+      "unanswerable_refused": {
+        "numerator": 10,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 23,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7596
+    },
+    {
+      "threshold": 0.77262,
+      "unanswerable_refused": {
+        "numerator": 10,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 24,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7542
+    },
+    {
+      "threshold": 0.77934,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 24,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7926
+    },
+    {
+      "threshold": 0.78513,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 25,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7872
+    },
+    {
+      "threshold": 0.78769,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 26,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7818
+    },
+    {
+      "threshold": 0.79293,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 27,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7763
+    },
+    {
+      "threshold": 0.7958,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 28,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7709
+    },
+    {
+      "threshold": 0.79713,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 29,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7655
+    },
+    {
+      "threshold": 0.79883,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 30,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.76
+    },
+    {
+      "threshold": 0.80145,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 31,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7546
+    },
+    {
+      "threshold": 0.80294,
+      "unanswerable_refused": {
+        "numerator": 11,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 32,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7492
+    },
+    {
+      "threshold": 0.80405,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 32,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7876
+    },
+    {
+      "threshold": 0.80553,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 33,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7822
+    },
+    {
+      "threshold": 0.80589,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 34,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7768
+    },
+    {
+      "threshold": 0.80808,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 35,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7713
+    },
+    {
+      "threshold": 0.81097,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 36,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7659
+    },
+    {
+      "threshold": 0.81312,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 37,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7605
+    },
+    {
+      "threshold": 0.81348,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 38,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.755
+    },
+    {
+      "threshold": 0.81525,
+      "unanswerable_refused": {
+        "numerator": 12,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 39,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7496
+    },
+    {
+      "threshold": 0.81945,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 39,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.788
+    },
+    {
+      "threshold": 0.82117,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 40,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7826
+    },
+    {
+      "threshold": 0.82357,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 41,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7772
+    },
+    {
+      "threshold": 0.82895,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 42,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7717
+    },
+    {
+      "threshold": 0.83258,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 43,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7663
+    },
+    {
+      "threshold": 0.83323,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 44,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7609
+    },
+    {
+      "threshold": 0.83388,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 45,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7554
+    },
+    {
+      "threshold": 0.8342,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 46,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.75
+    },
+    {
+      "threshold": 0.83485,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 47,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7446
+    },
+    {
+      "threshold": 0.8437,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 48,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7391
+    },
+    {
+      "threshold": 0.84463,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 49,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7337
+    },
+    {
+      "threshold": 0.84677,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 50,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7283
+    },
+    {
+      "threshold": 0.86024,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 51,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7228
+    },
+    {
+      "threshold": 0.86248,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 52,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7174
+    },
+    {
+      "threshold": 0.86524,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 53,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.712
+    },
+    {
+      "threshold": 0.86714,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 54,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7065
+    },
+    {
+      "threshold": 0.87034,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 55,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.7011
+    },
+    {
+      "threshold": 0.87166,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 56,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6957
+    },
+    {
+      "threshold": 0.87349,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 57,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6902
+    },
+    {
+      "threshold": 0.87426,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 58,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6848
+    },
+    {
+      "threshold": 0.87681,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 59,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6793
+    },
+    {
+      "threshold": 0.87732,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 60,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6739
+    },
+    {
+      "threshold": 0.87957,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 61,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6685
+    },
+    {
+      "threshold": 0.88228,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 62,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.663
+    },
+    {
+      "threshold": 0.88564,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 63,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6576
+    },
+    {
+      "threshold": 0.88659,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 64,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6522
+    },
+    {
+      "threshold": 0.88682,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 65,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6467
+    },
+    {
+      "threshold": 0.88823,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 66,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6413
+    },
+    {
+      "threshold": 0.88869,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 67,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6359
+    },
+    {
+      "threshold": 0.88962,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 68,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6304
+    },
+    {
+      "threshold": 0.89502,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 69,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.625
+    },
+    {
+      "threshold": 0.89677,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 70,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6196
+    },
+    {
+      "threshold": 0.89934,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 71,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6141
+    },
+    {
+      "threshold": 0.89955,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 72,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6087
+    },
+    {
+      "threshold": 0.89977,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 73,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.6033
+    },
+    {
+      "threshold": 0.91023,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 75,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5924
+    },
+    {
+      "threshold": 0.91119,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 76,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.587
+    },
+    {
+      "threshold": 0.91436,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 77,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5815
+    },
+    {
+      "threshold": 0.91454,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 78,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5761
+    },
+    {
+      "threshold": 0.91636,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 79,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5707
+    },
+    {
+      "threshold": 0.91707,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 80,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5652
+    },
+    {
+      "threshold": 0.92125,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 81,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5598
+    },
+    {
+      "threshold": 0.9231,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 82,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5543
+    },
+    {
+      "threshold": 0.92572,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 83,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5489
+    },
+    {
+      "threshold": 0.93057,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 85,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.538
+    },
+    {
+      "threshold": 0.93266,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 86,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5326
+    },
+    {
+      "threshold": 0.94084,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 87,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5272
+    },
+    {
+      "threshold": 0.94797,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 88,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5217
+    },
+    {
+      "threshold": 0.95045,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 89,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5163
+    },
+    {
+      "threshold": 0.95078,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 90,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5109
+    },
+    {
+      "threshold": 0.95345,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 91,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5054
+    },
+    {
+      "threshold": 1.01,
+      "unanswerable_refused": {
+        "numerator": 13,
+        "denominator": 13
+      },
+      "answerable_refused": {
+        "numerator": 92,
+        "denominator": 92
+      },
+      "balanced_accuracy": 0.5
+    }
+  ],
+  "router": {
+    "accuracy": {
+      "numerator": 98,
+      "denominator": 118
+    },
+    "confusion (expected -> routed)": {
+      "graph -> vector": 13,
+      "vector -> graph": 7,
+      "vector -> vector": 98
+    }
+  },
+  "run_manifest": {
+    "ladder_sha256": "263eb1d96eedc47b5c63ceda5890a0b90a88259e2113552df02882d8f700eeb6",
+    "dev_questions_sha256": "15867eb25dc08e6166045edd9e01bb7cfcc1985370b92524413f4eeb8688571f"
+  }
+}

@@ -133,6 +133,7 @@ class CohereReranker:
         response.raise_for_status()
         body = response.json()
         self.search_units += body.get("meta", {}).get("billed_units", {}).get("search_units", 0)
+        self.top_score = max((item["relevance_score"] for item in body["results"]), default=0.0)
         return [item["index"] for item in body["results"]]
 
 
@@ -145,6 +146,7 @@ class BgeReranker:
 
     def rerank(self, query: str, texts: list[str]) -> list[int]:
         scores = self.model.predict([(query, text) for text in texts], batch_size=32)
+        self.top_score = float(np.max(scores)) if len(scores) else 0.0
         return np.argsort(-np.asarray(scores)).tolist()
 
 

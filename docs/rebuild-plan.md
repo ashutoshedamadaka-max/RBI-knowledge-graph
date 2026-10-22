@@ -293,7 +293,7 @@ The README is rebuilt from saved runs only, keeping the current honest framing.
 | D7 | Wording when a rule was replaced | "<Old> was repealed by <New>, issued <date>, in force from <date>; this is the current rule." Use "Withdrawn (detected <date>)" only when no successor is known. |
 | D8 | The 6 documents approved through the config file | Re-approve them through the review path with an RBI quote as evidence |
 | D9 | Labelling you'll provide | Gold links, replay questions, ~200 questions with reference answers, ~50 graph paragraphs, ~50 claims |
-| D10 | Authority node has no edge type | Add ISSUED_BY (Document → Authority) with a tested query, or drop the Authority node |
+| D10 | Authority node has no edge type | **Decided 22 October 2026: keep ISSUED_BY** (Document → issuing department), with a tested query |
 | — | CI on GitHub Actions | Add it in Phase 1a |
 
 ---

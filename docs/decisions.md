@@ -239,7 +239,7 @@ An earlier end date is never replaced by a later one.
 | WITHDRAWS | RBI's register of withdrawn circulars, quoting the register row | No |
 | REFERS_TO | Patterns: "paragraph N", and circular numbers that match a corpus document | No |
 | DEFINES | Pattern: '"term" means …' | No |
-| ISSUED_BY | Issuing department. This is D10, recommended and awaiting Ashu's confirmation. | No |
+| ISSUED_BY | Issuing department (D10: kept by Ashu on 22 October 2026) | No |
 | APPLIES_TO, REQUIRES | gpt-4o-mini, one provision per call, entities picked from `config/graph/entities.yaml` | Yes |
 
 Every pattern and LLM edge quotes text from its provision. An LLM edge is dropped if its quote isn't in the provision or its entity isn't on the list, and every drop is counted in the build report.
