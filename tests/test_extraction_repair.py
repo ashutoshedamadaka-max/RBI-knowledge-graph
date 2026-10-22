@@ -88,3 +88,14 @@ def test_repairs_saved_deleted_markup_without_changing_lifecycle(tmp_path):
     assert 'twelve crore' not in service.vector_store.get_by_document_id(document.document_id)[0].text
     assert service.manifest.path.read_bytes() == before
     assert repair_legacy_notifications(service) == 0
+
+
+def test_repair_keeps_the_configured_chunker(tmp_path):
+    # Regression (22 Oct 2026): the repair re-chunked structure-aware documents with the legacy chunker.
+    service, document = legacy_service(tmp_path,
+        "Skip to main content Not Pressed RBI/2026-27/15 Priority sector lending limits shall increase to ten lakh rupees.")
+    assert service.settings.chunker == "structure"
+
+    repair_legacy_notifications(service)
+
+    assert {chunk.chunker for chunk in service.vector_store.get_by_document_id(document.document_id)} == {"structure"}

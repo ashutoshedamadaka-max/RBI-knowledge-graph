@@ -6,7 +6,7 @@ import re
 from urllib.parse import urlsplit
 
 from app.graph.extraction import DeterministicEntityExtractor
-from app.ingestion.chunking import chunk_pages
+from app.ingestion.chunking import chunk_document
 from app.ingestion.parser import parse_document
 
 logger = logging.getLogger(__name__)
@@ -68,7 +68,9 @@ def repair_legacy_notifications(service) -> int:
         if len(cleaned) != len(pages) or not cleaned:
             logger.warning("legacy_extraction_repair_skipped document_id=%s reason=unverified_boundaries", document.document_id)
             continue
-        chunks = chunk_pages(document, cleaned, service.settings.chunk_size, service.settings.chunk_overlap)
+        # The configured chunker, so a corpus built with structure-aware chunks is never rewritten into
+        # legacy ones (this happened on 22 Oct 2026: the repair re-chunked 76 chunks of corpus-v2).
+        chunks = chunk_document(document, cleaned, service.settings)
         if [chunk.model_dump() for chunk in chunks] == [chunk.model_dump() for chunk in old_chunks]:
             continue
         paths = [service.vector_store.path, service.graph_service.store.path]
