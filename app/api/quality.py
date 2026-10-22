@@ -65,7 +65,9 @@ def quality_report() -> dict:
             continue
         data = json.loads(path.read_text(encoding="utf-8"))
         if "records" in data:
-            data = {**{key: value for key, value in data.items() if key != "records"}, "failures": failures(data["records"])}
+            latencies = sorted(record["latency_ms"] for record in data["records"] if "latency_ms" in record)
+            data = {**{key: value for key, value in data.items() if key != "records"}, "failures": failures(data["records"]),
+                    "latency_ms_p95": latencies[min(len(latencies) - 1, int(0.95 * len(latencies)))] if latencies else None}
         report[name] = {"status": "measured", "file": file_name, "data": data}
     report["spend"] = spend()
     return report

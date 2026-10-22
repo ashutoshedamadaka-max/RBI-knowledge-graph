@@ -221,6 +221,17 @@ async def query_stream(request: Request, payload: QueryRequest) -> StreamingResp
     )
 
 
+@router.get("/documents/{document_id}/chunks")
+def document_chunks(document_id: str, request: Request) -> list[dict]:
+    """How a document was cut: each chunk's paragraph, heading path, size and text (the Sources chunk viewer)."""
+    chunks = request.app.state.ingestion_service.vector_store.get_by_document_id(document_id)
+    if not chunks:
+        raise HTTPException(status_code=404, detail="No chunks for that document.")
+    return [{"chunk_id": chunk.chunk_id, "chunk_index": chunk.chunk_index, "page_number": chunk.page_number,
+             "paragraph_ref": chunk.paragraph_ref, "heading_path": chunk.heading_path, "token_count": chunk.token_count,
+             "chunker": chunk.chunker, "text": chunk.text} for chunk in sorted(chunks, key=lambda item: item.chunk_index)]
+
+
 @router.get("/quality")
 def quality() -> dict:
     """The quality dashboard's numbers, read only from saved evaluation runs."""
