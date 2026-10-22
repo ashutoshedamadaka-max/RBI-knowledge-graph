@@ -68,6 +68,7 @@ class RegulatoryQueryService:
         if progress:
             progress("building_grounded_answer")
         sections = self.vector.store.sections(merged)  # empty unless chunks belong to sections (structure chunker)
+        generation_started = perf_counter()
         generation = self.generator.generate(user_query, merged, **({"sections": sections} if sections else {}),
                                              as_of=day, notices=[item.text for item in notices])
         research = generation.research
@@ -90,7 +91,9 @@ class RegulatoryQueryService:
                 "graph_context": None,
             })
 
+        answer_ms = round((perf_counter() - generation_started) * 1000, 1)
         checker_cost, checker_usage = 0.0, {}
+        check_started = perf_counter()
         if research.status is ResearchStatus.GROUNDED and not fallback_used and generation.model != "deterministic":
             # ADR-030: every claim is checked against its own citations and flagged, never rewritten.
             try:
@@ -102,6 +105,12 @@ class RegulatoryQueryService:
                                                     self.settings.openai_output_cost_per_million)
             except Exception as exc:  # the answer stands; its claims simply carry no verdict
                 logger.warning("claim_check_failed error=%s", exc)
+        trace = {**retrieved.trace, "timings_ms": {**retrieved.trace.get("timings_ms", {}), "answer": answer_ms,
+                 **({"claim_check": round((perf_counter() - check_started) * 1000, 1)} if checker_usage else {})},
+                 "tokens": {"answer_input": generation.input_tokens, "answer_output": generation.output_tokens,
+                            "check_input": checker_usage.get("prompt_tokens", 0),
+                            "check_output": checker_usage.get("completion_tokens", 0)},
+                 "cost_usd": {"answer": generation.estimated_cost_usd, "claim_check": checker_cost}}
         answer = research_to_markdown(research)
         if notices:
             answer = "### What changed\n" + "\n".join(f"- {item.text}" for item in notices) + "\n\n" + answer
@@ -137,7 +146,7 @@ class RegulatoryQueryService:
         return QueryResponse(
             request_id=request_id, answer=answer, citations=citations, route=RetrievalRoute.HYBRID, in_scope=True,
             retrieved_evidence=merged, latency_ms=latency_ms, estimated_cost_usd=generation.estimated_cost_usd + checker_cost,
-            citation_valid=citation_valid, research=research, as_of=day, notices=notices,
+            citation_valid=citation_valid, research=research, as_of=day, notices=notices, trace=trace,
             pipeline=QueryPipelineSummary(
                 candidate_evidence_count=candidate_evidence_count,
                 excluded_after_validity_check=excluded_after_validity_check,

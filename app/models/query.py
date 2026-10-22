@@ -64,3 +64,4 @@ class QueryResponse(BaseModel):
     pipeline: QueryPipelineSummary = Field(default_factory=QueryPipelineSummary)
     as_of: date | None = None
     notices: list[ChangeNotice] = Field(default_factory=list)
+    trace: dict = Field(default_factory=dict)  # per-step facts for the trace drawer (timings, candidates, filter, cost)

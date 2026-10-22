@@ -7,13 +7,14 @@ built graph there is no expansion; the result says which steps ran.
 """
 import hashlib
 import logging
+import time
 from dataclasses import dataclass, field
 from datetime import date
 
 from app.config.settings import Settings
 from app.models.chunks import ChunkMetadata, VectorSearchResult
 from app.retrieval.hybrid import BM25, CohereReranker, Dense, GraphExpansion, OpenAIEmbedder, corpus_embeddings, rrf
-from app.retrieval.vector_store import is_current_guidance
+from app.retrieval.vector_store import UNSETTLED, is_current_guidance
 
 logger = logging.getLogger(__name__)
 
@@ -23,6 +24,7 @@ class Retrieved:
     results: list[VectorSearchResult]
     top_score: float | None  # Cohere's top relevance score; None when re-ranking did not run
     steps: list[str] = field(default_factory=list)
+    trace: dict = field(default_factory=dict)  # what each step did, for the answer's trace drawer
 
 
 class ApprovedRetriever:
@@ -58,30 +60,76 @@ class ApprovedRetriever:
         if not rows or not query.strip():
             return Retrieved([], None)
         bm25, dense, expansion = self._build(rows)
+        trace: dict = {"timings_ms": {}, "candidates": {}}
+        clock_start = time.perf_counter()
+
+        def lap(stage: str) -> None:
+            nonlocal clock_start
+            trace["timings_ms"][stage] = round((time.perf_counter() - clock_start) * 1000, 1)
+            clock_start = time.perf_counter()
+
+        def ids(indices) -> list[str]:
+            return [rows[index]["chunk_id"] for index in indices[:TRACE_TOP]]
+
         steps = ["bm25"]
         order = bm25.rank(query)
+        trace["candidates"]["bm25"] = ids(order)
+        lap("bm25")
         if dense is not None:
             try:
-                order = rrf(order, dense.rank(query))
+                dense_order = dense.rank(query)
+                trace["candidates"]["openai_embeddings"] = ids(dense_order)
+                order = rrf(order, dense_order)
+                trace["candidates"]["fused"] = ids(order)
                 steps.append("openai_embeddings")
             except Exception as exc:
                 logger.warning("dense_query_failed error=%s", exc)
+            lap("openai_embeddings")
         if expansion is not None:
             order = expansion(order)
+            trace["graph_added"] = [{"from": rows[a]["chunk_id"], "to": rows[b]["chunk_id"]} for a, b in expansion.last_added]
             steps.append("graph_cross_references")
+            lap("graph_cross_references")
         if filtered:
+            removed = [index for index in order[:self.settings.rerank_candidates] if not is_current_guidance(rows[index], day)]
+            trace["filtered_out"] = [{"chunk_id": rows[index]["chunk_id"], "document_title": rows[index]["document_title"],
+                                      "reason": why_excluded(rows[index], day)} for index in removed[:TRACE_TOP]]
+            trace["filtered_out_count"] = len(removed)
             order = [index for index in order if is_current_guidance(rows[index], day)]
             steps.append("in_force_filter")
+            lap("in_force_filter")
         order = order[:self.settings.rerank_candidates]
         top_score = None
         if filtered and self.settings.cohere_api_key and order:
             reranker = CohereReranker(self.settings.cohere_api_key, waits=self.rerank_waits)
             try:
-                order = [order[i] for i in reranker.rerank(query, [rows[i]["text"] for i in order])]
+                before = list(order)
+                order = [before[i] for i in reranker.rerank(query, [rows[i]["text"] for i in before])]
                 top_score = reranker.top_score
+                trace["rerank"] = [{"chunk_id": rows[index]["chunk_id"], "before": before.index(index) + 1, "after": rank,
+                                    "score": round(reranker.scores.get(before.index(index), 0.0), 4)}
+                                   for rank, index in enumerate(order[:TRACE_TOP], start=1)]
                 steps.append("cohere_rerank")
             except Exception as exc:  # keep the fused order; no abstention score this time
                 logger.warning("rerank_failed error=%s", exc)
+            lap("cohere_rerank")
         results = [VectorSearchResult(**rows[index], similarity_score=round(1 / (rank + 1), 6))
                    for rank, index in enumerate(order[:limit])]
-        return Retrieved(results, top_score, steps)
+        return Retrieved(results, top_score, steps, trace)
+
+
+TRACE_TOP = 10  # how many candidates per step the trace keeps
+
+
+def why_excluded(chunk: dict, day: date) -> str:
+    """The plain reason the in-force filter removed a passage on ``day``."""
+    lifecycle = (chunk.get("lifecycle") or "UNKNOWN").upper()
+    if lifecycle in UNSETTLED:
+        return "status not yet confirmed by review"
+    if chunk.get("in_force_from") and date.fromisoformat(chunk["in_force_from"]) > day:
+        return f"not yet in force on {day} (from {chunk['in_force_from']})"
+    if chunk.get("in_force_to") and date.fromisoformat(chunk["in_force_to"]) <= day:
+        return f"no longer in force on {day} (ended {chunk['in_force_to']}, {lifecycle.lower()})"
+    if chunk.get("is_current") is False:
+        return "an older version of the RBI page"
+    return f"{lifecycle.lower()}"

@@ -119,6 +119,7 @@ class CohereReranker:
         body = response.json()
         self.search_units += body.get("meta", {}).get("billed_units", {}).get("search_units", 0)
         self.top_score = max((item["relevance_score"] for item in body["results"]), default=0.0)
+        self.scores = {item["index"]: item["relevance_score"] for item in body["results"]}
         return [item["index"] for item in body["results"]]
 
 
@@ -143,11 +144,12 @@ class GraphExpansion:
 
     def __call__(self, order: list[int]) -> list[int]:
         top = order[:self.head]
-        added = []
+        added, self.last_added = [], []
         for index in top:
             for provision in self.provisions_in[index]:
                 for _, target, data in self.graph.out_edges(provision, data=True):
                     cited = self.chunk_of.get(target) if data["type"] == "REFERS_TO" else None
                     if cited is not None and cited not in top and cited not in added:
                         added.append(cited)
+                        self.last_added.append((index, cited))
         return top + added + [index for index in order[self.head:] if index not in added]

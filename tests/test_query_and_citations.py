@@ -140,7 +140,7 @@ class _Reranker:
     score = 0.0
 
     def __init__(self, *args, **kwargs) -> None:
-        self.top_score = 0.0
+        self.top_score, self.scores = 0.0, {}
 
     def rerank(self, query: str, texts: list[str]) -> list[int]:
         self.top_score = _Reranker.score
@@ -167,3 +167,26 @@ def test_a_low_reranker_score_means_no_answer(tmp_path: Path, monkeypatch) -> No
     assert answered.pipeline.retrieval_method == "bm25+in_force_filter+cohere_rerank"  # no OpenAI key, no graph built
 
 
+
+
+def test_the_trace_says_what_each_step_did(tmp_path: Path, monkeypatch) -> None:
+    from datetime import date
+
+    from app.retrieval.pipeline import why_excluded
+
+    monkeypatch.setattr("app.retrieval.pipeline.CohereReranker", _Reranker)
+    source = tmp_path / "rbi.txt"
+    source.write_text("Reserve Bank of India states that lenders must disclose penal charges clearly.")
+    settings = Settings(data_dir=tmp_path / "data", cohere_api_key="test")
+    ingest_verified_active(settings, source)
+    _Reranker.score = 0.9
+
+    trace = RegulatoryQueryService(settings).query("What must lenders disclose about penal charges?").trace
+
+    assert trace["candidates"]["bm25"] and trace["rerank"][0]["after"] == 1
+    assert {"bm25", "in_force_filter", "cohere_rerank", "answer"} <= set(trace["timings_ms"])
+    assert trace["filtered_out_count"] == 0 and "tokens" in trace and "cost_usd" in trace
+    day = date(2026, 1, 1)
+    assert why_excluded({"lifecycle": "WITHDRAWN", "in_force_to": "2025-11-28"}, day).startswith("no longer in force")
+    assert why_excluded({"lifecycle": "ACTIVE", "in_force_from": "2026-07-01"}, day).startswith("not yet in force")
+    assert why_excluded({"lifecycle": "REVIEW_REQUIRED"}, day) == "status not yet confirmed by review"
