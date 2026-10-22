@@ -44,3 +44,21 @@ def test_every_ladder_rung_changes_exactly_one_setting() -> None:
     for name, parent, _ in module.RUNGS:
         if parent:
             assert sum(plan[name][key] != plan[parent][key] for key in plan[name]) == 1, name
+
+
+def test_graph_expansion_adds_cited_paragraphs_right_after_the_top_results() -> None:
+    from types import SimpleNamespace
+
+    import networkx as nx
+
+    from app.evaluation.ladder import GraphExpansion
+
+    chunks = [SimpleNamespace(document_id="d", text=text) for text in
+              ["1. Lenders shall follow paragraph 3.", "2. Unrelated.", "3. The cited rule on penal charges."]]
+    graph = nx.MultiDiGraph()
+    for label, text in [("1", chunks[0].text), ("3", chunks[2].text)]:
+        graph.add_node(f"d#{label}", type="Provision", document_id="d", text=text)
+    graph.add_edge("d#1", "d#3", type="REFERS_TO")
+
+    assert GraphExpansion(graph, chunks, head=1)([0, 1, 2]) == [0, 2, 1]
+    assert GraphExpansion(graph, chunks, head=1)([1, 0, 2]) == [1, 0, 2]  # nothing cited by the top result

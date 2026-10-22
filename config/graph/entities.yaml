@@ -1,0 +1,45 @@
+# Canonical entities for the knowledge graph (Phase 4). The LLM must pick one of these ids;
+# a name it gives that matches an alias resolves to that id, anything else is counted as unresolved.
+# Aliases are compared lower-case with punctuation removed.
+
+RegulatedEntity:
+  nbfc: {name: NBFC (all layers), aliases: [nbfc, nbfcs, non-banking financial company, non-banking financial companies, applicable nbfcs]}
+  nbfc-bl: {name: NBFC - Base Layer, aliases: [nbfc-bl, base layer nbfc, nbfcs in the base layer, base layer]}
+  nbfc-ml: {name: NBFC - Middle Layer, aliases: [nbfc-ml, middle layer nbfc, nbfcs in the middle layer, middle layer]}
+  nbfc-ul: {name: NBFC - Upper Layer, aliases: [nbfc-ul, upper layer nbfc, nbfcs in the upper layer, upper layer]}
+  nbfc-tl: {name: NBFC - Top Layer, aliases: [nbfc-tl, top layer nbfc, top layer]}
+  nbfc-mfi: {name: NBFC - Microfinance Institution, aliases: [nbfc-mfi, nbfc-mfis, microfinance institution, mfi]}
+  nbfc-p2p: {name: NBFC - Peer to Peer Lending Platform, aliases: [nbfc-p2p, p2p platform, peer to peer lending platform]}
+  hfc: {name: Housing Finance Company, aliases: [hfc, hfcs, housing finance company, housing finance companies]}
+  cic: {name: Core Investment Company, aliases: [cic, cics, core investment company]}
+  nbfc-factor: {name: NBFC - Factor, aliases: [nbfc-factor, factor, nbfc factors]}
+  sbr-other: {name: "Other NBFC type (IFC, IDF, ARC, SPD, Mortgage Guarantee Company)", aliases: [nbfc-ifc, idf-nbfc, arc, spd, mortgage guarantee company, nbfc-mgc]}
+  bank: {name: Commercial Bank, aliases: [bank, banks, commercial bank, commercial banks, scheduled commercial bank]}
+  cooperative-bank: {name: Co-operative Bank, aliases: [ucb, ucbs, urban co-operative bank, co-operative bank, cooperative bank, rcb]}
+  lsp: {name: Lending Service Provider, aliases: [lsp, lsps, lending service provider, lending service providers]}
+  dla: {name: Digital Lending App, aliases: [dla, dlas, digital lending app, digital lending apps]}
+  service-provider: {name: Outsourced service provider, aliases: [service provider, service providers, third-party service provider]}
+  recovery-agent: {name: Recovery Agent, aliases: [recovery agent, recovery agents]}
+  credit-information-company: {name: Credit Information Company, aliases: [credit information company, credit information companies, credit bureau]}
+  originator: {name: Originator (securitisation or credit transfer), aliases: [originator, originators, transferor]}
+  spe: {name: Special Purpose Entity, aliases: [spe, spes, special purpose entity]}
+  borrower: {name: Borrower / Customer, aliases: [borrower, borrowers, customer, customers]}
+  guarantor: {name: Guarantor, aliases: [guarantor, guarantors]}
+
+Product:
+  digital-loan: {name: Digital loan, aliases: [digital lending, digital loan, digital loans]}
+  gold-loan: {name: Loan against gold or silver, aliases: [gold loan, gold loans, loan against gold, loans against gold jewellery, lending against gold]}
+  co-lending: {name: Co-lending, aliases: [co-lending, co-lending arrangement, cla]}
+  microfinance-loan: {name: Microfinance loan, aliases: [microfinance loan, microfinance loans]}
+  credit-card: {name: Credit card, aliases: [credit card, credit cards]}
+  housing-loan: {name: Housing loan, aliases: [housing loan, housing loans, home loan]}
+  vehicle-loan: {name: Vehicle loan, aliases: [vehicle loan, vehicle loans]}
+  personal-loan: {name: Personal or consumer loan, aliases: [personal loan, personal loans, consumer credit]}
+  msme-loan: {name: MSME loan, aliases: [msme loan, msme, msmes, loans to msmes]}
+  loan-against-securities: {name: Loan against shares or securities, aliases: [loan against shares, loans against securities, ipo financing]}
+  floating-rate-loan: {name: Floating rate loan, aliases: [floating rate loan, floating rate loans, floating rate term loans]}
+  securitisation: {name: Securitisation exposure, aliases: [securitisation, securitisation transaction, securitisation exposure]}
+  loan-transfer: {name: Transfer of loan exposures, aliases: [transfer of loans, loan transfer, transfer of loan exposures]}
+  p2p-loan: {name: Peer to peer loan, aliases: [p2p loan, peer to peer loan, peer to peer lending]}
+  dlg: {name: Default loss guarantee, aliases: [dlg, default loss guarantee]}
+  bridge-loan: {name: Bridge loan, aliases: [bridge loan, bridge finance]}

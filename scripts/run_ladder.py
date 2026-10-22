@@ -31,7 +31,7 @@ from app.retrieval.vector_store import LocalVectorStore, is_current_guidance  # 
 
 CANDIDATES = 30
 COHERE_PRICE_PER_SEARCH = 0.002  # USD, Cohere list price for rerank-v3.5 ($2 per 1,000 searches)
-BASE = {"retriever": "rung0", "filter": "off", "rerank": "none"}
+BASE = {"retriever": "rung0", "filter": "off", "rerank": "none", "graph": "off"}
 RUNGS = [  # (name, parent, the one setting it changes)
     ("rung0", None, {}),
     ("bm25", "rung0", {"retriever": "bm25"}),
@@ -41,6 +41,7 @@ RUNGS = [  # (name, parent, the one setting it changes)
     ("hybrid+as-of", "hybrid", {"filter": "as_of"}),
     ("rerank-cohere", "hybrid+as-of", {"rerank": "cohere"}),
     ("rerank-bge", "hybrid+as-of", {"rerank": "bge"}),
+    ("graph", "hybrid+as-of", {"graph": "refers_to"}),  # Phase 4 fair test: graph on vs off
 ]
 
 
@@ -61,6 +62,7 @@ def main() -> None:
     parser.add_argument("--rungs", nargs="*", help="Run only these rungs (default: all).")
     parser.add_argument("--cohere-trial", action="store_true", help="The Cohere key is a free trial key (no charge).")
     parser.add_argument("--hybrid-dense", choices=["openai", "bge"], default="openai")
+    parser.add_argument("--graph-file", type=Path, help="Default: <corpus>/graph/graph.json")
     parser.add_argument("--out", type=Path, default=ROOT / "data" / "evaluation" / "ladder-dev.json")
     args = parser.parse_args()
     settings = Settings()
@@ -96,6 +98,11 @@ def main() -> None:
     if "bge" in rerank_needed:
         rerankers["bge"] = ladder.BgeReranker()
 
+    expand = None
+    if any(plan[name]["graph"] != "off" for name in names):
+        from app.graph import ontology
+        expand = ladder.GraphExpansion(ontology.load(args.graph_file or args.corpus_dir / "graph" / "graph.json"), chunks)
+
     def ranking(config: dict, query: str) -> list[int]:
         if config["retriever"] == "rung0":
             return [by_id[item.chunk_id] for item in store.search(query, top_k=len(chunks), current_only=False)]
@@ -114,6 +121,8 @@ def main() -> None:
             day = date_of(question) or today
             started = time.perf_counter()
             order = ranking(config, question["question"])
+            if config["graph"] == "refers_to":
+                order = expand(order)
             if config["filter"] == "as_of":
                 order = [index for index in order if is_current_guidance(rows[index], day)]
             order = order[:CANDIDATES]
@@ -143,7 +152,7 @@ def main() -> None:
             "withdrawn_trap_leak@5": {"numerator": sum(leaks), "denominator": len(leaks)},
             "latency_ms": {"p50": round(statistics.median(latencies), 1), "p95": round(cuts[18], 1)},
             "paid_usage": {"openai_query_tokens": tokens, "cohere_search_units": units},
-            "cost_per_query_usd": round(cost / len(questions), 6),
+            "cost_per_query_usd": round(cost / len(questions), 9),
             "by_type": {kind: {**summarise(value["ranks"]),
                                "ndcg@10": round(statistics.mean(value["ndcg"]), 4) if value["ndcg"] else None}
                         for kind, value in sorted(by_type.items())},

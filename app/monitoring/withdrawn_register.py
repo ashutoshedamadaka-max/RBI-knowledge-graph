@@ -65,19 +65,30 @@ def parse_register(page: str) -> list[RegisterEntry]:
     return entries
 
 
-def apply_register(ingestion: IngestionService, entries: list[RegisterEntry], checked_at: datetime) -> list[str]:
-    """Withdraw every current corpus document the register lists. Returns their document IDs.
-
-    Matched by any printed reference number, or by the RBI page address. A document that is
-    already withdrawn, repealed or superseded keeps its status and evidence.
-    """
+def match_register(documents: list, entries: list[RegisterEntry]) -> dict[str, RegisterEntry]:
+    """The register row for each listed document, by any printed reference number or the RBI page address."""
     by_key = {key: entry for entry in entries for key in entry.keys}
     by_url = {DocumentManifest.source_key(entry.page_url): entry for entry in entries if entry.page_url}
-    withdrawn = []
-    for document in ingestion.list_documents():
+    matched = {}
+    for document in documents:
         entry = next((by_key[key] for key in document.circular_numbers if key in by_key), None)
         if entry is None and document.source_url:
             entry = by_url.get(DocumentManifest.source_key(document.source_url))
+        if entry is not None:
+            matched[document.document_id] = entry
+    return matched
+
+
+def apply_register(ingestion: IngestionService, entries: list[RegisterEntry], checked_at: datetime) -> list[str]:
+    """Withdraw every current corpus document the register lists. Returns their document IDs.
+
+    A document that is already withdrawn, repealed or superseded keeps its status and evidence.
+    """
+    documents = ingestion.list_documents()
+    matched = match_register(documents, entries)
+    withdrawn = []
+    for document in documents:
+        entry = matched.get(document.document_id)
         if entry is None:
             continue
         if document.lifecycle not in NON_OPERATIVE:

@@ -1,18 +1,19 @@
 {
-  "built_at": "2026-10-21T07:16:48.081450+00:00",
-  "vector_backend": "postgres",
+  "built_at": "2026-10-21T13:51:26.350301+00:00",
+  "vector_backend": "filesystem",
   "documents": 88,
   "lifecycle_counts": {
     "WITHDRAWN": 72,
-    "REVIEW_REQUIRED": 16
+    "ACTIVE": 16
   },
   "directions_from_pdfs": 16,
   "predecessors_selected": 72,
   "withdrawn_by_register": 0,
+  "approved_by_reviewer": 16,
   "linking": {
-    "links_created": 135,
+    "links_created": 48,
     "auto_trusted": 0,
-    "review_required": 135,
+    "review_required": 48,
     "switches_applied": 0,
     "failures": []
   },

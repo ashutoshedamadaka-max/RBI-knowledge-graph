@@ -160,3 +160,33 @@ def ndcg_at(found_texts_urls: list[tuple[str, str]], gold: list[dict], k: int = 
             dcg += 1 / math.log2(rank + 1)
     ideal = sum(1 / math.log2(rank + 1) for rank in range(1, min(len(gold), k) + 1))
     return dcg / ideal if ideal else 0.0
+
+
+class GraphExpansion:
+    """After the top results, add the paragraphs they cite (REFERS_TO), before the rest of the ranking."""
+
+    def __init__(self, graph, chunks: list, head: int = 5) -> None:
+        self.graph, self.head = graph, head
+        by_document = defaultdict(list)
+        for index, chunk in enumerate(chunks):
+            by_document[chunk.document_id].append(index)
+        self.chunk_of, self.provisions_in = {}, defaultdict(list)
+        for node, data in graph.nodes(data=True):
+            if data["type"] != "Provision":
+                continue
+            start = normalise(data["text"])[:60]
+            index = next((i for i in by_document[data["document_id"]] if start in normalise(chunks[i].text)), None)
+            if index is not None:
+                self.chunk_of[node] = index
+                self.provisions_in[index].append(node)
+
+    def __call__(self, order: list[int]) -> list[int]:
+        top = order[:self.head]
+        added = []
+        for index in top:
+            for provision in self.provisions_in[index]:
+                for _, target, data in self.graph.out_edges(provision, data=True):
+                    cited = self.chunk_of.get(target) if data["type"] == "REFERS_TO" else None
+                    if cited is not None and cited not in top and cited not in added:
+                        added.append(cited)
+        return top + added + [index for index in order[self.head:] if index not in added]

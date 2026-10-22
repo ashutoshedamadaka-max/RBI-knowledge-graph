@@ -1,0 +1,261 @@
+{
+  "generated_at": "2026-10-22T04:45:27.159165+00:00",
+  "questions": 118,
+  "gold_sentences": 105,
+  "includes_unreviewed_drafts": true,
+  "chunks": 2754,
+  "chunkers": [
+    "structure"
+  ],
+  "candidates": 30,
+  "hybrid_dense": "openai",
+  "models": {
+    "openai": "openai/text-embedding-3-small",
+    "bge": "BAAI/bge-base-en-v1.5",
+    "cohere": "cohere/rerank-v3.5",
+    "bge_rerank": "BAAI/bge-reranker-base"
+  },
+  "cohere_trial_key": false,
+  "prices_usd": {
+    "openai_per_million_tokens": 0.02,
+    "cohere_per_search": 0.002
+  },
+  "corpus_embedding_tokens_this_run": {
+    "openai": 0
+  },
+  "rungs": [
+    {
+      "name": "hybrid+as-of",
+      "parent": "hybrid",
+      "change": {
+        "filter": "as_of"
+      }
+    },
+    {
+      "name": "graph",
+      "parent": "hybrid+as-of",
+      "change": {
+        "graph": "refers_to"
+      }
+    }
+  ],
+  "results": {
+    "hybrid+as-of": {
+      "config": {
+        "retriever": "hybrid",
+        "filter": "as_of",
+        "rerank": "none",
+        "graph": "off"
+      },
+      "recall@5": {
+        "value": 0.8762,
+        "numerator": 92,
+        "denominator": 105
+      },
+      "recall@10": {
+        "value": 0.8952,
+        "numerator": 94,
+        "denominator": 105
+      },
+      "mrr": 0.6809,
+      "ndcg@10": 0.7677,
+      "withdrawn_trap_leak@5": {
+        "numerator": 0,
+        "denominator": 13
+      },
+      "latency_ms": {
+        "p50": 1823.3,
+        "p95": 5180.4
+      },
+      "paid_usage": {
+        "openai_query_tokens": 2576,
+        "cohere_search_units": 0
+      },
+      "cost_per_query_usd": 4.37e-07,
+      "by_type": {
+        "applies_to": {
+          "recall@5": {
+            "value": 0.7,
+            "numerator": 14,
+            "denominator": 20
+          },
+          "recall@10": {
+            "value": 0.8,
+            "numerator": 16,
+            "denominator": 20
+          },
+          "mrr": 0.5988,
+          "ndcg@10": 0.6476
+        },
+        "change_over_time": {
+          "recall@5": {
+            "value": 1.0,
+            "numerator": 17,
+            "denominator": 17
+          },
+          "recall@10": {
+            "value": 1.0,
+            "numerator": 17,
+            "denominator": 17
+          },
+          "mrr": 0.7059,
+          "ndcg@10": 0.7797
+        },
+        "false_premise": {
+          "recall@5": {
+            "value": 1.0,
+            "numerator": 11,
+            "denominator": 11
+          },
+          "recall@10": {
+            "value": 1.0,
+            "numerator": 11,
+            "denominator": 11
+          },
+          "mrr": 1.0,
+          "ndcg@10": 1.0
+        },
+        "multi_hop": {
+          "recall@5": {
+            "value": 0.8462,
+            "numerator": 22,
+            "denominator": 26
+          },
+          "recall@10": {
+            "value": 0.8462,
+            "numerator": 22,
+            "denominator": 26
+          },
+          "mrr": 0.5411,
+          "ndcg@10": 0.7476
+        },
+        "single_fact": {
+          "recall@5": {
+            "value": 0.9032,
+            "numerator": 28,
+            "denominator": 31
+          },
+          "recall@10": {
+            "value": 0.9032,
+            "numerator": 28,
+            "denominator": 31
+          },
+          "mrr": 0.7242,
+          "ndcg@10": 0.7646
+        }
+      }
+    },
+    "graph": {
+      "config": {
+        "retriever": "hybrid",
+        "filter": "as_of",
+        "rerank": "none",
+        "graph": "refers_to"
+      },
+      "recall@5": {
+        "value": 0.8952,
+        "numerator": 94,
+        "denominator": 105
+      },
+      "recall@10": {
+        "value": 0.9143,
+        "numerator": 96,
+        "denominator": 105
+      },
+      "mrr": 0.6878,
+      "ndcg@10": 0.7752,
+      "withdrawn_trap_leak@5": {
+        "numerator": 0,
+        "denominator": 13
+      },
+      "latency_ms": {
+        "p50": 1696.6,
+        "p95": 3646.2
+      },
+      "paid_usage": {
+        "openai_query_tokens": 2576,
+        "cohere_search_units": 0
+      },
+      "cost_per_query_usd": 4.37e-07,
+      "by_type": {
+        "applies_to": {
+          "recall@5": {
+            "value": 0.7,
+            "numerator": 14,
+            "denominator": 20
+          },
+          "recall@10": {
+            "value": 0.8,
+            "numerator": 16,
+            "denominator": 20
+          },
+          "mrr": 0.5988,
+          "ndcg@10": 0.6476
+        },
+        "change_over_time": {
+          "recall@5": {
+            "value": 1.0,
+            "numerator": 17,
+            "denominator": 17
+          },
+          "recall@10": {
+            "value": 1.0,
+            "numerator": 17,
+            "denominator": 17
+          },
+          "mrr": 0.7059,
+          "ndcg@10": 0.7797
+        },
+        "false_premise": {
+          "recall@5": {
+            "value": 1.0,
+            "numerator": 11,
+            "denominator": 11
+          },
+          "recall@10": {
+            "value": 1.0,
+            "numerator": 11,
+            "denominator": 11
+          },
+          "mrr": 1.0,
+          "ndcg@10": 1.0
+        },
+        "multi_hop": {
+          "recall@5": {
+            "value": 0.9231,
+            "numerator": 24,
+            "denominator": 26
+          },
+          "recall@10": {
+            "value": 0.9231,
+            "numerator": 24,
+            "denominator": 26
+          },
+          "mrr": 0.5688,
+          "ndcg@10": 0.801
+        },
+        "single_fact": {
+          "recall@5": {
+            "value": 0.9032,
+            "numerator": 28,
+            "denominator": 31
+          },
+          "recall@10": {
+            "value": 0.9032,
+            "numerator": 28,
+            "denominator": 31
+          },
+          "mrr": 0.7242,
+          "ndcg@10": 0.7646
+        }
+      }
+    }
+  },
+  "run_manifest": {
+    "git_commit": "a992dc2776bd5b0d3e4453e18485dfc1b48a6ba8",
+    "working_tree_dirty": true,
+    "corpus_fingerprint": "d9a245a5cf6cf011846c13de4585b4fa7aeca2179994747b898f19083a54da18",
+    "dev_questions_sha256": "15867eb25dc08e6166045edd9e01bb7cfcc1985370b92524413f4eeb8688571f",
+    "as_of_today": "2026-10-22"
+  }
+}

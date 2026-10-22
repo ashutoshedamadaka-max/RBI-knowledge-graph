@@ -1,0 +1,29 @@
+{
+  "nodes": {
+    "Document": 89,
+    "Authority": 4,
+    "Provision": 1968,
+    "DefinedTerm": 100
+  },
+  "edges": {
+    "ISSUED_BY": 88,
+    "SUPERSEDES": 4,
+    "PART_OF": 1968,
+    "REFERS_TO": 453,
+    "DEFINES": 138,
+    "WITHDRAWS": 72
+  },
+  "failures": {
+    "cross_reference_to_missing_paragraph": 34,
+    "reference_to_document_outside_corpus": 260,
+    "paragraph_reference_in_amendment": 35
+  },
+  "run_manifest": {
+    "built_at": "2026-10-22T04:29:26.203489+00:00",
+    "git_commit": "a992dc2776bd5b0d3e4453e18485dfc1b48a6ba8",
+    "working_tree_dirty": true,
+    "corpus_fingerprint": "d9a245a5cf6cf011846c13de4585b4fa7aeca2179994747b898f19083a54da18",
+    "register_sha256": "508bd479f599ebda9579d995739f1e0dc32e5a03e054a833f7a56e677cbd9800",
+    "llm_edges_sha256": null
+  }
+}
