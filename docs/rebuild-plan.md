@@ -341,3 +341,17 @@ Enabling the pgvector extension on the production Supabase database and deployin
 **Phase 3 — approved by Ashu on 22 October 2026** (ADR-026; ladder `data/evaluation/ladder-dev.json`, abstention and router `data/evaluation/abstention-dev.json`).
 
 **Phase 4 — approved by Ashu on 22 October 2026** (ADR-027; quality `data/evaluation/graph-quality.json`, graph on/off `data/evaluation/ladder-graph-dev.json`). The APPLIES_TO filter was measured on 20 fresh paragraphs (drafted by Claude, checked by Ashu): precision 6/18 after the filter, against 6/57 before.
+
+**Phase 5 — results on the held-out test split (22 October 2026), gate open.** `data/evaluation/answers-test-gpt-4o-mini.json`, commit `aefd4d1`, gpt-4o-mini, 63 questions (drafted; 30 dev questions sampled for review).
+
+| Measure | Result (95% range) |
+|---|---|
+| Right RBI sentence cited | 51/57 (81–96%) |
+| Answerable questions wrongly refused | 1/49 (0–6%) |
+| Withdrawn rule cited on trap questions | 0/7 |
+| Unanswerable questions refused | 5/7 (29–100%). The two answered, q168 and q174, have unreviewed labels; the dev review showed such labels can be wrong. |
+| Past-date questions citing the right sentence | 7/10, the weakest type |
+| Claims, by the checker (not validated; it misses about two-thirds of over-generalised claims) | 145 supported, 41 partly, 18 not, 12 not checked (4 answers fell back to quoting) |
+| Cost per question (answer + claim check + re-ranking at list price) | $0.0036 |
+
+The first test run was aborted and discarded unseen; see the test-split ledger. Phase 6 began at Ashu's instruction ("once this is done, begin phase 6") while this gate is open.
