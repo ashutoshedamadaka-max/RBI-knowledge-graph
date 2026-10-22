@@ -221,6 +221,35 @@ async def query_stream(request: Request, payload: QueryRequest) -> StreamingResp
     )
 
 
+@router.get("/quality")
+def quality() -> dict:
+    """The quality dashboard's numbers, read only from saved evaluation runs."""
+    from app.api.quality import quality_report
+
+    return quality_report()
+
+
+@router.get("/graph/map")
+def graph_map(request: Request) -> dict:
+    from app.api.graph_map import graph_for, overview
+
+    graph = graph_for(request.app.state.settings.data_dir)
+    if graph is None:
+        raise HTTPException(status_code=404, detail="The knowledge graph has not been built for this corpus yet.")
+    return overview(graph)
+
+
+@router.get("/graph/node/{node_id:path}")
+def graph_node(node_id: str, request: Request) -> dict:
+    from app.api.graph_map import graph_for, node_detail
+
+    graph = graph_for(request.app.state.settings.data_dir)
+    detail = node_detail(graph, node_id) if graph is not None else None
+    if detail is None:
+        raise HTTPException(status_code=404, detail="No such node in the knowledge graph.")
+    return detail
+
+
 @router.get("/metrics")
 def metrics(request: Request) -> dict[str, float | int]:
     return MetricsService(CostTracker(request.app.state.settings.runtime_dir / "cost_events.json")).snapshot()
