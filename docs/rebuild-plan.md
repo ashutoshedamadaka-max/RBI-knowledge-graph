@@ -340,4 +340,4 @@ Enabling the pgvector extension on the production Supabase database and deployin
 
 **Phase 3 — approved by Ashu on 22 October 2026** (ADR-026; ladder `data/evaluation/ladder-dev.json`, abstention and router `data/evaluation/abstention-dev.json`).
 
-**Phase 4 — approved by Ashu on 22 October 2026** (ADR-027; quality `data/evaluation/graph-quality.json`, graph on/off `data/evaluation/ladder-graph-dev.json`). Optional follow-up: 20 fresh paragraphs to measure the APPLIES_TO filter. Until they are labelled, its fresh-label precision is reported as "not yet measured".
+**Phase 4 — approved by Ashu on 22 October 2026** (ADR-027; quality `data/evaluation/graph-quality.json`, graph on/off `data/evaluation/ladder-graph-dev.json`). The APPLIES_TO filter was measured on 20 fresh paragraphs (drafted by Claude, checked by Ashu): precision 6/18 after the filter, against 6/57 before.

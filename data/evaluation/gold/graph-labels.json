@@ -959,6 +959,316 @@
       "text_sha256": "2bbc32f7f17492a3fae86235eb87ceba718332c132cda98e69d3bdd6969463bc",
       "labelled_at": "2026-10-22T06:05:10.886293+00:00",
       "source": "model-drafted, reviewed by Ashu"
+    },
+    "doc_034d60929469ff1a#2": {
+      "applies_to": [],
+      "requires": [],
+      "defines": [],
+      "refers_to": [],
+      "sentences": 1,
+      "text_sha256": "73c69236997525471624720b7fd0ebce2142d6e8d85b65353371560d2f505592",
+      "labelled_at": "2026-10-22T06:23:15.397248+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_120d4c9ff627069c#31": {
+      "applies_to": [],
+      "requires": [
+        1,
+        2
+      ],
+      "defines": [],
+      "refers_to": [],
+      "sentences": 2,
+      "text_sha256": "186a16b6fdc7c698199f6eccaf1d4b53564322321c5a7eee5ba79404496746fd",
+      "labelled_at": "2026-10-22T06:23:15.397248+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_12f703cfabeb2d1d#107": {
+      "applies_to": [],
+      "requires": [],
+      "defines": [],
+      "refers_to": [],
+      "sentences": 6,
+      "text_sha256": "563275fdcf9391bfb747dcc5b140439d14791e4a583b72ceb68bed0be2703a56",
+      "labelled_at": "2026-10-22T06:23:15.397248+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_12f703cfabeb2d1d#92": {
+      "applies_to": [
+        "nbfc",
+        "borrower",
+        "microfinance-loan"
+      ],
+      "requires": [
+        1,
+        2
+      ],
+      "defines": [],
+      "refers_to": [],
+      "sentences": 3,
+      "text_sha256": "1424e7db9ef484abc355d97fef0e27e1a0ab6134c4ba8a488df61bcacc19a2a7",
+      "labelled_at": "2026-10-22T06:23:15.397248+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_2706017d8d62cce0#4": {
+      "applies_to": [
+        "credit-information-company",
+        "borrower",
+        "microfinance-loan"
+      ],
+      "requires": [
+        1,
+        3,
+        4
+      ],
+      "defines": [],
+      "refers_to": [
+        2
+      ],
+      "sentences": 4,
+      "text_sha256": "aae079827e8fb3d53a431a264e66d5e5c44109ce238358d02a36eab6cfd584f3",
+      "labelled_at": "2026-10-22T06:23:15.397248+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_6dc49b3fd58281ba#19": {
+      "applies_to": [
+        "borrower"
+      ],
+      "requires": [
+        2,
+        3,
+        4
+      ],
+      "defines": [],
+      "refers_to": [
+        1,
+        2,
+        3,
+        4
+      ],
+      "sentences": 4,
+      "text_sha256": "81d52c1d21ffd252b906df6d037d22a36d97e9c58b47e83907610d21dc669494",
+      "labelled_at": "2026-10-22T06:23:15.397248+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_6dc49b3fd58281ba#9": {
+      "applies_to": [
+        "borrower"
+      ],
+      "requires": [
+        1,
+        3,
+        5,
+        7,
+        8,
+        11
+      ],
+      "defines": [
+        3
+      ],
+      "refers_to": [
+        10
+      ],
+      "sentences": 11,
+      "text_sha256": "a6bc22f64fef6597bce07d144f2c0454af3bd1ff883b683b61dd438ac2d8a35e",
+      "labelled_at": "2026-10-22T06:23:15.397248+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_7b2049f104535ba8#76": {
+      "applies_to": [
+        "credit-card"
+      ],
+      "requires": [
+        1
+      ],
+      "defines": [],
+      "refers_to": [
+        1
+      ],
+      "sentences": 1,
+      "text_sha256": "cd5fc68aa4dbcbf1948730ee0e0f1f24de30499394f974892a72a2fbcc135ec9",
+      "labelled_at": "2026-10-22T06:23:15.397248+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_877909011f8613af#105": {
+      "applies_to": [
+        "spe",
+        "securitisation"
+      ],
+      "requires": [],
+      "defines": [],
+      "refers_to": [],
+      "sentences": 1,
+      "text_sha256": "dd1094f52135c789949a336fd84758978b8865cc9bebb59882ef153998875d9d",
+      "labelled_at": "2026-10-22T06:23:15.397248+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_907075fb62ceeefe#135": {
+      "applies_to": [],
+      "requires": [],
+      "defines": [],
+      "refers_to": [
+        1
+      ],
+      "sentences": 1,
+      "text_sha256": "c51a650f1a45f2c625339ab066d72a18a2e641d9957ea7300b47cf572fe373ed",
+      "labelled_at": "2026-10-22T06:23:15.397248+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_907075fb62ceeefe#162": {
+      "applies_to": [],
+      "requires": [],
+      "defines": [],
+      "refers_to": [],
+      "sentences": 4,
+      "text_sha256": "9a0d1a27e430118b413803640c299ca95098cbc28120cb5b2ab13afa6a13a7f4",
+      "labelled_at": "2026-10-22T06:23:15.397248+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_9513254ffe79de18#33": {
+      "applies_to": [
+        "borrower"
+      ],
+      "requires": [
+        1,
+        2,
+        3
+      ],
+      "defines": [],
+      "refers_to": [],
+      "sentences": 3,
+      "text_sha256": "f427026623704b44c68744086e6ec772af53a51a451800abb4bc4a8026771240",
+      "labelled_at": "2026-10-22T06:23:15.397248+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_95d3161bacc1e327#18": {
+      "applies_to": [
+        "cooperative-bank",
+        "borrower"
+      ],
+      "requires": [
+        2,
+        4
+      ],
+      "defines": [],
+      "refers_to": [],
+      "sentences": 4,
+      "text_sha256": "9d11115eab62089745381ca065796bd9c6a9bae2a6281da4cc009bbeec3e9197",
+      "labelled_at": "2026-10-22T06:23:15.398761+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_afd64b6ca83d03db#1": {
+      "applies_to": [
+        "nbfc",
+        "hfc",
+        "bank",
+        "cooperative-bank",
+        "digital-loan"
+      ],
+      "requires": [],
+      "defines": [],
+      "refers_to": [],
+      "sentences": 5,
+      "text_sha256": "4ff3071d84a82aaa8e601d0493ef240c2f64b2159f2962d84cb53b7991694ebe",
+      "labelled_at": "2026-10-22T06:23:15.398761+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_bc55e72c851cf8e3#47": {
+      "applies_to": [
+        "originator",
+        "spe",
+        "securitisation"
+      ],
+      "requires": [
+        3,
+        5,
+        6,
+        7
+      ],
+      "defines": [
+        1
+      ],
+      "refers_to": [
+        4
+      ],
+      "sentences": 7,
+      "text_sha256": "d077205e3569f4b81af510bd0789abb1f998b000c198d13be56d4f76a1f347a1",
+      "labelled_at": "2026-10-22T06:23:15.398761+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_bc55e72c851cf8e3#92": {
+      "applies_to": [
+        "securitisation"
+      ],
+      "requires": [
+        3,
+        4
+      ],
+      "defines": [
+        2,
+        5
+      ],
+      "refers_to": [],
+      "sentences": 6,
+      "text_sha256": "2ff32300fe8e6595295ce5fc0c7aa3a8bc9a0d139be80255e7bb4947e38987c4",
+      "labelled_at": "2026-10-22T06:23:15.398761+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_bc55e72c851cf8e3#98": {
+      "applies_to": [
+        "bank",
+        "securitisation"
+      ],
+      "requires": [],
+      "defines": [],
+      "refers_to": [
+        1
+      ],
+      "sentences": 1,
+      "text_sha256": "d4e6fbde6464ad8044bdce576b9d4c956eba6abd88fca2aad6aabce44dc48cf0",
+      "labelled_at": "2026-10-22T06:23:15.399266+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_bf8aefb7519a699b#2": {
+      "applies_to": [],
+      "requires": [],
+      "defines": [],
+      "refers_to": [
+        2,
+        5
+      ],
+      "sentences": 5,
+      "text_sha256": "ff070c9786a2d895b3ddfdf8e67a49d4a8799a6eefa15a78bc3f74b659efacbb",
+      "labelled_at": "2026-10-22T06:23:15.399266+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_ce5de4dbdceb04e1#2~2": {
+      "applies_to": [],
+      "requires": [],
+      "defines": [],
+      "refers_to": [],
+      "sentences": 1,
+      "text_sha256": "bbca9dcded4b0fda07340658557b42b57e2b579c52ae87e842c3b6bd56ddc7d5",
+      "labelled_at": "2026-10-22T06:23:15.399266+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
+    },
+    "doc_ce5de4dbdceb04e1#80": {
+      "applies_to": [
+        "sbr-other"
+      ],
+      "requires": [
+        3,
+        4
+      ],
+      "defines": [],
+      "refers_to": [
+        2,
+        3
+      ],
+      "sentences": 4,
+      "text_sha256": "f4bbc7f675eff2791e2f9d587494957ed5080867fec80240cc32f15865874005",
+      "labelled_at": "2026-10-22T06:23:15.399266+00:00",
+      "source": "fresh: model-drafted, reviewed by Ashu"
     }
   },
   "fresh_seed": 6,

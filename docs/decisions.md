@@ -307,3 +307,5 @@ Three rules guard against wrong edges:
   | Claude-drafted, checked (27 paragraphs) | 16/73 | 16/31 | 16/35 | 16/35 |
 
 **Trade-off:** the filter misses entities that a provision addresses only implicitly, so recall falls.
+
+**ADR-027 result on 20 fresh paragraphs (22 October 2026):** these labels were drafted by Claude and checked by Ashu, and none of the paragraphs were used for tuning. APPLIES_TO precision rose from 6/57 before the filter to 6/18 after it. Recall stayed at 6/26. The filter removes wrong edges without losing right ones. Even so, only about 1 in 3 remaining APPLIES_TO edges is correct, so the edge type stays out of answers and filters (decision 5).
