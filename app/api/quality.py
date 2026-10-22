@@ -53,7 +53,7 @@ def failures(records: list[dict], limit: int = 12) -> list[dict]:
         if reasons or flagged:
             out.append({"id": record["id"], "type": record["type"], "question": questions.get(record["id"]), "reasons": reasons,
                         "flagged_claims": [{"text": claim["text"], "verdict": claim["verdict"]} for claim in flagged[:2]]})
-    return out[:limit]
+    return sorted(out, key=lambda item: not item["reasons"])[:limit]  # real misses first, then flagged sentences
 
 
 def spend() -> dict:
