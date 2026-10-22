@@ -227,3 +227,34 @@ An earlier end date is never replaced by a later one.
 **Why:** Previously the as-of filter used the document's status today. A question dated 2024 therefore skipped every rule that has since been withdrawn, which is almost every rule that applied in 2024.
 
 **Trade-off:** For withdrawals detected only by the watermark, the window can run past RBI's actual withdrawal date, by up to one check interval for new withdrawals. Answers for those dates still state the detection date (D7).
+
+## ADR-025: The knowledge graph is built from the corpus in one pass, cheapest evidence first
+
+**Decision:** `scripts/build_graph.py` builds the Phase 4 graph from a stored corpus. The graph has seven node types: Document, Provision, RegulatedEntity, Product, Obligation, DefinedTerm and Authority. Edges come from these sources, cheapest first:
+
+| Edge | Source | Model call? |
+|---|---|---|
+| PART_OF | The structure chunker's paragraph segmentation | No |
+| SUPERSEDES, AMENDS | The link store. Content-matched CANDIDATE links and rejected links are excluded. | No |
+| WITHDRAWS | RBI's register of withdrawn circulars, quoting the register row | No |
+| REFERS_TO | Patterns: "paragraph N", and circular numbers that match a corpus document | No |
+| DEFINES | Pattern: '"term" means …' | No |
+| ISSUED_BY | Issuing department. This is D10, recommended and awaiting Ashu's confirmation. | No |
+| APPLIES_TO, REQUIRES | gpt-4o-mini, one provision per call, entities picked from `config/graph/entities.yaml` | Yes |
+
+Every pattern and LLM edge quotes text from its provision. An LLM edge is dropped if its quote isn't in the provision or its entity isn't on the list, and every drop is counted in the build report.
+
+Three rules guard against wrong edges:
+- In amendment documents, "paragraph N" means the amended document's paragraph. It is counted, never linked to the amendment's own paragraph.
+- REQUIRES edges from definitions paragraphs are dropped, and the drops are counted.
+- The 20 paragraphs used to write the extraction prompt are excluded from the 50-paragraph labelling sample.
+
+**Why:**
+- The brief asks for extraction cheapest and most reliable first, with quoted evidence.
+- A batch build can be measured, rebuilt and versioned as a whole. The old graph was filled in live, one chunk at a time, with unquoted sentence edges.
+- DEFINES uses a pattern rather than the LLM because RBI writes definitions in a fixed form. If Ashu's labels show the pattern's recall is poor, the LLM is the fallback.
+
+**Trade-off:**
+- The live ingestion path still feeds the old graph. The product switches to this graph when Phase 6 needs it.
+- Only numbered paragraphs become provisions. Preambles and unnumbered annex text get no provision nodes.
+- Numbered table rows in annexes do become provisions. They add noise, which the labelled sample will show.
