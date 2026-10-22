@@ -336,3 +336,15 @@ Three rules guard against wrong edges:
 **Trade-off:**
 - Citing the gold sentence doesn't prove the answer is right. Correctness on false-premise and two-paragraph questions rests on the validated checker plus Ashu's labels.
 - Reference answers for 32 trap and unanswerable questions are templates, tagged `reference_answer_source`.
+
+## ADR-029: The larger answer model is costed, not run
+
+**Decision (Ashu, 22 October 2026):** gpt-4o is not run on the question set. The Phase 5 report gives:
+- gpt-4o-mini's measured cost;
+- gpt-4o's projected cost for the same work: mini's measured input and output tokens at gpt-4o's list price ($2.50 and $10.00 per million tokens, against mini's $0.15 and $0.60). It is labelled as a projection.
+
+The write-up states that gpt-4o was not run, for cost. It says mini was sufficient only as far as mini's measured dev and test results support that.
+
+**Why:** cost optimisation. On the same tokens, gpt-4o costs about 16.7 times as much. Retrieval decides most of the answer quality, as the Phase 3 ladder showed, and the claim checker catches unsupported claims whichever model writes them.
+
+**Trade-off:** there is no measured answer-quality comparison between the two models. If mini's results show a gap (for example, false-premise questions it fails to correct), gpt-4o is the documented next step.
