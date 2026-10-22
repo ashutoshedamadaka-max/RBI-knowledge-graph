@@ -72,12 +72,12 @@ class ApprovedRetriever:
 
     def warm(self) -> None:
         """Build the indexes before the first question (called at start-up, in the background)."""
-        rows = [row["chunk"] for row in self.store._rows()]
+        rows = self.store._chunks()
         if rows:
             self._build(rows)
 
     def search(self, query: str, day: date, limit: int, filtered: bool = True) -> Retrieved:
-        rows = [row["chunk"] for row in self.store._rows()]
+        rows = self.store._chunks()
         if not rows or not query.strip():
             return Retrieved([], None)
         bm25, dense, expansion = self._build(rows)

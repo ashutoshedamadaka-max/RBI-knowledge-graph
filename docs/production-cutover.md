@@ -17,8 +17,8 @@ branch-backup step.
   `f16e1229fc17452ea871227c7e3f0ecdef87e0b014d4325f7b967acaa475fad1`.
 - Graph SHA-256 recorded by the held-out evaluation:
   `b3c81dbda4c6f52b7ec5c90d9cca50a1b059c68675d40219a149ab77370a3cc9`.
-- Python tests: 250 passed after schema isolation, the Supabase precision fix,
-  and credential-handling regression tests.
+- Python tests: 252 passed after schema isolation, the Supabase precision fix,
+  credential handling, and bounded-memory PostgreSQL reads/snapshots.
   The `web/` TypeScript check and production build also passed.
 
 ## Production preflight after keys were added
@@ -172,6 +172,26 @@ Deploy the subsequent credential-handling fix before another paid smoke test.
 It trims surrounding whitespace, rejects embedded whitespace, hides secrets in
 settings diagnostics, and records only failure types and HTTP statuses. Old log
 entries refer to revoked credentials; do not copy their contents into reports.
+
+The patched deployment `51525bd` (`dep-dbd1k23rjlhs73f1o0j0`) is live. Its
+streaming smoke test confirmed both replacement keys work: embeddings, graph
+expansion, in-force filtering, Cohere reranking, grounded generation, valid
+citations, partial answer events, and claim checking all ran successfully.
+The next historical query received a 502 when Render killed the process for
+exceeding its 512 MiB limit (`server_failed`, 14:17:52 UTC). Main remains
+unmerged pending a memory fix and the remaining live checks.
+
+The memory fix avoids decoding unused hash embeddings for hybrid retrieval,
+streams the legacy notice-search vectors in batches of 64, omits the unused
+vector snapshot in PostgreSQL mode, and limits BLAS worker threads. Read-only
+profiling on the production corpus measured snapshot-restore peak Python
+allocations falling from 177.2 to 63.7 MiB; metadata reads retain 13.6 MiB versus
+46.2 MiB with vectors. A streamed scan of all 2,754 vectors peaked at 9.0 MiB.
+These are allocation profiles, not live Render RSS or proof that the deployment
+fits its memory limit. Recheck live requests and Render events after deploying.
+The full Python suite passed (252 tests). Current and historical notice-search
+results on the production corpus also matched the previous code's exact chunk
+IDs and scores. Reports are saved under `data/runtime/cutover-verification/`.
 
 - [ ] Confirm staging, tested backup, saved Vercel settings, keys and the exact
   pushed branch SHA. Render must select `/service/data`, PostgreSQL,

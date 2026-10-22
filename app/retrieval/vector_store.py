@@ -65,6 +65,13 @@ class LocalVectorStore:
             _ROWS.update(key=key, rows=self._read())
         return _ROWS["rows"]
 
+    def _chunks(self) -> list[dict]:
+        """Metadata and text for hybrid retrieval, without legacy hash vectors."""
+        return [row["chunk"] for row in self._rows()]
+
+    def _search_rows(self):
+        return self._rows()
+
     def upsert(self, chunks: list[ChunkMetadata]) -> None:
         indexed = {row["chunk"]["chunk_id"]: row for row in self._read()}
         for chunk in chunks:
@@ -111,7 +118,7 @@ class LocalVectorStore:
         query_terms = self._keywords(query)
         matches = []
         day = as_of or clock.now().date()
-        for row in self._rows():
+        for row in self._search_rows():
             chunk = row["chunk"]
             if document_ids is not None and chunk["document_id"] not in document_ids:
                 continue
@@ -137,9 +144,9 @@ class LocalVectorStore:
         if not wanted:
             return {}
         members: dict[str, list[dict]] = {}
-        for row in self._rows():
-            if row["chunk"].get("parent_id") in wanted:
-                members.setdefault(row["chunk"]["parent_id"], []).append(row["chunk"])
+        for row in self._chunks():
+            if row.get("parent_id") in wanted:
+                members.setdefault(row["parent_id"], []).append(row)
         out = {}
         for chunk in chunks:
             siblings = sorted(members.get(chunk.parent_id, []), key=lambda item: item["chunk_index"])
@@ -158,10 +165,10 @@ class LocalVectorStore:
 
     def get_by_ids(self, chunk_ids: list[str]) -> list[ChunkMetadata]:
         wanted = set(chunk_ids)
-        return [ChunkMetadata.model_validate(row["chunk"]) for row in self._rows() if row["chunk"]["chunk_id"] in wanted]
+        return [ChunkMetadata.model_validate(row) for row in self._chunks() if row["chunk_id"] in wanted]
 
     def get_by_document_id(self, document_id: str) -> list[ChunkMetadata]:
-        return [ChunkMetadata.model_validate(row["chunk"]) for row in self._rows() if row["chunk"]["document_id"] == document_id]
+        return [ChunkMetadata.model_validate(row) for row in self._chunks() if row["document_id"] == document_id]
 
     def mark_document_current(self, document_id: str) -> None:
         rows = self._read()
@@ -241,6 +248,24 @@ class PostgresVectorStore(LocalVectorStore):
 
     def _rows(self) -> list[dict]:
         return self._read()  # the database is the source of truth on every read
+
+    def _chunks(self) -> list[dict]:
+        # Hybrid retrieval uses its cached dense matrix, not the legacy hash
+        # vectors. Decoding those arrays added ~33 MiB of Python objects per read
+        # for this corpus, plus database buffers, on the 512 MiB service.
+        with self._connect() as connection:
+            rows = connection.execute(self._query("SELECT chunk FROM {table} ORDER BY chunk_id"), binary=True).fetchall()
+        return [chunk for (chunk,) in rows]
+
+    def _search_rows(self):
+        # Rule-change notices still use the exact legacy hash scores. Stream
+        # their vectors in small batches instead of materializing the corpus.
+        with self._connect() as connection, connection.transaction():
+            with connection.cursor(name="chunk_search", binary=True) as cursor:
+                cursor.itersize = 64
+                cursor.execute(self._query("SELECT chunk, embedding FROM {table} ORDER BY chunk_id"))
+                for chunk, embedding in cursor:
+                    yield {"chunk": chunk, "embedding": embedding}
 
     def upsert(self, chunks: list[ChunkMetadata]) -> None:
         with self._connect() as connection, connection.cursor() as cursor:

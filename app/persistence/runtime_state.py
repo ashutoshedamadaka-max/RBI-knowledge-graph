@@ -29,6 +29,10 @@ class DurableRuntimeState:
         self.database_url = settings.database_url
         self.schema = settings.postgres_schema
         self.runtime_dir = settings.runtime_dir
+        # PostgreSQL chunks are authoritative in this mode. The legacy vectors
+        # snapshot is unused and must not be decoded at startup or on every sync.
+        self.file_names = tuple(name for name in self.file_names
+                                if name != "vectors.json" or settings.vector_backend != "postgres")
         self._saved_hashes: dict[str, str] = {}
         self._sync_lock = Lock()
 
@@ -43,13 +47,13 @@ class DurableRuntimeState:
         self.runtime_dir.mkdir(parents=True, exist_ok=True)
         with self._connection() as connection, connection.cursor() as cursor:
             self._ensure_schema(cursor)
-            cursor.execute(sql.SQL("SELECT state_key, payload FROM {}").format(self._table))
-            rows = {key: payload for key, payload in cursor.fetchall()}
-        for file_name in self.file_names:
-            payload = rows.get(file_name)
-            if payload is not None:
-                (self.runtime_dir / file_name).write_text(json.dumps(payload, indent=2))
-                self._saved_hashes[file_name] = hashlib.sha256((self.runtime_dir / file_name).read_bytes()).hexdigest()
+            cursor.execute(sql.SQL("SELECT state_key, payload FROM {} WHERE state_key = ANY(%s)").format(self._table),
+                           (list(self.file_names),))
+            for file_name, payload in cursor:
+                if payload is not None:
+                    content = json.dumps(payload, indent=2)
+                    (self.runtime_dir / file_name).write_text(content)
+                    self._saved_hashes[file_name] = hashlib.sha256((self.runtime_dir / file_name).read_bytes()).hexdigest()
 
     def sync(self) -> None:
         """Store changed repositories only, serializing concurrent snapshots."""

@@ -74,6 +74,26 @@ def test_isolated_stage_and_application_writes_preserve_old_state(connection, tm
     assert old_store._rows() == []
 
 
+def test_postgres_snapshots_leave_legacy_vector_state_untouched(connection, tmp_path):
+    conn, url = connection
+    old = backup()
+    restore_backup_to_scratch(conn, old)
+    stage(conn, candidate(), old)
+    settings = Settings(_env_file=None, data_dir=tmp_path / "postgres-runtime", database_url=url,
+                        postgres_schema="rbi_corpus_v2", vector_backend="postgres")
+    settings.runtime_dir.mkdir(parents=True)
+    legacy = settings.runtime_dir / "vectors.json"
+    legacy.write_text("This unused snapshot must never be parsed or replaced.")
+    state = DurableRuntimeState(settings)
+    state.restore()
+    assert legacy.read_text().startswith("This unused snapshot")
+    (settings.runtime_dir / "documents.json").write_text('[{"document_id":"new","reviewed":true}]')
+    state.sync()
+    assert conn.execute("SELECT payload FROM rbi_corpus_v2.rbi_runtime_state WHERE state_key='vectors.json'").fetchone()[0] == candidate()["rows"]
+    assert conn.execute("SELECT payload FROM rbi_corpus_v2.rbi_runtime_state WHERE state_key='documents.json'").fetchone()[0][0]["reviewed"]
+    assert PostgresVectorStore(url, schema="rbi_corpus_v2")._chunks() == [candidate()["rows"][0]["chunk"]]
+
+
 def test_failed_stage_rolls_back_all_new_objects(connection):
     conn, _ = connection
     old = backup()

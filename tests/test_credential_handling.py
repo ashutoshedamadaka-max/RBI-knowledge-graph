@@ -68,7 +68,7 @@ def test_query_and_rerank_failures_preserve_results_without_logging_headers(monk
     row = ChunkMetadata(chunk_id="c", document_id="d", document_title="Directions", page_number=1,
                         chunk_index=0, text="loan repayment limit", lifecycle="ACTIVE", authority_current=True).model_dump(mode="json")
     settings = Settings(_env_file=None, data_dir=tmp_path, openai_api_key=TOKEN, cohere_api_key=TOKEN)
-    retriever = pipeline.ApprovedRetriever(settings, SimpleNamespace(_rows=lambda: [{"chunk": row}]))
+    retriever = pipeline.ApprovedRetriever(settings, SimpleNamespace(_chunks=lambda: [row]))
     dense = SimpleNamespace(rank=Mock(side_effect=httpx.LocalProtocolError(TOKEN)))
     monkeypatch.setattr(retriever, "_build", lambda rows: (pipeline.BM25([row["text"]]), dense, None))
     monkeypatch.setattr(pipeline.CohereReranker, "rerank", Mock(side_effect=httpx.LocalProtocolError(TOKEN)))

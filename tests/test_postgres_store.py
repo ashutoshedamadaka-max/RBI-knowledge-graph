@@ -79,3 +79,18 @@ def test_stored_embeddings_round_trip_exactly(tmp_path, database_url) -> None:
     assert [row["embedding"] for row in pg._read()] == [
         row["embedding"] for row in sorted(file_store._read(), key=lambda row: row["chunk"]["chunk_id"])
     ]
+
+
+def test_hybrid_reads_remain_fresh_without_loading_hash_vectors(tmp_path, database_url, monkeypatch):
+    file_store, pg = both(tmp_path, database_url)
+    expected = sorted(file_store._chunks(), key=lambda row: row["chunk_id"])
+    assert pg._chunks() == expected
+    monkeypatch.setattr(pg, "_read", lambda: pytest.fail("Hybrid path loaded legacy hash vectors"))
+    assert pg.search("penal charges") == file_store.search("penal charges")
+    pg.apply_lifecycle("new", "WITHDRAWN")
+    assert next(row for row in pg._chunks() if row["chunk_id"] == "b1")["lifecycle"] == "WITHDRAWN"
+    assert pg.get_by_ids(["b1"])[0].lifecycle is DocumentLifecycle.WITHDRAWN
+    pg.upsert([item.model_copy(update={"parent_id": "shared", "chunk_index": index})
+               for index, item in enumerate(chunks()[:2])])
+    evidence = pg.get_by_document_id("old")
+    assert len(pg.sections(evidence)) == 2
