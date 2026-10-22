@@ -337,3 +337,7 @@ Enabling the pgvector extension on the production Supabase database and deployin
 **Phase 3 — gate open (not yet approved).** The ladder ran on the provisional dev questions (`data/evaluation/ladder-dev.json`, commit `b89613b`); the as-of fix is ADR-024. Still to do before the gate: router accuracy and the abstention threshold, and Ashu's 30-question review sample. **Phase 4 work started on 22 October 2026 at Ashu's instruction ("continue with phase 4") while the Phase 3 gate is open.** Phase 4's first commit (`b89613b`) is on `rebuild/phase-3`; later Phase 4 work is on `rebuild/phase-4`.
 
 **Phase 3 and Phase 4 gate decisions — 22 October 2026.** Ashu accepted every recommendation (ADR-026, ADR-027). Label provenance: the 30-question review sample (30 kept; the 20 edits were drafted by Claude and checked by Ashu, tagged `edit_source`), and 50 graph paragraphs (23 by hand, 27 drafted by Claude and checked by Ashu, scored separately). Still open for Phase 4: measuring the APPLIES_TO filter on 20 fresh paragraphs (`data/evaluation/gold/graph-labels-fresh-to-fill.md`).
+
+**Phase 3 — approved by Ashu on 22 October 2026** (ADR-026; ladder `data/evaluation/ladder-dev.json`, abstention and router `data/evaluation/abstention-dev.json`).
+
+**Phase 4 — approved by Ashu on 22 October 2026** (ADR-027; quality `data/evaluation/graph-quality.json`, graph on/off `data/evaluation/ladder-graph-dev.json`). Optional follow-up: 20 fresh paragraphs to measure the APPLIES_TO filter. Until they are labelled, its fresh-label precision is reported as "not yet measured".
