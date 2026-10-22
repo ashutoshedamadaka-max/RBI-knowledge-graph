@@ -13,7 +13,8 @@ const STAGES: Record<string, string> = {
   retrieving_official_evidence: "Searching RBI paragraphs (keywords, meaning, cross-references)",
   checking_regulatory_validity: "Keeping only rules in force on the date",
   selecting_authoritative_evidence: "Ranking the best passages",
-  building_grounded_answer: "Writing the answer from those passages, then checking each claim",
+  building_grounded_answer: "Writing the answer from those passages",
+  checking_claims: "Checking each claim against its cited text",
 };
 const VERDICT_TEXT = { supported: "Supported by the cited text", partially_supported: "Only partly supported by the cited text",
   not_supported: "Not supported by the cited text" } as const;
@@ -58,7 +59,8 @@ export default function Ask() {
   async function ask(text = query, date = asOf) {
     setBusy(true); setError(null); setResult(null); setStages([]); setActiveClaim(null); setOpenChunk(null);
     try {
-      setResult(await streamQuery(text, date || null, (stage) => setStages((done) => [...done, stage])));
+      setResult(await streamQuery(text, date || null, (stage) => setStages((done) => [...done, stage]),
+        (preview) => setResult(preview)));
     } catch (exc) {
       setError(exc instanceof Error ? exc.message : String(exc));
     } finally {
@@ -103,7 +105,8 @@ export default function Ask() {
         {error && <p className="status-bad" role="alert">{error}</p>}
         {result && reveal >= 3 && (
           <>
-            <p className="muted">As of {result.as_of} · {result.pipeline.selected_evidence_count} passages · {Math.round(result.latency_ms / 100) / 10} s · ${result.estimated_cost_usd.toFixed(4)}</p>
+            <p className="muted">As of {result.as_of} · {result.pipeline.selected_evidence_count} passages · {result.pipeline.answer_mode === "checking"
+              ? "checking each claim…" : `${Math.round(result.latency_ms / 100) / 10} s · $${result.estimated_cost_usd.toFixed(4)}`}</p>
             {result.notices.map((notice, index) => (
               <div key={index} className={`notice ${notice.kind}`}><strong>{notice.kind === "upcoming" ? "Not yet in force" : notice.kind === "replaced" ? "Replaced" : "Withdrawn"}:</strong> {notice.text}</div>
             ))}

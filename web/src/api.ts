@@ -34,7 +34,8 @@ export interface QueryResult {
   trace: Trace;
 }
 
-export async function streamQuery(query: string, asOf: string | null, onStage: (stage: string) => void): Promise<QueryResult> {
+export async function streamQuery(query: string, asOf: string | null, onStage: (stage: string) => void,
+                                  onAnswer?: (preview: QueryResult) => void): Promise<QueryResult> {
   const response = await fetch(`${BASE}/query/stream`, {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, ...(asOf ? { as_of: asOf } : {}) }),
@@ -54,6 +55,12 @@ export async function streamQuery(query: string, asOf: string | null, onStage: (
       const kind = /^event: (.+)$/m.exec(block)?.[1];
       const data = /^data: (.*)$/m.exec(block)?.[1] ?? "{}";
       if (kind === "progress") onStage(JSON.parse(data).stage);
+      if (kind === "answer" && onAnswer) {
+        // The answer before its claim check: shown at once; the verdicts arrive with the result.
+        const body = JSON.parse(data);
+        onAnswer({ ...body, request_id: "", trace: {}, latency_ms: 0, estimated_cost_usd: 0, in_scope: true,
+          pipeline: { retrieval_method: "", answer_mode: "checking", selected_evidence_count: body.retrieved_evidence.length } });
+      }
       if (kind === "result") return JSON.parse(data);
       if (kind === "error") throw new Error(JSON.parse(data).detail);
     }

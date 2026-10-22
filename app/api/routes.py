@@ -197,9 +197,12 @@ async def query_stream(request: Request, payload: QueryRequest) -> StreamingResp
     def progress(stage: str) -> None:
         loop.call_soon_threadsafe(events.put_nowait, ("progress", {"stage": stage}))
 
+    def answered(body: dict) -> None:  # the answer before its claim check, so it shows sooner
+        loop.call_soon_threadsafe(events.put_nowait, ("answer", body))
+
     async def stream():
         task = asyncio.create_task(
-            run_in_threadpool(service.query, payload.query, payload.top_k, request_id, progress, payload.as_of)
+            run_in_threadpool(service.query, payload.query, payload.top_k, request_id, progress, payload.as_of, answered)
         )
         while not task.done() or not events.empty():
             try:

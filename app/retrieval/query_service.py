@@ -42,6 +42,7 @@ class RegulatoryQueryService:
         request_id: str | None = None,
         progress: Callable[[str], None] | None = None,
         as_of: date | None = None,
+        on_answer: Callable[[dict], None] | None = None,
     ) -> QueryResponse:
         started = perf_counter()
         day = as_of or clock.now().date()
@@ -59,7 +60,7 @@ class RegulatoryQueryService:
         if progress:
             progress("checking_regulatory_validity")
         evidence: list[ChunkMetadata] = list(retrieved.results)
-        notices, successor_evidence = self._change_notices(user_query, evidence, day, limit)
+        notices, successor_evidence = self._change_notices(user_query, evidence, day, limit, retrieved.unfiltered)
         candidate_evidence_count = len(evidence) + len(successor_evidence)
         merged = list({chunk.chunk_id: chunk for chunk in successor_evidence + evidence}.values())[:limit]
         excluded_after_validity_check = candidate_evidence_count - len(merged)
@@ -94,7 +95,13 @@ class RegulatoryQueryService:
         answer_ms = round((perf_counter() - generation_started) * 1000, 1)
         checker_cost, checker_usage = 0.0, {}
         check_started = perf_counter()
+        if on_answer:  # show the answer now; the claim check (several seconds) adds its verdicts afterwards
+            on_answer({"research": research.model_dump(mode="json"), "as_of": str(day),
+                       "retrieved_evidence": [chunk.model_dump(mode="json") for chunk in merged],
+                       "notices": [notice.model_dump(mode="json") for notice in notices]})
         if research.status is ResearchStatus.GROUNDED and not fallback_used and generation.model != "deterministic":
+            if progress:
+                progress("checking_claims")
             # ADR-030: every claim is checked against its own citations and flagged, never rewritten.
             try:
                 verdicts, checker_usage = claim_checker.check(self.settings.openai_api_key, self.settings.openai_extraction_model,
@@ -156,8 +163,8 @@ class RegulatoryQueryService:
             ),
         )
 
-    def _change_notices(self, query: str, eligible: list[ChunkMetadata], day: date, limit: int
-                        ) -> tuple[list[ChangeNotice], list[ChunkMetadata]]:
+    def _change_notices(self, query: str, eligible: list[ChunkMetadata], day: date, limit: int,
+                        unfiltered: list | None = None) -> tuple[list[ChangeNotice], list[ChunkMetadata]]:
         """Say what replaced a retired rule the question matches, and quote rules not yet in force.
 
         A retired passage counts when the status filter removed it from the top results the
@@ -170,7 +177,8 @@ class RegulatoryQueryService:
         notices: list[ChangeNotice] = []
         extra: list[ChunkMetadata] = []
         seen: set[str] = set()
-        for result in self.retriever.search(query, day, limit, filtered=False).results:
+        ranked = unfiltered if unfiltered is not None else self.retriever.search(query, day, limit, filtered=False).results
+        for result in ranked:  # the main search's own ranking before the in-force filter: no second search
             if result.document_id in seen or is_current_guidance(result.model_dump(mode="json"), day):
                 continue
             seen.add(result.document_id)

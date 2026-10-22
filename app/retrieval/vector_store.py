@@ -40,6 +40,9 @@ def is_upcoming(chunk: dict, day: date) -> bool:
         and bool(start) and date.fromisoformat(start) > day
 
 
+_ROWS: dict = {}  # the last parsed file store, shared by every request
+
+
 class LocalVectorStore:
     """Filesystem-backed vector index used by the local-first development mode."""
 
@@ -50,6 +53,17 @@ class LocalVectorStore:
 
     def _read(self) -> list[dict]:
         return json.loads(self.path.read_text()) if self.path.exists() else []
+
+    def _rows(self) -> list[dict]:
+        """Rows for read-only use, parsed once per version of the file (a 2,754-chunk store is ~22 MB of JSON
+        and was parsed several times per question). Writers use _read(), so they never mutate this copy."""
+        if not self.path.exists():
+            return []
+        stamp = self.path.stat()
+        key = (str(self.path), stamp.st_mtime_ns, stamp.st_size)
+        if _ROWS.get("key") != key:
+            _ROWS.update(key=key, rows=self._read())
+        return _ROWS["rows"]
 
     def upsert(self, chunks: list[ChunkMetadata]) -> None:
         indexed = {row["chunk"]["chunk_id"]: row for row in self._read()}
@@ -97,7 +111,7 @@ class LocalVectorStore:
         query_terms = self._keywords(query)
         matches = []
         day = as_of or clock.now().date()
-        for row in self._read():
+        for row in self._rows():
             chunk = row["chunk"]
             if document_ids is not None and chunk["document_id"] not in document_ids:
                 continue
@@ -123,7 +137,7 @@ class LocalVectorStore:
         if not wanted:
             return {}
         members: dict[str, list[dict]] = {}
-        for row in self._read():
+        for row in self._rows():
             if row["chunk"].get("parent_id") in wanted:
                 members.setdefault(row["chunk"]["parent_id"], []).append(row["chunk"])
         out = {}
@@ -144,10 +158,10 @@ class LocalVectorStore:
 
     def get_by_ids(self, chunk_ids: list[str]) -> list[ChunkMetadata]:
         wanted = set(chunk_ids)
-        return [ChunkMetadata.model_validate(row["chunk"]) for row in self._read() if row["chunk"]["chunk_id"] in wanted]
+        return [ChunkMetadata.model_validate(row["chunk"]) for row in self._rows() if row["chunk"]["chunk_id"] in wanted]
 
     def get_by_document_id(self, document_id: str) -> list[ChunkMetadata]:
-        return [ChunkMetadata.model_validate(row["chunk"]) for row in self._read() if row["chunk"]["document_id"] == document_id]
+        return [ChunkMetadata.model_validate(row["chunk"]) for row in self._rows() if row["chunk"]["document_id"] == document_id]
 
     def mark_document_current(self, document_id: str) -> None:
         rows = self._read()
@@ -217,6 +231,9 @@ class PostgresVectorStore(LocalVectorStore):
         with self._connect() as connection:
             rows = connection.execute("SELECT chunk, embedding FROM chunks ORDER BY chunk_id").fetchall()
         return [{"chunk": chunk, "embedding": embedding} for chunk, embedding in rows]
+
+    def _rows(self) -> list[dict]:
+        return self._read()  # the database is the source of truth on every read
 
     def upsert(self, chunks: list[ChunkMetadata]) -> None:
         with self._connect() as connection, connection.cursor() as cursor:

@@ -1,4 +1,5 @@
 import logging
+import threading
 from pathlib import Path
 
 from fastapi import FastAPI
@@ -14,6 +15,15 @@ from app.ingestion.repair import repair_legacy_notifications
 from app.monitoring.registry import RegulatorySourceRegistry
 from app.monitoring.store import MonitoringStore
 from app.persistence.runtime_state import DurableRuntimeState
+
+
+def _warm_retrieval(settings) -> None:
+    try:
+        from app.retrieval.query_service import RegulatoryQueryService
+
+        RegulatoryQueryService(settings).retriever.warm()
+    except Exception:  # a cold first question is slower, never broken
+        logging.getLogger(__name__).exception("retrieval_warm_up_failed")
 
 
 def create_app() -> FastAPI:
@@ -40,6 +50,8 @@ def create_app() -> FastAPI:
         # service; leave the captured evidence intact for investigation.
         logging.getLogger(__name__).exception("legacy_extraction_repair_failed")
     application.state.ingestion_service.cleanup_duplicate_sources()
+    # Build the search indexes before the first question rather than during it (~15 s on the NBFC corpus).
+    threading.Thread(target=_warm_retrieval, args=(settings,), daemon=True, name="warm-retrieval").start()
     curated_source_ids = {
         source.source_id for source in RegulatorySourceRegistry(settings.regulatory_sources_path).enabled_sources()
         if source.parser_strategy == "rbi_document"

@@ -25,20 +25,27 @@ class Retrieved:
     top_score: float | None  # Cohere's top relevance score; None when re-ranking did not run
     steps: list[str] = field(default_factory=list)
     trace: dict = field(default_factory=dict)  # what each step did, for the answer's trace drawer
+    unfiltered: list[VectorSearchResult] = field(default_factory=list)  # the same ranking before the in-force filter
+
+
+# Indexes depend only on the chunk texts and the graph file, so every request shares them. The API creates a
+# query service per request; keeping the index on the instance rebuilt it (~15 s) for every question.
+_INDEXES: dict = {}
 
 
 class ApprovedRetriever:
     def __init__(self, settings: Settings, store) -> None:
         self.settings, self.store = settings, store
-        self._key, self._index = None, None
         self.rerank_waits: tuple[int, ...] = (0,)  # live queries try Cohere once
 
     def _build(self, rows: list[dict]):
         """Indexes depend only on chunk texts; statuses are read fresh from the store on every query."""
         texts = [row["text"] for row in rows]
-        key = hashlib.sha256("\n".join(row["chunk_id"] for row in rows).encode()).hexdigest()
-        if key == self._key:
-            return self._index
+        graph_file = self.settings.data_dir / "graph" / "graph.json"
+        key = (hashlib.sha256("\n".join(row["chunk_id"] for row in rows).encode()).hexdigest(),
+               bool(self.settings.openai_api_key), graph_file.stat().st_mtime_ns if graph_file.exists() else None)
+        if key in _INDEXES:
+            return _INDEXES[key]
         bm25 = BM25(texts)
         dense = None
         if self.settings.openai_api_key:
@@ -48,15 +55,21 @@ class ApprovedRetriever:
             except Exception as exc:  # the answer still comes from BM25; the result records it
                 logger.warning("dense_index_unavailable error=%s", exc)
         expansion = None
-        graph_file = self.settings.data_dir / "graph" / "graph.json"
         if graph_file.exists():
             from app.graph import ontology
             expansion = GraphExpansion(ontology.load(graph_file), [ChunkMetadata.model_validate(row) for row in rows])
-        self._key, self._index = key, (bm25, dense, expansion)
-        return self._index
+        _INDEXES.clear()  # one corpus is served at a time; keep memory flat
+        _INDEXES[key] = (bm25, dense, expansion)
+        return _INDEXES[key]
+
+    def warm(self) -> None:
+        """Build the indexes before the first question (called at start-up, in the background)."""
+        rows = [row["chunk"] for row in self.store._rows()]
+        if rows:
+            self._build(rows)
 
     def search(self, query: str, day: date, limit: int, filtered: bool = True) -> Retrieved:
-        rows = [row["chunk"] for row in self.store._read()]
+        rows = [row["chunk"] for row in self.store._rows()]
         if not rows or not query.strip():
             return Retrieved([], None)
         bm25, dense, expansion = self._build(rows)
@@ -90,6 +103,7 @@ class ApprovedRetriever:
             trace["graph_added"] = [{"from": rows[a]["chunk_id"], "to": rows[b]["chunk_id"]} for a, b in expansion.last_added]
             steps.append("graph_cross_references")
             lap("graph_cross_references")
+        unfiltered = order[:limit]
         if filtered:
             removed = [index for index in order[:self.settings.rerank_candidates] if not is_current_guidance(rows[index], day)]
             trace["filtered_out"] = [{"chunk_id": rows[index]["chunk_id"], "document_title": rows[index]["document_title"],
@@ -115,7 +129,9 @@ class ApprovedRetriever:
             lap("cohere_rerank")
         results = [VectorSearchResult(**rows[index], similarity_score=round(1 / (rank + 1), 6))
                    for rank, index in enumerate(order[:limit])]
-        return Retrieved(results, top_score, steps, trace)
+        return Retrieved(results, top_score, steps, trace,
+                         [VectorSearchResult(**rows[index], similarity_score=round(1 / (rank + 1), 6))
+                          for rank, index in enumerate(unfiltered)])
 
 
 TRACE_TOP = 10  # how many candidates per step the trace keeps
