@@ -8,3 +8,4 @@
 {"at": "2026-10-22T04:57:22.496716+00:00", "phase": 4, "task": "graph edge extraction", "model": "gpt-4o-mini", "prompt_tokens": 2218635, "completion_tokens": 414085, "provisions": 1948, "estimated_cost_usd": 0.58124625}
 {"at": "2026-10-22T05:02:04.460773+00:00", "phase": 3, "task": "ladder embeddings", "model": "text-embedding-3-small", "prompt_tokens": 2576, "estimated_cost_usd": 5.152e-05}
 {"at": "2026-10-22T05:02:04.460773+00:00", "phase": 3, "task": "ladder re-ranking", "model": "rerank-v3.5", "search_units": 118, "estimated_cost_usd": 0, "note": "Cohere trial key: no charge. Cost per query in the report uses the list price, as production would pay."}
+{"at": "2026-10-22T06:42:26.998030+00:00", "phase": 5, "task": "answers (dev)", "model": "gpt-4o-mini", "checker_model": "gpt-4o-mini", "questions": 3, "estimated_cost_usd": 0.004935, "note": "Cohere re-ranking on a trial key: no charge."}

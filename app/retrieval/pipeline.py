@@ -29,6 +29,7 @@ class ApprovedRetriever:
     def __init__(self, settings: Settings, store) -> None:
         self.settings, self.store = settings, store
         self._key, self._index = None, None
+        self.rerank_waits: tuple[int, ...] = (0,)  # live queries try Cohere once
 
     def _build(self, rows: list[dict]):
         """Indexes depend only on chunk texts; statuses are read fresh from the store on every query."""
@@ -74,7 +75,7 @@ class ApprovedRetriever:
         order = order[:self.settings.rerank_candidates]
         top_score = None
         if filtered and self.settings.cohere_api_key and order:
-            reranker = CohereReranker(self.settings.cohere_api_key)
+            reranker = CohereReranker(self.settings.cohere_api_key, waits=self.rerank_waits)
             try:
                 order = [order[i] for i in reranker.rerank(query, [rows[i]["text"] for i in order])]
                 top_score = reranker.top_score

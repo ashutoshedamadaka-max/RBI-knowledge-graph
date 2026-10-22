@@ -66,7 +66,7 @@ def test_query_falls_back_to_cited_evidence_when_model_citation_is_invalid(tmp_p
     service = RegulatoryQueryService(settings)
 
     class InvalidCitationGenerator:
-        def generate(self, query, evidence):
+        def generate(self, query, evidence, **context):
             return GenerationResult(answer="Unverified statement [chunk_00000000000000000000]", model="test")
 
     service.generator = InvalidCitationGenerator()
@@ -85,7 +85,7 @@ def test_query_preserves_model_abstention_even_when_chunks_were_retrieved(tmp_pa
     service = RegulatoryQueryService(settings)
 
     class ConservativeGenerator:
-        def generate(self, query, evidence):
+        def generate(self, query, evidence, **context):
             from app.models.research import ResearchStatus, StructuredResearch
             return GenerationResult(answer="Insufficient evidence", model="test", research=StructuredResearch(status=ResearchStatus.INSUFFICIENT_EVIDENCE))
 

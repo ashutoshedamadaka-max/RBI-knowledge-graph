@@ -45,7 +45,7 @@ class AnswerGenerationError(RuntimeError):
 class AnswerGenerator(ABC):
     @abstractmethod
     def generate(self, query: str, evidence: list[ChunkMetadata],
-                 sections: dict[str, str] | None = None) -> GenerationResult:
+                 sections: dict[str, str] | None = None, as_of=None, notices: list[str] | None = None) -> GenerationResult:
         raise NotImplementedError
 
 
@@ -172,7 +172,7 @@ class DeterministicAnswerGenerator(AnswerGenerator):
     """Evidence-only response composer used when no model is configured."""
 
     def generate(self, query: str, evidence: list[ChunkMetadata],
-                 sections: dict[str, str] | None = None) -> GenerationResult:
+                 sections: dict[str, str] | None = None, as_of=None, notices: list[str] | None = None) -> GenerationResult:
         research = deterministic_research(query, evidence)
         return GenerationResult(answer=research_to_markdown(research), model="deterministic", research=research)
 
@@ -195,7 +195,7 @@ class OpenAIAnswerGenerator(AnswerGenerator):
         self.max_output_tokens = max_output_tokens
 
     def generate(self, query: str, evidence: list[ChunkMetadata],
-                 sections: dict[str, str] | None = None) -> GenerationResult:
+                 sections: dict[str, str] | None = None, as_of=None, notices: list[str] | None = None) -> GenerationResult:
         context = "\n\n".join(
             f"CHUNK {chunk.chunk_id} | {chunk.document_title} | lifecycle {chunk.lifecycle.value} | passage {chunk.chunk_index + 1}\n{chunk.text}"
             + (f"\nSECTION CONTEXT (to understand the passage; cite only the CHUNK id above):\n{sections[chunk.chunk_id]}"
@@ -220,10 +220,16 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             "Only include a heading if its wording is supported by both the claim and its cited passage; otherwise use null. "
             "Do not infer that a provision is new just because it appears in an amendment. "
             "Historical or withdrawn evidence must be explicitly labelled as such, not presented as current guidance. "
-            "do not create empty sections. related_questions is optional and must be RBI lending questions.\n"
+            "do not create empty sections. related_questions is optional and must be RBI lending questions. "
+            "Each claim states one requirement or fact and cites the passages that state it; never combine two "
+            "requirements in one claim. If the question assumes something the evidence contradicts, say so plainly. "
+            "When CHANGE NOTICES are given, state the relevant ones in the direct answer: a rule replaced or withdrawn "
+            "since, or a rule that takes effect only from a future date (say that date).\n"
             "JSON shape: {status, display_title|null, direct_answer:{text,citation_ids}|null, "
             "sections:[{id,title,claims:[{title|null,text,citation_ids}]}], related_questions:[...]}.\n\n"
-            f"QUESTION: {query}\n\nEVIDENCE:\n{context}"
+            + (f"ANSWER AS OF: {as_of} (use the rules in force on that date)\n" if as_of else "")
+            + ("CHANGE NOTICES (facts from RBI's records):\n" + "\n".join(f"- {item}" for item in notices) + "\n" if notices else "")
+            + f"QUESTION: {query}\n\nEVIDENCE:\n{context}"
         )
         try:
             response = httpx.post(

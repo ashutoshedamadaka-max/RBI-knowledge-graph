@@ -63,7 +63,8 @@ class RegulatoryQueryService:
         if progress:
             progress("building_grounded_answer")
         sections = self.vector.store.sections(merged)  # empty unless chunks belong to sections (structure chunker)
-        generation = self.generator.generate(user_query, merged, **({"sections": sections} if sections else {}))
+        generation = self.generator.generate(user_query, merged, **({"sections": sections} if sections else {}),
+                                             as_of=day, notices=[item.text for item in notices])
         research = generation.research
         fallback_used = False
         if (
