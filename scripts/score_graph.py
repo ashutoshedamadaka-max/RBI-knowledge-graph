@@ -52,7 +52,14 @@ def main() -> None:
         "generated_at": datetime.now(UTC).isoformat(),
         "labelled": len(labels), "scored": len(labels) - len(stale), "stale": stale,
         "unit": "APPLIES_TO: entity ids per provision; the others: sentences per provision (micro-averaged)",
-        "results": {SENTENCE_EDGES.get(key, "APPLIES_TO"): score(predicted[key], gold[key]) for key in gold},
+        # Headline: Ashu's hand labels. Model-drafted labels Ashu reviewed are reported separately, never pooled.
+        "results": {source: {"provisions": sum(1 for node in gold["applies_to"] if labels[node].get("source", "hand") == source),
+                             **{SENTENCE_EDGES.get(key, "APPLIES_TO"): score(
+                                 predicted[key], {node: value for node, value in gold[key].items()
+                                                  if labels[node].get("source", "hand") == source})
+                                for key in gold}}
+                    for source in sorted({label.get("source", "hand") for label in labels.values()},
+                                         key=lambda source: source != "hand")},
         "run_manifest": {
             "git_commit": subprocess.run(["git", "rev-parse", "HEAD"], cwd=ROOT, capture_output=True, text=True).stdout.strip(),
             "graph_sha256": hashlib.sha256(graph_file.read_bytes()).hexdigest(),

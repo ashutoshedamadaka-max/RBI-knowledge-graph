@@ -1,0 +1,116 @@
+{
+  "generated_at": "2026-10-22T06:05:26.032988+00:00",
+  "labelled": 50,
+  "scored": 50,
+  "stale": [],
+  "unit": "APPLIES_TO: entity ids per provision; the others: sentences per provision (micro-averaged)",
+  "results": {
+    "hand": {
+      "provisions": 23,
+      "APPLIES_TO": {
+        "precision": {
+          "value": 0.3582,
+          "numerator": 24,
+          "denominator": 67
+        },
+        "recall": {
+          "value": 0.5217,
+          "numerator": 24,
+          "denominator": 46
+        }
+      },
+      "REQUIRES": {
+        "precision": {
+          "value": 0.9714,
+          "numerator": 34,
+          "denominator": 35
+        },
+        "recall": {
+          "value": 0.7234,
+          "numerator": 34,
+          "denominator": 47
+        }
+      },
+      "DEFINES": {
+        "precision": {
+          "value": 0.0,
+          "numerator": 0,
+          "denominator": 1
+        },
+        "recall": {
+          "value": 0.0,
+          "numerator": 0,
+          "denominator": 3
+        }
+      },
+      "REFERS_TO": {
+        "precision": {
+          "value": 0.3333,
+          "numerator": 1,
+          "denominator": 3
+        },
+        "recall": {
+          "value": 0.0345,
+          "numerator": 1,
+          "denominator": 29
+        }
+      }
+    },
+    "model-drafted, reviewed by Ashu": {
+      "provisions": 27,
+      "APPLIES_TO": {
+        "precision": {
+          "value": 0.2192,
+          "numerator": 16,
+          "denominator": 73
+        },
+        "recall": {
+          "value": 0.4571,
+          "numerator": 16,
+          "denominator": 35
+        }
+      },
+      "REQUIRES": {
+        "precision": {
+          "value": 0.9219,
+          "numerator": 59,
+          "denominator": 64
+        },
+        "recall": {
+          "value": 0.6484,
+          "numerator": 59,
+          "denominator": 91
+        }
+      },
+      "DEFINES": {
+        "precision": {
+          "value": null,
+          "numerator": 0,
+          "denominator": 0
+        },
+        "recall": {
+          "value": 0.0,
+          "numerator": 0,
+          "denominator": 4
+        }
+      },
+      "REFERS_TO": {
+        "precision": {
+          "value": 1.0,
+          "numerator": 4,
+          "denominator": 4
+        },
+        "recall": {
+          "value": 0.1818,
+          "numerator": 4,
+          "denominator": 22
+        }
+      }
+    }
+  },
+  "run_manifest": {
+    "git_commit": "d0e885102203bd3fa64573f916d4fe1ac9028d61",
+    "graph_sha256": "3a39cccf8e5b66e63794a5847761e556760b0ff6bd57a151ecfb70390c010fec",
+    "labels_sha256": "feea34fc39ff2da68284bb6765f804711663c947311971e5dd72299a4b035b09"
+  }
+}
