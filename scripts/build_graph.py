@@ -12,6 +12,7 @@ import hashlib
 import json
 import subprocess
 import sys
+from collections import Counter
 from datetime import UTC, datetime
 from pathlib import Path
 
@@ -46,6 +47,7 @@ def main() -> None:
     if args.llm_edges:
         report["llm"] = ontology.add_llm_edges(graph, json.loads(args.llm_edges.read_text(encoding="utf-8")))
         report["edges"] = ontology.edge_counts(graph)
+        report["nodes"] = dict(Counter(data["type"] for _, data in graph.nodes(data=True)))
     ontology.add_layout(graph)
     ontology.save(graph, args.corpus_dir / "graph" / "graph.json")
 
