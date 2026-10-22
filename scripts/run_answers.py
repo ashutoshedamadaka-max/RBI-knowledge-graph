@@ -55,7 +55,6 @@ def main() -> None:
     parser = argparse.ArgumentParser(description=__doc__, formatter_class=argparse.RawDescriptionHelpFormatter)
     parser.add_argument("--corpus-dir", type=Path, required=True)
     parser.add_argument("--model", default="gpt-4o-mini", choices=sorted(PRICES))
-    parser.add_argument("--checker-model", default="gpt-4o-mini", choices=sorted(PRICES))
     parser.add_argument("--final", action="store_true", help="Run the held-out test split (logged).")
     parser.add_argument("--limit", type=int, help="Only the first N questions (a dry run).")
     parser.add_argument("--out", type=Path)
@@ -72,9 +71,9 @@ def main() -> None:
         sys.exit("OPENAI_API_KEY and COHERE_API_KEY are both needed (the approved path re-ranks with Cohere).")
     service = RegulatoryQueryService(settings)
     service.retriever.rerank_waits = (0, 10, 20, 40, 60, 60)  # a trial Cohere key is rate-limited per minute
-    checker_rates = PRICES[args.checker_model]
+    # The claim checker runs inside the live path with settings.openai_extraction_model (ADR-030).
 
-    records, usage = [], Counter()
+    records = []
     for number, question in enumerate(questions, start=1):
         day = date.fromisoformat(question["as_of"]) if question.get("as_of") else None
         started = time.perf_counter()
@@ -94,20 +93,17 @@ def main() -> None:
         if question["must_not_cite"]:
             record["cited_withdrawn"] = any(cites(response, sentence) for sentence in question["must_not_cite"])
         if grounded:
-            verdicts, checker_usage = claim_checker.check(settings.openai_api_key, args.checker_model, response.research,
-                                                          response.retrieved_evidence)
-            usage["checker_input"] += checker_usage.get("prompt_tokens", 0)
-            usage["checker_output"] += checker_usage.get("completion_tokens", 0)
+            # The live path already checked every claim (ADR-030); that cost is inside answer_cost_usd.
             passages = {chunk.chunk_id: chunk for chunk in response.retrieved_evidence}
-            record["claims"] = [{"text": claim.text, "verdict": verdict["verdict"],
+            record["claims"] = [{"text": claim.text, "verdict": claim.support or "not_checked",
                                  "cited": [{"chunk_id": cid, "title": passages[cid].document_title, "text": passages[cid].text}
                                            for cid in claim.citation_ids if cid in passages]}
-                                for claim, verdict in zip(claim_checker.claims_of(response.research), verdicts)]
+                                for claim in claim_checker.claims_of(response.research)]
         records.append(record)
         print(f"{number}/{len(questions)} {question['id']} {question['type']} answered={grounded}", flush=True)
 
     answer_cost = sum(record.get("answer_cost_usd") or 0 for record in records)
-    checker_cost = (usage["checker_input"] * checker_rates[0] + usage["checker_output"] * checker_rates[1]) / 1e6
+    checker_cost = 0.0  # since ADR-030 the live path checks claims; the cost is part of each answer's cost
     by_type = defaultdict(list)
     for record in records:
         by_type[record["type"]].append(record)
@@ -119,7 +115,7 @@ def main() -> None:
     claims = [claim for row in records for claim in row.get("claims", [])]
     report = {
         "generated_at": datetime.now(UTC).isoformat(), "split": split, "questions": len(questions),
-        "model": args.model, "checker_model": args.checker_model,
+        "model": args.model, "checker_model": settings.openai_extraction_model,
         "includes_unreviewed_drafts": any(row["status"] == "drafted" for row in questions),
         "failed_questions": [row["id"] for row in records if "error" in row],
         "questions_without_rerank": [row["id"] for row in records if "cohere_rerank" not in (row.get("steps") or "")],
@@ -136,7 +132,7 @@ def main() -> None:
                                   if kind in ANSWERABLE else {})}
                         for kind, rows in sorted(by_type.items())},
             "latency_ms_p50": sorted(row["latency_ms"] for row in records if "latency_ms" in row)[len(records) // 2] if records else None,
-            "cost_usd": {"answers": round(answer_cost, 4), "checker": round(checker_cost, 4),
+            "cost_usd": {"answers_including_claim_check": round(answer_cost, 4),
                          "per_question_answer_plus_rerank": round(answer_cost / max(len(records), 1) + COHERE_PRICE_PER_SEARCH, 5)},
         },
         "records": records,
@@ -153,7 +149,7 @@ def main() -> None:
     out.write_text(json.dumps(report, indent=2), encoding="utf-8")
     with (ROOT / "data" / "evaluation" / "spend-ledger.jsonl").open("a", encoding="utf-8") as ledger:
         ledger.write(json.dumps({"at": datetime.now(UTC).isoformat(), "phase": 5, "task": f"answers ({split})",
-                                 "model": args.model, "checker_model": args.checker_model, "questions": len(questions),
+                                 "model": args.model, "checker_model": settings.openai_extraction_model, "questions": len(questions),
                                  "estimated_cost_usd": round(answer_cost + checker_cost, 6),
                                  "note": "Cohere re-ranking on a trial key: no charge."}) + "\n")
     if args.final:

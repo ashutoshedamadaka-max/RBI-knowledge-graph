@@ -15,6 +15,7 @@ class ResearchClaim(BaseModel):
     title: str | None = Field(default=None, max_length=120)
     text: str = Field(min_length=1, max_length=1800)
     citation_ids: list[str] = Field(default_factory=list)
+    support: str | None = None  # the claim checker's verdict (ADR-030); None when it did not run
 
 
 class ResearchSection(BaseModel):

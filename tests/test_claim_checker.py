@@ -49,3 +49,17 @@ def test_a_claim_with_no_citations_needs_no_model_call() -> None:
 
     assert verdicts == [{"verdict": "not_supported", "quote": "", "reason": "no valid citation"}]
     post.assert_not_called()
+
+
+def test_claims_the_checker_does_not_pass_are_flagged_in_the_answer() -> None:
+    from app.llm.claim_checker import with_verdicts
+    from app.llm.generation import research_to_markdown
+
+    research = with_verdicts(
+        _research(ResearchClaim(text="Penal charges cannot be capitalised.", citation_ids=["chunk_a"]),
+                  ResearchClaim(text="Penal charges are capped at 2%.", citation_ids=["chunk_a"])),
+        [{"verdict": "supported"}, {"verdict": "partially_supported"}])
+
+    text = research_to_markdown(research)
+    assert "capitalised. [chunk_a]" in text and "capitalised. [chunk_a] _(" not in text  # supported: no marker
+    assert "capped at 2%. [chunk_a] _(only partly supported by the cited text)_" in text

@@ -36,6 +36,19 @@ def claims_of(research: StructuredResearch) -> list:
         claim for section in research.sections for claim in section.claims]
 
 
+def with_verdicts(research: StructuredResearch, verdicts: list[dict]) -> StructuredResearch:
+    """The research with each claim's verdict attached, in claims_of order."""
+    remaining = iter(verdicts)
+
+    def mark(claim):
+        return claim.model_copy(update={"support": next(remaining)["verdict"]})
+
+    direct = mark(research.direct_answer) if research.direct_answer else None
+    sections = [section.model_copy(update={"claims": [mark(claim) for claim in section.claims]})
+                for section in research.sections]
+    return research.model_copy(update={"direct_answer": direct, "sections": sections})
+
+
 def check(api_key: str, model: str, research: StructuredResearch, evidence: list[ChunkMetadata]) -> tuple[list[dict], dict]:
     """One verdict per claim (in claims_of order) and the call's token usage. A claim without citations is
     not_supported without a model call; a quote that is not in the cited passages downgrades a support verdict."""

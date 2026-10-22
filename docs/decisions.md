@@ -348,3 +348,17 @@ The write-up states that gpt-4o was not run, for cost. It says mini was sufficie
 **Why:** cost optimisation. On the same tokens, gpt-4o costs about 16.7 times as much. Retrieval decides most of the answer quality, as the Phase 3 ladder showed, and the claim checker catches unsupported claims whichever model writes them.
 
 **Trade-off:** there is no measured answer-quality comparison between the two models. If mini's results show a gap (for example, false-premise questions it fails to correct), gpt-4o is the documented next step.
+
+## ADR-030: Claims that fail the check are flagged, not regenerated
+
+**Decision (22 October 2026):** every live answer's claims go through the claim checker (ADR-028), and each verdict is attached to its claim. A claim that isn't fully supported is shown with a marker: "only partly supported by the cited text" or "not supported by the cited text". Nothing is rewritten or regenerated. The checker's cost is part of each answer's cost.
+
+This was the recommendation; Ashu said to finish Phase 5 and move on without objecting to it, so it was applied as the default. It's open to change at the Phase 5 gate.
+
+**Why:** regenerating helps only if the checker reliably finds bad claims. Against 50 labels (drafted by Claude; review by Ashu not confirmed), the checker:
+- flagged 6 of 21 claims the labels mark as not fully supported;
+- was right on 6 of its 10 flags.
+
+A marker shows the reader exactly what the system knows, at one extra small call per answer. A regeneration loop would spend more on a signal that misses most problems.
+
+**Trade-off:** the checker passes about two-thirds of over-generalised claims, for example "an NBFC must…" cited from a paragraph about NBFC-P2P only. That limit is published. The improvement path is a stricter checker prompt or a larger checker model, re-measured on fresh labels.

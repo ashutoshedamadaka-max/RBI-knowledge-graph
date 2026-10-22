@@ -83,13 +83,22 @@ def research_to_markdown(research: StructuredResearch) -> str:
     parts = []
     if research.direct_answer:
         citations = " ".join(f"[{item}]" for item in research.direct_answer.citation_ids)
-        parts.extend(["### Direct answer", f"{research.direct_answer.text} {citations}".strip()])
+        parts.extend(["### Direct answer", f"{research.direct_answer.text} {citations}{_flag(research.direct_answer)}".strip()])
     for section in research.sections:
         parts.append(f"### {section.title}")
         for claim in section.claims:
             citations = " ".join(f"[{item}]" for item in claim.citation_ids)
-            parts.append(f"- {claim.text} {citations}".strip())
+            parts.append(f"- {claim.text} {citations}{_flag(claim)}".strip())
     return "\n\n".join(parts)
+
+
+FLAGS = {"partially_supported": " _(only partly supported by the cited text)_",
+         "not_supported": " _(not supported by the cited text)_"}
+
+
+def _flag(claim: ResearchClaim) -> str:
+    """ADR-030: a claim the checker does not pass is shown with a marker, never silently kept or rewritten."""
+    return FLAGS.get(claim.support or "", "")
 
 
 def _query_terms(query: str) -> set[str]:

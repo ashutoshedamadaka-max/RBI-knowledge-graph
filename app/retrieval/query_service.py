@@ -3,7 +3,10 @@ from time import perf_counter
 from collections.abc import Callable
 from uuid import uuid4
 
+import logging
+
 from app.config.settings import Settings
+from app.llm import claim_checker
 from app.llm.citations import validate_structured_citations
 from app.llm.generation import DeterministicAnswerGenerator, get_answer_generator, research_to_markdown, align_research_headings
 from app.models.chunks import ChunkMetadata
@@ -11,7 +14,7 @@ from app.models.documents import DocumentLifecycle
 from app.models.query import ChangeNotice, Citation, QueryPipelineSummary, QueryResponse
 from app.models.research import ResearchClaim, ResearchStatus, StructuredResearch
 from app.models.retrieval import RetrievalRoute
-from app.observability.costs import CostEvent, CostTracker
+from app.observability.costs import CostEvent, CostTracker, estimate_openai_cost
 from app.observability.events import QueryEvent, log_query_event
 from app.retrieval.pipeline import ApprovedRetriever
 from app.retrieval.service import VectorRetrievalService
@@ -20,6 +23,8 @@ from app.ingestion.manifest import DocumentManifest
 from app.models.documents import DocumentMetadata
 from app import clock
 from datetime import date
+
+logger = logging.getLogger(__name__)
 
 
 class RegulatoryQueryService:
@@ -85,6 +90,18 @@ class RegulatoryQueryService:
                 "graph_context": None,
             })
 
+        checker_cost, checker_usage = 0.0, {}
+        if research.status is ResearchStatus.GROUNDED and not fallback_used and generation.model != "deterministic":
+            # ADR-030: every claim is checked against its own citations and flagged, never rewritten.
+            try:
+                verdicts, checker_usage = claim_checker.check(self.settings.openai_api_key, self.settings.openai_extraction_model,
+                                                      research, merged)
+                research = claim_checker.with_verdicts(research, verdicts)
+                checker_cost = estimate_openai_cost(checker_usage.get("prompt_tokens", 0), checker_usage.get("completion_tokens", 0),
+                                                    self.settings.openai_input_cost_per_million,
+                                                    self.settings.openai_output_cost_per_million)
+            except Exception as exc:  # the answer stands; its claims simply carry no verdict
+                logger.warning("claim_check_failed error=%s", exc)
         answer = research_to_markdown(research)
         if notices:
             answer = "### What changed\n" + "\n".join(f"- {item.text}" for item in notices) + "\n\n" + answer
@@ -102,6 +119,12 @@ class RegulatoryQueryService:
                 input_tokens=generation.input_tokens, output_tokens=generation.output_tokens,
                 estimated_cost_usd=generation.estimated_cost_usd, correlation_id=request_id,
             ))
+        if checker_usage:
+            self.cost_tracker.record(CostEvent(
+                timestamp=datetime.now(UTC), operation="claim_check", model=self.settings.openai_extraction_model,
+                input_tokens=checker_usage.get("prompt_tokens", 0), output_tokens=checker_usage.get("completion_tokens", 0),
+                estimated_cost_usd=checker_cost, correlation_id=request_id,
+            ))
         method = "+".join(retrieved.steps)
         log_query_event(QueryEvent(
             timestamp=datetime.now(UTC), request_id=request_id, query=user_query, route=RetrievalRoute.HYBRID.value,
@@ -113,7 +136,7 @@ class RegulatoryQueryService:
         ))
         return QueryResponse(
             request_id=request_id, answer=answer, citations=citations, route=RetrievalRoute.HYBRID, in_scope=True,
-            retrieved_evidence=merged, latency_ms=latency_ms, estimated_cost_usd=generation.estimated_cost_usd,
+            retrieved_evidence=merged, latency_ms=latency_ms, estimated_cost_usd=generation.estimated_cost_usd + checker_cost,
             citation_valid=citation_valid, research=research, as_of=day, notices=notices,
             pipeline=QueryPipelineSummary(
                 candidate_evidence_count=candidate_evidence_count,
