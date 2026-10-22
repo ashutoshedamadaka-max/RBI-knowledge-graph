@@ -309,3 +309,30 @@ Three rules guard against wrong edges:
 **Trade-off:** the filter misses entities that a provision addresses only implicitly, so recall falls.
 
 **ADR-027 result on 20 fresh paragraphs (22 October 2026):** these labels were drafted by Claude and checked by Ashu, and none of the paragraphs were used for tuning. APPLIES_TO precision rose from 6/57 before the filter to 6/18 after it. Recall stayed at 6/26. The filter removes wrong edges without losing right ones. Even so, only about 1 in 3 remaining APPLIES_TO edges is correct, so the edge type stays out of answers and filters (decision 5).
+
+## ADR-028: Answers are checked claim by claim, and scored only against gold
+
+**Decision:**
+- **Answer prompt.** It asks for one requirement or fact per claim, each citing the passages that state it. It also receives the question's as-of date and the change notices: what was replaced or withdrawn since, and what takes effect later (D1).
+- **Claim checker.** A separate gpt-4o-mini call (`app/llm/claim_checker.py`) judges each claim using only the passages it cites:
+  - it never sees the question or the rest of the answer;
+  - a claim with no valid citation is not_supported, without a model call;
+  - a "supported" verdict whose quote isn't in the passages becomes partially_supported;
+  - a claim the checker skips is not_supported.
+- **Answer evaluation.** `scripts/run_answers.py` scores only what gold can decide:
+  - whether the gold sentence is cited;
+  - whether an answerable question was wrongly refused;
+  - whether a withdrawn trap cites the withdrawn sentence;
+  - whether an unanswerable question was refused.
+
+  Every rate has a 95% bootstrap interval. The checker's verdicts are reported as "not yet validated" until about 50 claims labelled by Ashu measure its agreement. The test split runs only with `--final`, and every such run is logged.
+- **Tests never make paid calls.** The test setup blanks every API key and blocks the OpenAI and Cohere hosts. This was found while switching the live path: older tests read the keys from `.env`.
+
+**Why:**
+- The brief asks for per-claim citations and a separate checker.
+- Gold-based scores keep test answers independent of system output.
+- A checker that saw the question could pass a claim on topic rather than on evidence.
+
+**Trade-off:**
+- Citing the gold sentence doesn't prove the answer is right. Correctness on false-premise and two-paragraph questions rests on the validated checker plus Ashu's labels.
+- Reference answers for 32 trap and unanswerable questions are templates, tagged `reference_answer_source`.
