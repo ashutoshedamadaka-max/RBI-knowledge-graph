@@ -19,25 +19,52 @@ branch-backup step.
   `b3c81dbda4c6f52b7ec5c90d9cca50a1b059c68675d40219a149ab77370a3cc9`.
 - Python tests: 234 passed. `web/` TypeScript check and production build passed.
 
-The old 13-document production count comes from the handoff; it has not been
-independently rechecked. Live Render/Vercel settings and Supabase tables still
-need inspection. The Render connector had no selected workspace during
-preparation, so no workspace was selected and no service was changed.
+## Production preflight after keys were added
+
+- User confirmed Render workspace `tea-d6t4f76uk2gs738jn7a0` (My Workspace).
+- API service: `srv-dahtchbm8hqs73dajd3g`, Singapore, Docker, branch `main`,
+  automatic deploys enabled, health path `/health`.
+- Service plan is **free**, with no persistent disk returned by Render.
+  The original disk-based approach has been replaced by the image package below.
+  Free services cannot attach disks and lose filesystem changes on restart:
+  [Render free-service storage limitations](https://render.com/docs/free).
+- Deployment `dep-dbd00ami0phs73878qag` is live at the old revision
+  `2b819e921f44ca9f0f2f36771b78bd8dac29a31f`. The keys were followed by a manual
+  deployment, rather than only being saved for the next deployment.
+- Public `/health` confirms that revision and `/documents` confirms **13**
+  documents. A copy of the public document response is saved under
+  `data/runtime/cutover-backups/public-baseline/`; this is **not** a database backup.
+- No production database connection is available in the local environment.
+  Put `DATABASE_URL=...` in the ignored `data/runtime/production.env` for the
+  backup/migration operator; never commit or paste it into chat.
+- No browser is available through Computer Use, and the Opera connector requires
+  reauthentication. Vercel settings and Render secret values were not inspected.
+
+User selected **keep Render free and package the evaluated corpus with the app**.
+`data/releases/corpus-v2.zip` contains 275 verified files (41,681,738 bytes).
+SHA-256: `f199024c360f4bc8ddb2278c05fc475a798052916ccf7fc2b1b7fc78305f8836`.
+The Docker build verifies it with `scripts/install_corpus_release.py` and seeds
+`/service/data`, including the graph and embedding cache. Installation was
+verified in an isolated local directory; five installer tests passed, and local
+startup served 88 documents, 2,754 chunks, a populated map, and `/quality`.
+`render.yaml` passes Render's current official JSON Schema; no live Blueprint
+was applied. The CLI is unavailable. A Docker image build has not been run
+locally because the daemon is not running. The database backup remains pending.
 
 ## 1. Agent: back up code to GitHub
 
-- [ ] Scan every new historical blob, rather than only the current working tree,
+- [x] Scan every new historical blob, rather than only the current working tree,
   for credentials and private file paths. Report locations, never secret values.
-- [ ] Commit only the deployment documentation and monitoring relay carried into
+- [x] Commit only the deployment documentation and monitoring relay carried into
   `web/`. Leave the four pre-existing untracked case-study/review files untouched.
-- [ ] Push only `rebuild/phase-5`, without force, and verify the remote commit:
+- [x] Push only `rebuild/phase-5`, without force, and verify the remote commit:
 
   ```powershell
   git push --set-upstream origin rebuild/phase-5
   git ls-remote --heads origin main rebuild/phase-5
   ```
 
-- [ ] Confirm `main` still has its original revision. A branch push can create
+- [x] Confirm `main` still has its original revision. A branch push can create
   a Vercel preview; it does not change production when production tracks `main`.
 
 ## 2. User: prepare hosting settings without deploying
@@ -62,7 +89,7 @@ preparation, so no workspace was selected and no service was changed.
   | `CHUNKER` | `structure` |
   | `VECTOR_BACKEND` | `postgres` after chunk migration |
   | `DATABASE_URL` | Existing production Supabase connection, verified privately |
-  | `DATA_DIR` | New versioned corpus directory under `/service/data` |
+  | `DATA_DIR` | `/service/data`, seeded from the verified image package |
   | `RERANK_CANDIDATES` | `30` |
   | `ABSTAIN_BELOW` | `0.34` |
   | `CORS_ALLOWED_ORIGINS` | Exact production frontend origin(s) |
@@ -103,16 +130,16 @@ has both tables.
   A readable archive index is only the first check. Restore it into an isolated
   scratch database and verify the snapshot document count and any chunk rows
   before approving the swap. Never restore the test backup into production.
-- [ ] Back up Render's current data directory as well. Database snapshots do not
-  contain the original files, processed pages, or the new graph file. Keep both
-  backup locations and their checksums in the private operator record.
+- [ ] Determine whether production has any unarchived original files. The free
+  service has no SSH/shell or persistent disk; database snapshots do not contain
+  original bytes. Preserve anything recoverable before restart. Keep the frozen
+  corpus package and the database backup as separate recovery artifacts.
 - [ ] Freeze the evaluated corpus from `data/runtime/corpus-v2`; do not rebuild
   it from live RBI pages during deployment. Verify the counts and fingerprints
   above, raw-file content hashes, chunk-to-document references, and graph hash.
-- [ ] Transfer `raw/`, `processed/`, `graph/graph.json`, and
-  `runtime/embedding-cache/` into a **new** versioned directory under the Render
-  disk. Upload runtime manifests to staging too; do not overwrite the running
-  directory. Verify transferred files by SHA-256.
+- [x] Package `raw/`, `processed/`, `graph/graph.json`, corpus runtime manifests,
+  and `runtime/embedding-cache/` with the app image. Verify the package and its
+  extraction by SHA-256. No transfer to a nonexistent persistent disk is needed.
 - [ ] Prepare staging snapshot and chunk tables in Supabase. Replace the corpus
   payloads (`documents.json`, `vectors.json`, `knowledge_graph.json`,
   `document_links.json`, `monitoring.json`) with the verified candidate. Preserve
@@ -143,7 +170,7 @@ belongs in the maintenance window below.
 - [ ] Take a final backup after writers stop. Atomically switch both snapshot
   and chunk tables to the staged versions, retaining the old tables under
   versioned backup names. Verify 88 documents and 2,754 chunks before commit.
-- [ ] Ensure the next Render deployment uses the staged versioned `DATA_DIR`,
+- [ ] Ensure the next Render deployment uses `DATA_DIR=/service/data`,
   `VECTOR_BACKEND=postgres`, and the saved keys. The old service must remain
   stopped until the new revision starts.
 - [ ] Merge the reviewed branch into `main` and push `main` only now. Let the
@@ -175,8 +202,8 @@ belongs in the maintenance window below.
 ## Rollback
 
 If any gate fails, keep writers paused. Stop the new service, reverse the
-snapshot/chunk table swap (or restore the tested backup), point Render back to
-the previous data directory and environment, and redeploy its recorded old
+snapshot/chunk table swap (or restore the tested backup), restore Render's
+previous data-directory setting and environment, and redeploy its recorded old
 revision. Restore Vercel's prior deployment and settings (`frontend` root and
 the prior API variable). Verify the old corpus and query behavior before
 reenabling monitoring. A code revert alone does not restore the data or hosting

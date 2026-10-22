@@ -10,16 +10,21 @@ For the first deployment of the rebuilt application, follow
 
 ## Backend on Render
 
-The included `render.yaml` describes the Docker web service, its persistent disk
-at `/service/data`, and the `/health` health check. Verify the existing service's
-actual settings before changing them; the YAML does not provision Supabase,
-transfer the corpus, or configure production secrets.
+The existing service runs on Render's free plan with `/health` as its health
+check. `render.yaml` now matches its name, Singapore region, Docker runtime,
+`main` branch, and free plan, with no disk. No Blueprint was applied as part of
+the branch push; keep existing secrets and service settings when reviewing any
+future Blueprint adoption.
 
-Set `DATA_DIR` to the prepared corpus directory on the persistent disk.
+The Docker build verifies `data/releases/corpus-v2.zip` and seeds `/service/data`
+with the evaluated corpus, graph, raw/processed files, and embedding cache.
+Set `DATA_DIR=/service/data` in Render too if an existing variable overrides the
+image default. This supports the selected free service without a persistent disk.
 `DATABASE_URL` enables durable JSON snapshots; `VECTOR_BACKEND=postgres` also
 enables the separate `chunks` table. These are two parts of the same migration.
-The raw/processed documents, `graph/graph.json`, and embedding cache also need
-to be transferred to the disk: they are not restored by the snapshot adapter.
+The snapshot adapter does not restore the raw/processed files, `graph/graph.json`,
+or embedding cache; those come from the image. Newly ingested originals remain
+ephemeral. See [release provenance](../data/releases/README.md).
 
 Configure `OPENAI_API_KEY`, the paid `COHERE_API_KEY`, `ANSWER_PROVIDER=openai`,
 and the other settings in the cutover checklist. Keep model keys in Render.
