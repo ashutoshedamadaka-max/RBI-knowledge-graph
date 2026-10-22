@@ -211,15 +211,21 @@ class PostgresVectorStore(LocalVectorStore):
     pgvector's float4, so scores match exactly; the dense rungs add a pgvector column.
     """
 
-    def __init__(self, database_url: str, embedder: HashingEmbedder | None = None) -> None:
+    def __init__(self, database_url: str, embedder: HashingEmbedder | None = None, schema: str = "public") -> None:
         self.database_url = database_url
+        self.schema = schema
         self.embedder = embedder or HashingEmbedder()
         with self._connect() as connection:
             connection.execute(
-                "CREATE TABLE IF NOT EXISTS chunks (chunk_id text PRIMARY KEY, document_id text NOT NULL, "
-                "chunk jsonb NOT NULL, embedding double precision[] NOT NULL)"
+                self._query("CREATE TABLE IF NOT EXISTS {table} (chunk_id text PRIMARY KEY, document_id text NOT NULL, "
+                "chunk jsonb NOT NULL, embedding double precision[] NOT NULL)")
             )
-            connection.execute("CREATE INDEX IF NOT EXISTS chunks_document_id ON chunks (document_id)")
+            connection.execute(self._query("CREATE INDEX IF NOT EXISTS chunks_document_id ON {table} (document_id)"))
+
+    def _query(self, query: str):
+        from psycopg import sql
+
+        return sql.SQL(query).format(table=sql.Identifier(self.schema, "chunks"))
 
     def _connect(self):
         import psycopg
@@ -229,7 +235,8 @@ class PostgresVectorStore(LocalVectorStore):
     def _read(self) -> list[dict]:
         # ponytail: full scan per search, like the file store; the dense rungs add indexed search.
         with self._connect() as connection:
-            rows = connection.execute("SELECT chunk, embedding FROM chunks ORDER BY chunk_id").fetchall()
+            # Binary results preserve float8 arrays even when the host rounds text output.
+            rows = connection.execute(self._query("SELECT chunk, embedding FROM {table} ORDER BY chunk_id"), binary=True).fetchall()
         return [{"chunk": chunk, "embedding": embedding} for chunk, embedding in rows]
 
     def _rows(self) -> list[dict]:
@@ -238,16 +245,16 @@ class PostgresVectorStore(LocalVectorStore):
     def upsert(self, chunks: list[ChunkMetadata]) -> None:
         with self._connect() as connection, connection.cursor() as cursor:
             cursor.executemany(
-                "INSERT INTO chunks (chunk_id, document_id, chunk, embedding) VALUES (%s, %s, %s::jsonb, %s) "
+                self._query("INSERT INTO {table} (chunk_id, document_id, chunk, embedding) VALUES (%s, %s, %s::jsonb, %s) "
                 "ON CONFLICT (chunk_id) DO UPDATE SET document_id = EXCLUDED.document_id, chunk = EXCLUDED.chunk, "
-                "embedding = EXCLUDED.embedding",
+                "embedding = EXCLUDED.embedding"),
                 [(chunk.chunk_id, chunk.document_id, chunk.model_dump_json(), self.embedder.embed(chunk.text))
                  for chunk in chunks],
             )
 
     def _patch(self, document_id: str, fields: dict) -> None:
         with self._connect() as connection:
-            connection.execute("UPDATE chunks SET chunk = chunk || %s::jsonb WHERE document_id = %s",
+            connection.execute(self._query("UPDATE {table} SET chunk = chunk || %s::jsonb WHERE document_id = %s"),
                                (json.dumps(fields), document_id))
 
     def mark_document_current(self, document_id: str) -> None:
@@ -266,7 +273,7 @@ class PostgresVectorStore(LocalVectorStore):
     def remove_document_ids(self, document_ids: set[str]) -> None:
         if document_ids:
             with self._connect() as connection:
-                connection.execute("DELETE FROM chunks WHERE document_id = ANY(%s)", (list(document_ids),))
+                connection.execute(self._query("DELETE FROM {table} WHERE document_id = ANY(%s)"), (list(document_ids),))
 
 
 def open_vector_store(settings) -> LocalVectorStore:
@@ -274,5 +281,5 @@ def open_vector_store(settings) -> LocalVectorStore:
     if settings.vector_backend == "postgres":
         if not settings.database_url:
             raise ValueError("VECTOR_BACKEND=postgres requires DATABASE_URL.")
-        return PostgresVectorStore(settings.database_url)
+        return PostgresVectorStore(settings.database_url, schema=settings.postgres_schema)
     return LocalVectorStore(settings.runtime_dir / "vectors.json")

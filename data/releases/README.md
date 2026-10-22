@@ -14,6 +14,8 @@ The Docker build runs `scripts/install_corpus_release.py` to verify the package
 and seed `/service/data`. Render's free filesystem can then be recreated from
 the image on each restart. Supabase remains responsible for mutable runtime
 snapshots and PostgreSQL chunk rows; packaging does not migrate that database.
+The rebuilt image uses `POSTGRES_SCHEMA=rbi_corpus_v2`; the old API keeps its
+public snapshots. The staging script and cutover guide describe that separation.
 Newly ingested original files are still ephemeral on the free service. The
 packaged graph and cached embeddings represent the evaluated release, rather
 than an automatically rebuilt graph of future ingestions.

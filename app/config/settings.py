@@ -11,6 +11,7 @@ class Settings(BaseSettings):
     app_env: str = "development"
     data_dir: Path = Path("data")
     database_url: str | None = None
+    postgres_schema: str = "public"
     admin_api_key: str | None = None
     monitor_secret: str | None = None
     regulatory_sources_path: Path = Path("config/regulatory_sources.yaml")

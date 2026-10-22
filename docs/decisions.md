@@ -362,3 +362,24 @@ This was the recommendation; Ashu said to finish Phase 5 and move on without obj
 A marker shows the reader exactly what the system knows, at one extra small call per answer. A regeneration loop would spend more on a signal that misses most problems.
 
 **Trade-off:** the checker passes about two-thirds of over-generalised claims, for example "an NBFC must…" cited from a paragraph about NBFC-P2P only. That limit is published. The improvement path is a stricter checker prompt or a larger checker model, re-measured on fresh labels.
+
+## ADR-031: Isolate the production corpus release by database schema
+
+**Decision (22 October 2026):** keep the free Render service, as selected by
+Ashu. Freeze the evaluated corpus, originals, graph and embedding cache in a
+checksum-verified image asset. Persist mutable runtime data in Supabase.
+`POSTGRES_SCHEMA` defaults to public for development; the rebuilt Docker image
+selects `rbi_corpus_v2`. Both snapshot and chunk repositories explicitly qualify
+SQL identifiers without depending on pooled session search paths.
+
+**Why:** the old API can sync cached snapshots back after a database-only swap.
+An isolated schema keeps its old data separate until the new deployment is
+ready and retains a rollback path. Staging is transactional, refuses existing
+schemas, checks exact payloads/embeddings, and restricts Supabase API roles.
+The application backup was restored and staging rehearsed locally.
+
+**Trade-off:** the bundled graph/cache represents the evaluated release; future
+ingested originals remain ephemeral on free Render. Cost events written to
+public after staging remain there for later reconciliation. Supabase rounds
+float8 text output (`extra_float_digits=0`), so chunk reads use binary results
+to preserve embeddings exactly.

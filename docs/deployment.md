@@ -22,6 +22,10 @@ Set `DATA_DIR=/service/data` in Render too if an existing variable overrides the
 image default. This supports the selected free service without a persistent disk.
 `DATABASE_URL` enables durable JSON snapshots; `VECTOR_BACKEND=postgres` also
 enables the separate `chunks` table. These are two parts of the same migration.
+`POSTGRES_SCHEMA=rbi_corpus_v2` selects isolated release tables; development
+keeps the `public` default. Old public snapshots remain available for rollback.
+Run `scripts/stage_corpus_cutover.py` before deploying the rebuilt image; it
+refuses to replace existing schemas or active tables.
 The snapshot adapter does not restore the raw/processed files, `graph/graph.json`,
 or embedding cache; those come from the image. Newly ingested originals remain
 ephemeral. See [release provenance](../data/releases/README.md).

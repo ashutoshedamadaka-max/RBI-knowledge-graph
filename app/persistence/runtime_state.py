@@ -2,6 +2,7 @@ import json
 import hashlib
 from pathlib import Path
 from threading import Lock
+from psycopg import sql
 
 from app.config.settings import Settings
 
@@ -26,6 +27,7 @@ class DurableRuntimeState:
 
     def __init__(self, settings: Settings) -> None:
         self.database_url = settings.database_url
+        self.schema = settings.postgres_schema
         self.runtime_dir = settings.runtime_dir
         self._saved_hashes: dict[str, str] = {}
         self._sync_lock = Lock()
@@ -41,7 +43,7 @@ class DurableRuntimeState:
         self.runtime_dir.mkdir(parents=True, exist_ok=True)
         with self._connection() as connection, connection.cursor() as cursor:
             self._ensure_schema(cursor)
-            cursor.execute("SELECT state_key, payload FROM rbi_runtime_state")
+            cursor.execute(sql.SQL("SELECT state_key, payload FROM {}").format(self._table))
             rows = {key: payload for key, payload in cursor.fetchall()}
         for file_name in self.file_names:
             payload = rows.get(file_name)
@@ -73,12 +75,12 @@ class DurableRuntimeState:
             self._ensure_schema(cursor)
             for key, payload in snapshots:
                 cursor.execute(
-                    """
-                    INSERT INTO rbi_runtime_state (state_key, payload, updated_at)
+                    sql.SQL("""
+                    INSERT INTO {} (state_key, payload, updated_at)
                     VALUES (%s, %s::jsonb, now())
                     ON CONFLICT (state_key)
                     DO UPDATE SET payload = EXCLUDED.payload, updated_at = EXCLUDED.updated_at
-                    """,
+                    """).format(self._table),
                     (key, json.dumps(payload)),
                 )
         # Mark saved only after the transaction committed successfully.
@@ -90,14 +92,17 @@ class DurableRuntimeState:
         import psycopg
         return psycopg.connect(self.database_url)
 
-    @staticmethod
-    def _ensure_schema(cursor) -> None:
+    @property
+    def _table(self):
+        return sql.Identifier(self.schema, "rbi_runtime_state")
+
+    def _ensure_schema(self, cursor) -> None:
         cursor.execute(
-            """
-            CREATE TABLE IF NOT EXISTS rbi_runtime_state (
+            sql.SQL("""
+            CREATE TABLE IF NOT EXISTS {} (
                 state_key TEXT PRIMARY KEY,
                 payload JSONB NOT NULL,
                 updated_at TIMESTAMPTZ NOT NULL DEFAULT now()
             )
-            """
+            """).format(self._table)
         )
