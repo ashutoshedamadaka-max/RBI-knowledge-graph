@@ -41,6 +41,7 @@ export default function Ask() {
   const [result, setResult] = useState<QueryResult | null>(null);
   const [error, setError] = useState<string | null>(null);
   const [busy, setBusy] = useState(false);
+  const [draft, setDraft] = useState<string | null>(null); // the direct answer while it is being written
   const [activeClaim, setActiveClaim] = useState<number | null>(null);
   const [openChunk, setOpenChunk] = useState<string | null>(null);
   const [reveal, setReveal] = useState(4); // 0 documents, 1 links, 2 cited passages, 3 answer, 4 claim dots
@@ -57,10 +58,10 @@ export default function Ask() {
   }, [result]);
 
   async function ask(text = query, date = asOf) {
-    setBusy(true); setError(null); setResult(null); setStages([]); setActiveClaim(null); setOpenChunk(null);
+    setBusy(true); setError(null); setResult(null); setDraft(null); setStages([]); setActiveClaim(null); setOpenChunk(null);
     try {
       setResult(await streamQuery(text, date || null, (stage) => setStages((done) => [...done, stage]),
-        (preview) => setResult(preview)));
+        (preview) => { setDraft(null); setResult(preview); }, setDraft));
     } catch (exc) {
       setError(exc instanceof Error ? exc.message : String(exc));
     } finally {
@@ -103,6 +104,7 @@ export default function Ask() {
         <h2 id="answer-heading">{result?.research?.display_title ?? "Answer"}</h2>
         {!result && !error && <p className="muted">Answers come only from RBI paragraphs in force on the date you ask about. Each claim shows whether its cited text supports it.</p>}
         {error && <p className="status-bad" role="alert">{error}</p>}
+        {!result && draft && <p><strong>Direct answer. </strong>{draft}<span className="muted"> …</span></p>}
         {result && reveal >= 3 && (
           <>
             <p className="muted">As of {result.as_of} · {result.pipeline.selected_evidence_count} passages · {result.pipeline.answer_mode === "checking"

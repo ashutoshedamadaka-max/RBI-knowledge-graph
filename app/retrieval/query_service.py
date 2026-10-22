@@ -43,6 +43,7 @@ class RegulatoryQueryService:
         progress: Callable[[str], None] | None = None,
         as_of: date | None = None,
         on_answer: Callable[[dict], None] | None = None,
+        on_partial: Callable[[str], None] | None = None,
     ) -> QueryResponse:
         started = perf_counter()
         day = as_of or clock.now().date()
@@ -71,7 +72,8 @@ class RegulatoryQueryService:
         sections = self.vector.store.sections(merged)  # empty unless chunks belong to sections (structure chunker)
         generation_started = perf_counter()
         generation = self.generator.generate(user_query, merged, **({"sections": sections} if sections else {}),
-                                             as_of=day, notices=[item.text for item in notices])
+                                             as_of=day, notices=[item.text for item in notices],
+                                             **({"on_text": on_partial} if on_partial else {}))
         research = generation.research
         fallback_used = False
         if (

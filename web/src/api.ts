@@ -35,7 +35,8 @@ export interface QueryResult {
 }
 
 export async function streamQuery(query: string, asOf: string | null, onStage: (stage: string) => void,
-                                  onAnswer?: (preview: QueryResult) => void): Promise<QueryResult> {
+                                  onAnswer?: (preview: QueryResult) => void,
+                                  onPartial?: (text: string) => void): Promise<QueryResult> {
   const response = await fetch(`${BASE}/query/stream`, {
     method: "POST", headers: { "Content-Type": "application/json" },
     body: JSON.stringify({ query, ...(asOf ? { as_of: asOf } : {}) }),
@@ -55,6 +56,7 @@ export async function streamQuery(query: string, asOf: string | null, onStage: (
       const kind = /^event: (.+)$/m.exec(block)?.[1];
       const data = /^data: (.*)$/m.exec(block)?.[1] ?? "{}";
       if (kind === "progress") onStage(JSON.parse(data).stage);
+      if (kind === "partial" && onPartial) onPartial(JSON.parse(data).text);
       if (kind === "answer" && onAnswer) {
         // The answer before its claim check: shown at once; the verdicts arrive with the result.
         const body = JSON.parse(data);

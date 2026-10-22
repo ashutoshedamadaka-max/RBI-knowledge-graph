@@ -45,7 +45,8 @@ class AnswerGenerationError(RuntimeError):
 class AnswerGenerator(ABC):
     @abstractmethod
     def generate(self, query: str, evidence: list[ChunkMetadata],
-                 sections: dict[str, str] | None = None, as_of=None, notices: list[str] | None = None) -> GenerationResult:
+                 sections: dict[str, str] | None = None, as_of=None, notices: list[str] | None = None,
+                 on_text=None) -> GenerationResult:
         raise NotImplementedError
 
 
@@ -190,7 +191,8 @@ class DeterministicAnswerGenerator(AnswerGenerator):
     """Evidence-only response composer used when no model is configured."""
 
     def generate(self, query: str, evidence: list[ChunkMetadata],
-                 sections: dict[str, str] | None = None, as_of=None, notices: list[str] | None = None) -> GenerationResult:
+                 sections: dict[str, str] | None = None, as_of=None, notices: list[str] | None = None,
+                 on_text=None) -> GenerationResult:
         research = deterministic_research(query, evidence)
         return GenerationResult(answer=research_to_markdown(research), model="deterministic", research=research)
 
@@ -213,7 +215,8 @@ class OpenAIAnswerGenerator(AnswerGenerator):
         self.max_output_tokens = max_output_tokens
 
     def generate(self, query: str, evidence: list[ChunkMetadata],
-                 sections: dict[str, str] | None = None, as_of=None, notices: list[str] | None = None) -> GenerationResult:
+                 sections: dict[str, str] | None = None, as_of=None, notices: list[str] | None = None,
+                 on_text=None) -> GenerationResult:
         context = "\n\n".join(
             f"CHUNK {chunk.chunk_id} | {chunk.document_title} | {_status(chunk, as_of)} | passage {chunk.chunk_index + 1}\n{chunk.text}"
             + (f"\nSECTION CONTEXT (to understand the passage; cite only the CHUNK id above):\n{sections[chunk.chunk_id]}"
@@ -253,29 +256,33 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             + f"QUESTION: {query}\n\nEVIDENCE:\n{context}"
         )
         try:
-            response = httpx.post(
-                "https://api.openai.com/v1/chat/completions",
-                headers={"Authorization": f"Bearer {self.api_key}"},
-                json={
-                    "model": self.model,
-                    "messages": [
-                        {"role": "system", "content": "Grounded regulatory assistant."},
-                        {"role": "user", "content": prompt},
-                    ],
-                    "temperature": 0,
-                    "max_tokens": self.max_output_tokens,
-                    "response_format": {"type": "json_schema", "json_schema": {
-                        "name": "rbi_research_answer", "strict": True, "schema": answer_output_schema(),
-                    }},
-                },
-                timeout=self.timeout_seconds,
-            )
-            response.raise_for_status()
+            request = {
+                "model": self.model,
+                "messages": [
+                    {"role": "system", "content": "Grounded regulatory assistant."},
+                    {"role": "user", "content": prompt},
+                ],
+                "temperature": 0,
+                "max_tokens": self.max_output_tokens,
+                "response_format": {"type": "json_schema", "json_schema": {
+                    "name": "rbi_research_answer", "strict": True, "schema": answer_output_schema(),
+                }},
+            }
+            if on_text:
+                body = _stream_chat(self.api_key, request, self.timeout_seconds, on_text)
+            else:
+                response = httpx.post(
+                    "https://api.openai.com/v1/chat/completions",
+                    headers={"Authorization": f"Bearer {self.api_key}"},
+                    json=request,
+                    timeout=self.timeout_seconds,
+                )
+                response.raise_for_status()
+                body = response.json()
         except httpx.HTTPError as exc:
             raise AnswerGenerationError(
                 "The AI answer service is temporarily unavailable. Please retry in a moment."
             ) from exc
-        body = response.json()
         usage = body.get("usage", {})
         input_tokens = usage.get("prompt_tokens", 0)
         output_tokens = usage.get("completion_tokens", 0)
@@ -299,6 +306,48 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             estimated_cost_usd=estimate_openai_cost(input_tokens, output_tokens, self.input_rate, self.output_rate),
             research=research,
         )
+
+
+_DIRECT_TEXT = re.compile(r'"direct_answer"\s*:\s*\{\s*"title"\s*:\s*(?:null|"(?:[^"\\]|\\.)*")\s*,\s*"text"\s*:\s*"((?:[^"\\]|\\.)*)')
+
+
+def partial_direct_answer(content: str) -> str | None:
+    """The direct answer's text so far, read from a JSON answer still being written (schema order puts it early)."""
+    match = _DIRECT_TEXT.search(content)
+    if not match:
+        return None
+    raw = match.group(1)
+    for cut in range(0, 7):  # the stream may stop mid-escape, for example after a lone backslash or inside \\u00e9
+        try:
+            return json.loads(f'"{raw[:len(raw) - cut]}"')
+        except json.JSONDecodeError:
+            continue
+    return None
+
+
+def _stream_chat(api_key: str, request: dict, timeout: float, on_text) -> dict:
+    """The same chat completion, streamed: on_text gets the direct answer's text as it grows. Returns a body in
+    the shape of the non-streamed response, so the caller's checks (length, refusal, schema) are unchanged."""
+    content, finish, refusal, usage, shown = "", None, None, {}, ""
+    with httpx.stream("POST", "https://api.openai.com/v1/chat/completions", timeout=timeout,
+                      headers={"Authorization": f"Bearer {api_key}"},
+                      json={**request, "stream": True, "stream_options": {"include_usage": True}}) as response:
+        response.raise_for_status()
+        for line in response.iter_lines():
+            if not line.startswith("data: ") or line == "data: [DONE]":
+                continue
+            event = json.loads(line[6:])
+            usage = event.get("usage") or usage
+            for choice in event.get("choices", []):
+                delta = choice.get("delta", {})
+                content += delta.get("content") or ""
+                refusal = refusal or delta.get("refusal")
+                finish = choice.get("finish_reason") or finish
+            text = partial_direct_answer(content)
+            if text and text != shown:
+                shown = text
+                on_text(text)
+    return {"choices": [{"finish_reason": finish, "message": {"content": content, "refusal": refusal}}], "usage": usage}
 
 
 def get_answer_generator(settings: Settings) -> AnswerGenerator:
