@@ -149,12 +149,26 @@ def add_llm_edges(graph: nx.MultiDiGraph, extraction: dict) -> dict:
             entity = edge["entity"]
             graph.add_node(f"entity:{entity}", type=entities[entity]["type"], title=entities[entity]["name"])
             if edge["type"] == "APPLIES_TO":
+                # Decision 6 (22 Oct 2026): the model over-lists entities (precision 24/67 on Ashu's labels).
+                # Keep an edge only if the provision or its document's title names the entity.
+                title = graph.nodes[graph.nodes[provision]["document_id"]]["title"]
+                if not (names(entities[entity], graph.nodes[provision]["text"]) or names(entities[entity], title)):
+                    dropped["APPLIES_TO:not_named_in_provision_or_title"] += 1
+                    continue
                 _edge(graph, provision, f"entity:{entity}", "APPLIES_TO", "llm", edge["quote"], confidence=edge["confidence"])
             else:
                 obligation = f"{provision}/obligation:{number}"
                 graph.add_node(obligation, type="Obligation", title=edge["obligation"], bearer=entity)
                 _edge(graph, provision, obligation, "REQUIRES", "llm", edge["quote"], confidence=edge["confidence"])
     return {"model": extraction.get("model"), "dropped": dict(dropped)}
+
+
+def names(entity: dict, text: str) -> bool:
+    """Whether ``text`` mentions the entity by its name or an alias (whole words, case and punctuation ignored)."""
+    from app.graph.llm_extraction import _key
+
+    haystack = f" {_key(text)} "
+    return any(f" {_key(alias)} " in haystack for alias in [entity["name"], *entity["aliases"]] if _key(alias))
 
 
 def edge_counts(graph: nx.MultiDiGraph) -> dict:

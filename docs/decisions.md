@@ -258,3 +258,52 @@ Three rules guard against wrong edges:
 - The live ingestion path still feeds the old graph. The product switches to this graph when Phase 6 needs it.
 - Only numbered paragraphs become provisions. Preambles and unnumbered annex text get no provision nodes.
 - Numbered table rows in annexes do become provisions. They add noise, which the labelled sample will show.
+
+## ADR-026: The default retrieval path (Phase 3 gate decisions)
+
+**Decision (Ashu, 22 October 2026):**
+1. **Retrieval:** hybrid search (BM25 plus OpenAI text-embedding-3-small, merged by reciprocal rank fusion), then the past-date filter (ADR-024), then Cohere rerank-v3.5 over the top 30.
+2. **Scope guard:** the keyword scope guard is dropped.
+3. **Abstention:** the system refuses when Cohere's top relevance score is below 0.34.
+4. **Routing:** the query router is dropped, and the graph cross-reference step runs on every question (ADR-027).
+
+**Why:** results on the dev questions (`data/evaluation/ladder-dev.json`, `data/evaluation/abstention-dev.json`):
+- **The chosen path is the best on every retrieval measure:**
+  - right paragraph in the top 5: 94/105;
+  - right paragraph in the top 10: 97/105;
+  - nDCG@10: 0.83;
+  - withdrawn-trap leakage: 0/13.
+- **The keyword guard does more harm than good.** It refused 21 of 92 answerable questions and caught 1 of 13 unanswerable ones.
+- **The 0.34 threshold costs nothing on dev.** It refused 5 of 13 unanswerable questions and 0 of 92 answerable ones.
+- **The router missed every question that needed the graph.** It sent all 13 two-paragraph questions to vector search.
+
+**Trade-off:**
+- **Cohere needs a paid production key.** It costs about $0.002 per question at list price, still to be checked against Cohere's pricing page. bge is the free fallback: 90/105 in the top 5, but about 35 seconds per question on a CPU.
+- **The threshold was set on dev only.** There were just 13 unanswerable questions, so the held-out test split decides whether it holds.
+- **Not every unanswerable question is caught.** 8 of 13 score like real questions, so Phase 5's evidence check has to catch them.
+- **The production query path still uses rung 0.** It switches to this path at the start of Phase 5, where answers are built.
+
+## ADR-027: What the knowledge graph is trusted for (Phase 4 gate decisions)
+
+**Decision (Ashu, 22 October 2026):**
+5. **Default path:** the graph is in the default answer path only for cross-reference expansion (REFERS_TO). APPLIES_TO edges are not used in answers or filters, and the map labels them as machine-extracted with their measured precision.
+6. **APPLIES_TO filter:** an APPLIES_TO edge is kept only if the provision, or its document's title, names the entity by name or alias. The filter is measured on 20 fresh paragraphs, drawn after it was tuned.
+
+**Why:**
+- **Results on Ashu's 23 hand-labelled paragraphs** (`data/evaluation/graph-quality.json`):
+
+  | Edge | Precision | Recall |
+  |---|---|---|
+  | REQUIRES | 34/35 | 34/47 |
+  | APPLIES_TO | 24/67 | 24/46 |
+
+- **The 27 paragraphs drafted by Claude and checked by Ashu** are reported separately, never pooled with the hand labels.
+- **Graph on vs off:** two-paragraph questions rose from 22 to 24 of 26 evidence sentences in the top 5. There was no change for any other question type. This is an upper bound, because those questions were drafted from the same kind of cross-reference the graph uses.
+- **The filter on the same 50 labels, which were used for tuning:**
+
+  | Labels | Precision before | Precision after | Recall before | Recall after |
+  |---|---|---|---|---|
+  | Hand (23 paragraphs) | 24/67 | 19/26 | 24/46 | 19/46 |
+  | Claude-drafted, checked (27 paragraphs) | 16/73 | 16/31 | 16/35 | 16/35 |
+
+**Trade-off:** the filter misses entities that a provision addresses only implicitly, so recall falls.

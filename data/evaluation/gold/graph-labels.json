@@ -960,5 +960,29 @@
       "labelled_at": "2026-10-22T06:05:10.886293+00:00",
       "source": "model-drafted, reviewed by Ashu"
     }
-  }
+  },
+  "fresh_seed": 6,
+  "fresh_sample": [
+    "doc_034d60929469ff1a#2",
+    "doc_120d4c9ff627069c#31",
+    "doc_12f703cfabeb2d1d#107",
+    "doc_12f703cfabeb2d1d#92",
+    "doc_2706017d8d62cce0#4",
+    "doc_6dc49b3fd58281ba#19",
+    "doc_6dc49b3fd58281ba#9",
+    "doc_7b2049f104535ba8#76",
+    "doc_877909011f8613af#105",
+    "doc_907075fb62ceeefe#135",
+    "doc_907075fb62ceeefe#162",
+    "doc_9513254ffe79de18#33",
+    "doc_95d3161bacc1e327#18",
+    "doc_afd64b6ca83d03db#1",
+    "doc_bc55e72c851cf8e3#47",
+    "doc_bc55e72c851cf8e3#92",
+    "doc_bc55e72c851cf8e3#98",
+    "doc_bf8aefb7519a699b#2",
+    "doc_ce5de4dbdceb04e1#2~2",
+    "doc_ce5de4dbdceb04e1#80"
+  ],
+  "fresh_note": "Drawn 22 Oct 2026 after the APPLIES_TO filter (decision 6) was tuned on the first 50; measures that filter."
 }

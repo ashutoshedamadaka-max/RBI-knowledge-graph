@@ -99,3 +99,15 @@ def test_extracted_quotes_are_scored_by_the_sentence_they_fall_in() -> None:
     assert sentence_of("It shall also publish its policy", parts) == {2}
     result = score({"p": {1, 2}}, {"p": {2, 3}})
     assert result["precision"]["numerator"] == 1 and result["recall"]["denominator"] == 2
+
+
+def test_applies_to_is_kept_only_for_entities_the_provision_or_title_names() -> None:
+    graph, report = _graph()
+    extraction = {"model": "test", "provisions": {"new#2": {"edges": [
+        {"type": "APPLIES_TO", "entity": "hfc", "quote": "An NBFC shall disclose", "confidence": 0.9},
+        {"type": "APPLIES_TO", "entity": "borrower", "quote": "to the borrower", "confidence": 0.9}]}}}
+
+    dropped = ontology.add_llm_edges(graph, extraction)["dropped"]
+
+    assert ontology.neighbours(graph, "new#2", "APPLIES_TO") == ["entity:borrower", "entity:nbfc"]  # named in the text
+    assert dropped == {"APPLIES_TO:not_named_in_provision_or_title": 1}  # HFCs are not mentioned anywhere
