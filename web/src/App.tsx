@@ -1,15 +1,20 @@
 import { useEffect, useState } from "react";
-import Ask from "./screens/Ask";
-import RegulationMap from "./screens/RegulationMap";
+import Home from "./screens/Home";
+import HowItWorks from "./screens/HowItWorks";
+import HowIBuilt from "./screens/HowIBuilt";
 import Quality from "./screens/Quality";
 import Sources from "./screens/Sources";
+import KnowledgeGraph from "./screens/KnowledgeGraph";
 
-const SCREENS = { ask: "Ask", map: "Regulation map", quality: "Quality", sources: "Sources and monitoring" } as const;
+// Written for recruiters and hiring managers: each tab explains one side of the product on its own.
+const SCREENS = {
+  home: "Home", how: "How this works", built: "How I built this", evals: "Evals", sources: "Sources", graph: "Knowledge graph",
+} as const;
 type Screen = keyof typeof SCREENS;
 
 function current(): Screen {
   const hash = window.location.hash.replace("#", "") as Screen;
-  return hash in SCREENS ? hash : "ask";
+  return hash in SCREENS ? hash : "home";
 }
 
 export default function App() {
@@ -19,7 +24,7 @@ export default function App() {
   });
 
   useEffect(() => {
-    const onHash = () => setScreen(current());
+    const onHash = () => { setScreen(current()); window.scrollTo({ top: 0 }); };
     window.addEventListener("hashchange", onHash);
     return () => window.removeEventListener("hashchange", onHash);
   }, []);
@@ -28,12 +33,13 @@ export default function App() {
     else document.documentElement.setAttribute("data-theme", theme);
     try { localStorage.setItem("theme", theme); } catch { /* private mode: the choice lasts this visit */ }
   }, [theme]);
+  useEffect(() => { document.title = screen === "home" ? "RBI Lending Intelligence" : `${SCREENS[screen]} · RBI Lending Intelligence`; }, [screen]);
 
   return (
     <div className="shell">
       <header className="topbar">
-        <div className="brand">RBI Lending Intelligence<small>NBFC lending rules, answered from the rules in force</small></div>
-        <nav className="tabs" aria-label="Screens">
+        <a className="brand" href="#home" style={{ color: "inherit", textDecoration: "none" }}>RBI Lending Intelligence<small>Answers from the RBI rules in force, with the evidence</small></a>
+        <nav className="tabs" aria-label="Sections">
           {(Object.keys(SCREENS) as Screen[]).map((key) => (
             <button key={key} aria-current={screen === key ? "page" : undefined} onClick={() => { window.location.hash = key; }}>
               {SCREENS[key]}
@@ -46,10 +52,12 @@ export default function App() {
         </button>
       </header>
       <main>
-        {screen === "ask" && <Ask />}
-        {screen === "map" && <RegulationMap />}
-        {screen === "quality" && <Quality />}
+        {screen === "home" && <Home />}
+        {screen === "how" && <HowItWorks />}
+        {screen === "built" && <HowIBuilt />}
+        {screen === "evals" && <Quality />}
         {screen === "sources" && <Sources />}
+        {screen === "graph" && <KnowledgeGraph />}
       </main>
     </div>
   );

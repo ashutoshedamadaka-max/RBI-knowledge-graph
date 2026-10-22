@@ -94,8 +94,8 @@ export default function RegulationMap() {
 
   return (
     <div>
-      <h1>Regulation map</h1>
-      <p className="muted">88 RBI documents, their numbered paragraphs, defined terms and the lenders and products they govern. Colour = cluster of closely linked rules; size = number of connections; dimmed red = no longer in force on the selected date.</p>
+      <h2>Explore the map</h2>
+      <p className="muted">How to read it: each dot is a document, paragraph, term, lender type or loan type. <strong>Colour</strong> groups rules that are closely linked; <strong>size</strong> shows how connected a dot is; <strong>dimmed red</strong> means no longer in force in the chosen year. Drag to move, scroll to zoom, click a dot to see its text and the RBI quotes behind its links, and slide the year to replay how the rulebook changed. Prefer a list? Open "All documents as a list" below the map.</p>
       <div className="map-tools">
         <label>Search documents <input type="search" value={search} onChange={(event) => setSearch(event.target.value)} placeholder="e.g. digital lending" /></label>
         <label>Year: <strong>{year === YEARS[YEARS.length - 1] ? "today" : year}</strong>

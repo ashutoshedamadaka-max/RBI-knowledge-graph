@@ -3,6 +3,21 @@ import { getJson } from "../api";
 
 /* Every number on this screen comes from a saved evaluation run served by /quality. Nothing is computed
    here except formatting; a run that does not exist shows "not yet measured". */
+const RUNG_NAMES: Record<string, string> = {
+  rung0: "Original search", bm25: "Exact words", "dense-openai": "Meaning (OpenAI)", "dense-bge": "Meaning (free model)",
+  hybrid: "Both combined", "hybrid+as-of": "+ in-force filter", "rerank-cohere": "+ re-ranking (chosen)", "rerank-bge": "+ free re-ranker",
+};
+const TYPE_NAMES: Record<string, string> = {
+  single_fact: "Simple fact", applies_to: "Who it applies to", multi_hop: "Needs two paragraphs", change_over_time: "About a past date",
+  false_premise: "False premise", withdrawn_trap: "Trick: withdrawn rule", unanswerable: "Not answerable from the rulebook",
+};
+const EDGE_NAMES: Record<string, string> = {
+  APPLIES_TO: "Who a rule applies to", REQUIRES: "What a rule requires", DEFINES: "Defines a term", REFERS_TO: "Refers to another paragraph",
+};
+const SOURCE_NAMES: Record<string, string> = {
+  hand: "Labelled by hand", "model-drafted, reviewed by Ashu": "AI-drafted, checked by hand", "fresh: model-drafted, reviewed by Ashu": "Fresh paragraphs, AI-drafted, checked",
+};
+
 type Rate = { value: number | null; low?: number; high?: number; n: number; numerator?: number; denominator?: number };
 type Source = { status: "measured" | "not yet measured"; file: string; data?: any };
 type Report = Record<string, any>; // sources by name (each a Source), plus "spend"
@@ -56,11 +71,26 @@ export default function Quality() {
   const firstPrompt = report.answers_dev_first_prompt.data?.results;
 
   return (
-    <div>
-      <h1>Quality</h1>
-      <p className="muted">Measured on the {split}, from saved runs only. Questions were drafted by a model and sampled for review by Ashu; ranges are 95% bootstrap intervals over questions.</p>
+    <div className="page">
+      <section className="hero">
+        <div className="eyebrow">Evals</div>
+        <h1>How I know it works, and where it doesn't</h1>
+        <p className="lead">"It seems to answer well" is not evidence. Every claim about quality on this site comes from an automated test run against an answer key, with the run saved so the number can be traced back.</p>
+      </section>
+      <section>
+        <h2>How quality is measured</h2>
+        <div className="grid-2">
+          <div className="card kicker-card"><span className="pm-term">Answer key</span><h3>181 questions with known answers</h3><p>Each question comes with the exact RBI sentence that answers it, copied from the source document. A question passes only if the answer cites a passage containing that sentence. No AI grades its own work.</p></div>
+          <div className="card kicker-card"><span className="pm-term">Held-out set</span><h3>Tune on two thirds, test on one third</h3><p>The questions were split before any testing. Everything was tuned on the larger part; the smaller part was run once, at the end, so the headline numbers are not flattered by tuning.</p></div>
+          <div className="card kicker-card"><span className="pm-term">Coverage</span><h3>Seven kinds of question</h3><p>Simple facts, "who does this apply to", two-paragraph questions, questions about a past date, trick questions about withdrawn rules, questions with a false premise, and questions the rulebook cannot answer.</p></div>
+          <div className="card kicker-card"><span className="pm-term">Confidence</span><h3>Ranges, not just averages</h3><p>With dozens of questions, results carry uncertainty. Each headline number shows a 95% range: the true rate very likely lies inside it.</p></div>
+        </div>
+        <p className="muted" style={{ marginTop: 10 }}>Questions were drafted by an AI from RBI paragraphs and spot-checked by me (all 30 sampled questions kept). Measured on the {split}.</p>
+      </section>
+      <h2>Headline results</h2>
       <div className="tiles">
-        <Tile title="Answers that cite the right RBI sentence" rate={results.gold_sentence_cited} file={answers.file} />
+        <Tile title="Answers that cite the right RBI paragraph" rate={results.question_all_gold_cited} file={answers.file}
+          note={results.gold_sentence_cited ? `Counting every answer sentence in the key: ${Math.round(results.gold_sentence_cited.value * results.gold_sentence_cited.n)} of ${results.gold_sentence_cited.n}` : undefined} />
         <Tile title="Withdrawn rules cited on trap questions" rate={results.withdrawn_trap_cited_withdrawn} lowerIsBetter file={answers.file} />
         <Tile title="Unanswerable questions refused" rate={results.unanswerable_refused} file={answers.file} />
         <Tile title="Answerable questions wrongly refused" rate={results.answerable_wrongly_refused} lowerIsBetter file={answers.file} />
@@ -80,17 +110,20 @@ export default function Quality() {
 
       <div className="two-col">
         <section className="card">
-          <h2>Retrieval ladder (one change per step)</h2>
-          <p className="muted">Share of 105 gold sentences found in the top 5, dev set.</p>
-          <Bars rows={Object.entries(ladder).map(([name, row]: [string, any]) => [name, row["recall@5"]?.value ?? null])} />
-          <p className="muted">Withdrawn-rule leaks in the top 5: {Object.entries(ladder).map(([name, row]: [string, any]) => `${name} ${row["withdrawn_trap_leak@5"].numerator}/${row["withdrawn_trap_leak@5"].denominator}`).join(" · ")}</p>
+          <span className="pm-term">Experiment</span>
+          <h2>Finding the right paragraph: eight approaches, one change at a time</h2>
+          <p className="muted">How often the paragraph that answers the question is in the top 5 results (105 answer sentences, dev set). Each bar changes one thing from an earlier one.</p>
+          <Bars rows={Object.entries(ladder).map(([name, row]: [string, any]) => [RUNG_NAMES[name] ?? name, row["recall@5"]?.value ?? null])} />
+          <p className="muted">Withdrawn rules reaching the top 5 on 13 trick questions: {Object.entries(ladder).map(([name, row]: [string, any]) => `${RUNG_NAMES[name] ?? name} ${row["withdrawn_trap_leak@5"].numerator}`).join(" · ")}. The in-force filter is what takes this to zero.</p>
         </section>
         <section className="card">
-          <h2>By question type</h2>
+          <span className="pm-term">Segmentation</span>
+          <h2>Results by kind of question</h2>
+          <p className="muted">Where the product is strong and where it is weaker. Ranges in brackets.</p>
           <div className="table-wrap"><table>
             <thead><tr><th>Type</th><th>Questions</th><th>Answered</th><th>Right sentence cited</th></tr></thead>
             <tbody>{Object.entries(results.by_type ?? {}).map(([type, row]: [string, any]) => (
-              <tr key={type}><td>{type.replaceAll("_", " ")}</td><td>{row.questions}</td><td>{row.answered}</td>
+              <tr key={type}><td>{TYPE_NAMES[type] ?? type.replaceAll("_", " ")}</td><td>{row.questions}</td><td>{row.answered}</td>
                 <td>{row.gold_sentence_cited ? <><span className="num">{pct(row.gold_sentence_cited.value)}</span> <span className="muted">({pct(row.gold_sentence_cited.low)}–{pct(row.gold_sentence_cited.high)})</span></> : "—"}</td></tr>
             ))}</tbody>
           </table></div>
@@ -99,7 +132,9 @@ export default function Quality() {
 
       <div className="two-col">
         <section className="card">
-          <h2>Claim checker vs labels</h2>
+          <span className="pm-term">Validation</span>
+          <h2>Can the claim checker be trusted?</h2>
+          <p className="muted">The checker is itself an AI, so it was tested against 50 claims labelled separately.</p>
           {checkerRow ? (
             <>
               <p>Of <span className="num">{checkerRow[1]["unsupported_caught (recall)"].denominator}</span> claims the labels mark as not fully supported, the checker flagged <span className="num">{checkerRow[1]["unsupported_caught (recall)"].numerator}</span>; <span className="num">{checkerRow[1]["flags_correct (precision)"].numerator}</span> of its {checkerRow[1]["flags_correct (precision)"].denominator} flags were right.</p>
@@ -108,24 +143,29 @@ export default function Quality() {
           ) : <p className="muted">not yet measured</p>}
         </section>
         <section className="card">
-          <h2>Change handling (historical replay)</h2>
+          <span className="pm-term">Simulation</span>
+          <h2>Handling rule changes: a replay of real history</h2>
+          <p className="muted">RBI's real withdrawals and replacements were replayed day by day, and the product was asked questions along the way.</p>
           {replay ? <ReplaySummary replay={replay} /> : <p className="muted">not yet measured</p>}
         </section>
       </div>
 
       <div className="two-col">
         <section className="card">
-          <h2>Knowledge graph extraction</h2>
+          <span className="pm-term">Precision and recall</span>
+          <h2>Knowledge graph accuracy</h2>
+          <p className="muted"><strong>Precision</strong>: of the links it made, how many were right. <strong>Recall</strong>: of the links that exist, how many it found. Checked on hand-labelled paragraphs.</p>
           <div className="table-wrap"><table>
-            <thead><tr><th>Labels</th><th>Edge</th><th>Precision</th><th>Recall</th></tr></thead>
+            <thead><tr><th>Labels</th><th>Link type</th><th>Precision</th><th>Recall</th></tr></thead>
             <tbody>{Object.entries(graphQuality).flatMap(([source, edges]: [string, any]) =>
               Object.entries(edges).filter(([key]) => key !== "provisions").map(([edge, m]: [string, any]) => (
-                <tr key={source + edge}><td>{source}</td><td>{edge}</td>
+                <tr key={source + edge}><td>{SOURCE_NAMES[source] ?? source}</td><td>{EDGE_NAMES[edge] ?? edge}</td>
                   <td>{m.precision.numerator}/{m.precision.denominator}</td><td>{m.recall.numerator}/{m.recall.denominator}</td></tr>
               )))}</tbody>
           </table></div>
         </section>
         <section className="card">
+          <span className="pm-term">Unit economics</span>
           <h2>Cost</h2>
           <p>Total model spend for the whole build and every evaluation run: <span className="num">${report.spend.total_usd.toFixed(2)}</span> (budget $20).</p>
           <Bars rows={Object.entries(report.spend.by_phase_usd as Record<string, number>).map(([phase, usd]): [string, number] => [`Phase ${phase}`, usd])} max={Math.max(...(Object.values(report.spend.by_phase_usd) as number[]), 0.01)} format={(v) => `$${v.toFixed(3)}`} />
@@ -135,17 +175,20 @@ export default function Quality() {
 
       {firstPrompt && (
         <section className="card" style={{ marginTop: 16 }}>
-          <h2>One fix, measured: the answer prompt</h2>
+          <span className="pm-term">Iteration</span>
+          <h2>One fix, measured: the answer instructions</h2>
           <p>The first dev run wrongly refused <span className="num">{pct(firstPrompt.answerable_wrongly_refused.value)}</span> of answerable questions: passages for past dates were labelled with today's "withdrawn" status, so the model would not use them. After labelling each passage as in force on the question's date: <span className="num">{pct(report.answers_dev.data.results.answerable_wrongly_refused.value)}</span>. The cost: unanswerable questions refused fell from {pct(firstPrompt.unanswerable_refused.value)} to {pct(report.answers_dev.data.results.unanswerable_refused.value)}.</p>
         </section>
       )}
 
       <section className="card" style={{ marginTop: 16 }}>
-        <h2>Failure gallery (real cases from the {split})</h2>
+        <span className="pm-term">Failure analysis</span>
+        <h2>Where it still fails: real cases from the {split}</h2>
+        <p className="muted">Questions where the answer missed the expected paragraph, or where the checker flagged a sentence. Shown on purpose: knowing the failure modes is how the next iteration is chosen.</p>
         <div className="table-wrap"><table>
           <thead><tr><th>Question</th><th>Type</th><th>What went wrong</th></tr></thead>
           <tbody>{(answers.data?.failures ?? []).map((item: any) => (
-            <tr key={item.id}><td>{item.id}</td><td>{item.type.replaceAll("_", " ")}</td>
+            <tr key={item.id}><td>{item.question ?? item.id}</td><td>{TYPE_NAMES[item.type] ?? item.type.replaceAll("_", " ")}</td>
               <td>{[...item.reasons, ...item.flagged_claims.map((c: any) => `claim ${c.verdict.replaceAll("_", " ")}: “${c.text.slice(0, 120)}”`)].join("; ")}</td></tr>
           ))}</tbody>
         </table></div>
@@ -153,6 +196,7 @@ export default function Quality() {
 
       <section className="card" style={{ marginTop: 16 }}>
         <h2>Run history</h2>
+        <p className="muted">Each number on this page traces to one of these saved runs and the code version that produced it.</p>
         <div className="table-wrap"><table>
           <thead><tr><th>Run</th><th>File</th><th>Generated</th><th>Commit</th></tr></thead>
           <tbody>{Object.entries(report).filter(([name]) => name !== "spend").map(([name, source]) => (

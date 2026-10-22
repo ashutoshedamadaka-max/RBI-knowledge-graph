@@ -49,10 +49,48 @@ export default function Sources() {
     if (response.ok) load();
   }
 
+  const active = documents.filter((document) => document.lifecycle === "ACTIVE").length;
+  const withdrawn = documents.filter((document) => ["WITHDRAWN", "REPEALED", "SUPERSEDED"].includes(document.lifecycle)).length;
+  const example = documents.find((document) => /Responsible Business Conduct/.test(document.title) && document.lifecycle === "ACTIVE")
+    ?? documents.find((document) => document.lifecycle === "ACTIVE");
+
   return (
-    <div>
-      <h1>Sources and monitoring</h1>
+    <div className="page">
+      <section className="hero">
+        <div className="eyebrow">Sources</div>
+        <h1>What the product reads, and how it keeps that up to date</h1>
+        <p className="lead">An answer can only be as good as its sources. The product reads RBI's own documents and nothing else, keeps every version, and tracks for each one whether it is still in force.</p>
+      </section>
+
+      <section>
+        <div className="grid-3">
+          <div className="card kicker-card"><span className="pm-term">Scope</span><h3>{documents.length || 88} RBI documents, lending to NBFCs</h3>
+            <p>{active || 16} rules in force today (RBI's 2025 consolidated directions for non-bank lenders) and {withdrawn || 72} older rules they replaced, kept so questions about past dates can be answered.</p></div>
+          <div className="card kicker-card"><span className="pm-term">MVP scope decision</span><h3>Narrow on purpose</h3>
+            <p>One regulated sector, covered completely and tested by hand, rather than all of RBI covered thinly. Banks and co-operative banks are the next expansion.</p></div>
+          <div className="card kicker-card"><span className="pm-term">Single source of truth</span><h3>Only rbi.org.in</h3>
+            <p>Every document comes from RBI's website, saved exactly as downloaded with the date it was fetched, so any answer can be traced to what RBI published.</p></div>
+        </div>
+      </section>
+
+      <section>
+        <h2>Every rule has a status</h2>
+        <div className="legend-grid">
+          <div className="legend-item"><span className="swatch" style={{ background: "var(--ok)" }} /><div><strong>In force</strong><br /><span className="muted">Used for answers about any date it covers.</span></div></div>
+          <div className="legend-item"><span className="swatch" style={{ background: "var(--bad)" }} /><div><strong>Withdrawn or replaced</strong><br /><span className="muted">Kept for history; used only for questions about dates before it ended.</span></div></div>
+          <div className="legend-item"><span className="swatch" style={{ background: "var(--warn)" }} /><div><strong>Awaiting review</strong><br /><span className="muted">Never used for answers until a person confirms its status.</span></div></div>
+        </div>
+        <p className="muted">Status changes come from RBI's own evidence: its "Withdrawn" stamp, its register of withdrawn circulars, or a new rule's text saying what it replaces. A person can approve a suggested replacement, but cannot overrule RBI.</p>
+      </section>
+
+      <section>
+        <h2>How a document is cut into searchable pieces</h2>
+        <p className="prose">A 100-page direction is too big to hand to an AI, so it is cut into pieces. Cutting in the wrong place splits a rule from its conditions. This product cuts where RBI itself numbers its paragraphs, and attaches the chapter and section heading to every piece so it still makes sense on its own.</p>
+        {example && <ChunkPreview documentId={example.document_id} title={example.title} />}
+      </section>
+
       {message && <p role="status">{message}</p>}
+      <h2>The detail: monitoring, approvals and every document</h2>
       <div className="two-col" style={{ marginTop: 0 }}>
         <section className="card">
           <h2>Corpus</h2>
@@ -112,6 +150,37 @@ export default function Sources() {
           ))}</tbody>
         </table></div>
       </section>
+    </div>
+  );
+}
+
+/** The first few pieces of a real document, drawn as bands: what a "chunk" is, without jargon. */
+function ChunkPreview({ documentId, title }: { documentId: string; title: string }) {
+  const [rows, setRows] = useState<ChunkRow[]>([]);
+  useEffect(() => { getJson<ChunkRow[]>(`/documents/${documentId}/chunks`).then(setRows).catch(() => setRows([])); }, [documentId]);
+  const sample = rows.filter((row) => row.paragraph_ref && /^\d/.test(row.paragraph_ref)).slice(3, 7);
+  if (!sample.length) return null;
+  return (
+    <div className="grid-2">
+      <div className="doc-sheet" aria-label={`The first pieces of ${title}`}>
+        <div className="muted" style={{ marginBottom: 6 }}>{title} · {rows.length} pieces in total</div>
+        {sample.map((row) => (
+          <div className="chunk-band" key={row.chunk_id}>
+            <div className="meta">Paragraph {row.paragraph_ref} · page {row.page_number} · {row.token_count} tokens · {row.heading_path}</div>
+            {row.text.replace(/^\[[^\]]*\]\s*/, "").slice(0, 220)}…
+          </div>
+        ))}
+      </div>
+      <div className="card">
+        <h3>What each piece carries</h3>
+        <ul>
+          <li><strong>RBI's paragraph number</strong>, so answers can cite "paragraph 30" and readers can check it.</li>
+          <li><strong>Its chapter and section heading</strong>, so a piece makes sense out of context.</li>
+          <li><strong>Its dates in force</strong>, inherited from the document, for the in-force filter.</li>
+          <li><strong>Its size</strong>: big enough to hold a whole rule, small enough to search precisely.</li>
+        </ul>
+        <p className="muted">Tested against three other ways of cutting: only this one never split a rule in half.</p>
+      </div>
     </div>
   );
 }

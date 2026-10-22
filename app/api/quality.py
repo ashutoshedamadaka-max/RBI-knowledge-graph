@@ -23,10 +23,20 @@ SOURCES = {
 ANSWERABLE = {"single_fact", "applies_to", "multi_hop", "change_over_time", "false_premise"}
 
 
+def _questions() -> dict[str, str]:
+    """Question text by id, so the failure gallery shows what was asked (from the saved question set)."""
+    texts = {}
+    for split in ("dev", "test"):
+        path = EVALUATION / "v2" / f"{split}.jsonl"
+        if path.exists():
+            texts.update({row["id"]: row["question"] for row in map(json.loads, path.read_text(encoding="utf-8").splitlines()) if row})
+    return texts
+
+
 def failures(records: list[dict], limit: int = 12) -> list[dict]:
     """Real failed cases: answerable but refused or missing the gold sentence, a withdrawn rule cited, an
     unanswerable question answered, or a claim the checker did not pass."""
-    out = []
+    out, questions = [], _questions()
     for record in records:
         reasons = []
         if record.get("error"):
@@ -34,14 +44,14 @@ def failures(records: list[dict], limit: int = 12) -> list[dict]:
         if record["type"] in ANSWERABLE and not record.get("answered"):
             reasons.append("answerable, but refused")
         elif record["type"] in ANSWERABLE and not all(record.get("gold_cited", [True])):
-            reasons.append("did not cite the gold sentence")
+            reasons.append("did not cite the expected RBI paragraph")
         if record.get("cited_withdrawn"):
             reasons.append("cited a withdrawn rule")
         if record["type"] == "unanswerable" and record.get("answered"):
-            reasons.append("answered a question the corpus cannot answer")
+            reasons.append("answered a question the rulebook cannot answer")
         flagged = [claim for claim in record.get("claims", []) if claim["verdict"] != "supported"]
         if reasons or flagged:
-            out.append({"id": record["id"], "type": record["type"], "reasons": reasons,
+            out.append({"id": record["id"], "type": record["type"], "question": questions.get(record["id"]), "reasons": reasons,
                         "flagged_claims": [{"text": claim["text"], "verdict": claim["verdict"]} for claim in flagged[:2]]})
     return out[:limit]
 

@@ -75,7 +75,7 @@ export default function Ask() {
   return (
     <div className="grid-ask">
       <section className="card" aria-labelledby="ask-heading">
-        <h1 id="ask-heading">Ask about RBI lending rules</h1>
+        <h3 id="ask-heading">Your question</h3>
         <form onSubmit={(event) => { event.preventDefault(); ask(); }}>
           <label className="sr-only" htmlFor="question">Question</label>
           <textarea id="question" className="question" value={query} onChange={(event) => setQuery(event.target.value)} />
