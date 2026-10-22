@@ -168,6 +168,15 @@ def deterministic_research(query: str, evidence: list[ChunkMetadata]) -> Structu
     )
 
 
+def _status(chunk: ChunkMetadata, as_of) -> str:
+    """How the answer step sees a passage: in force on the answer date (search already ensured it), and
+    withdrawn since if it was. Today's status alone made the model refuse correct past-date answers."""
+    lifecycle = chunk.lifecycle.value
+    if as_of is None:
+        return f"lifecycle {lifecycle}"
+    return f"in force on {as_of}" + ("" if lifecycle in {"ACTIVE", "AMENDED"} else f" ({lifecycle.lower()} since)")
+
+
 class DeterministicAnswerGenerator(AnswerGenerator):
     """Evidence-only response composer used when no model is configured."""
 
@@ -197,14 +206,15 @@ class OpenAIAnswerGenerator(AnswerGenerator):
     def generate(self, query: str, evidence: list[ChunkMetadata],
                  sections: dict[str, str] | None = None, as_of=None, notices: list[str] | None = None) -> GenerationResult:
         context = "\n\n".join(
-            f"CHUNK {chunk.chunk_id} | {chunk.document_title} | lifecycle {chunk.lifecycle.value} | passage {chunk.chunk_index + 1}\n{chunk.text}"
+            f"CHUNK {chunk.chunk_id} | {chunk.document_title} | {_status(chunk, as_of)} | passage {chunk.chunk_index + 1}\n{chunk.text}"
             + (f"\nSECTION CONTEXT (to understand the passage; cite only the CHUNK id above):\n{sections[chunk.chunk_id]}"
                if sections and chunk.chunk_id in sections else "")
             for chunk in evidence
         )
         prompt = (
             "Return JSON only. Answer using only the provided RBI evidence. Do not invent regulations, dates, "
-            "or legal requirements. Use status 'insufficient_evidence' when the evidence cannot support a direct answer. "
+            "or legal requirements. Use status 'insufficient_evidence' only when no passage addresses the question; "
+            "when passages answer part of it, answer that part and say what the evidence does not cover. "
             "For a grounded answer, direct_answer and every claim must include citation_ids containing only supplied chunk IDs. "
             "display_title should be a concise, factual answer heading. direct_answer should be a plain-English summary "
             "of the cited evidence in 2-3 short sentences, directly answering the question. "
@@ -219,10 +229,12 @@ class OpenAIAnswerGenerator(AnswerGenerator):
             "Every heading must describe its own claim: never label healthcare provisions as housing, or infer a category. "
             "Only include a heading if its wording is supported by both the claim and its cited passage; otherwise use null. "
             "Do not infer that a provision is new just because it appears in an amendment. "
-            "Historical or withdrawn evidence must be explicitly labelled as such, not presented as current guidance. "
+            "Every passage supplied was in force on the answer date. When the answer date is in the past, answer with "
+            "the rules in force then, and say so; a rule withdrawn since is still the correct answer for that date. "
             "do not create empty sections. related_questions is optional and must be RBI lending questions. "
             "Each claim states one requirement or fact and cites the passages that state it; never combine two "
-            "requirements in one claim. If the question assumes something the evidence contradicts, say so plainly. "
+            "requirements in one claim. If the question assumes something the evidence contradicts, the status is "
+            "'grounded': correct the assumption plainly, citing the passage that shows it. "
             "When CHANGE NOTICES are given, state the relevant ones in the direct answer: a rule replaced or withdrawn "
             "since, or a rule that takes effect only from a future date (say that date).\n"
             "JSON shape: {status, display_title|null, direct_answer:{text,citation_ids}|null, "
