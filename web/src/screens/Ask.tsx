@@ -1,162 +1,638 @@
-import { useEffect, useMemo, useState } from "react";
-import { Chunk, Claim, QueryResult, streamQuery } from "../api";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { Claim, QueryResult, streamQuery } from "../api";
 import EvidenceGraph from "../components/EvidenceGraph";
 import TraceDrawer from "../components/TraceDrawer";
-
+import { Icon, PageIntro, SourceNote } from "../components/UI";
+import saved from "../data/example.json";
 const EXAMPLES = [
-  { label: "Answered, with citations", query: "Can an NBFC capitalise penal charges on a loan?", asOf: "" },
-  { label: "Correctly refused", query: "What is the role of CareEdge Global IFSC Limited as an External Credit Assessment Institution under Basel III?", asOf: "" },
-  { label: "A rule that has since been replaced", query: "What were the rules on default loss guarantee in digital lending?", asOf: "2024-06-01" },
+  {
+    label: "A current rule",
+    query:
+      "Can a non-banking financial company capitalise penal charges on a loan?",
+    date: "",
+  },
+  {
+    label: "A past date",
+    query: "What were the rules on default loss guarantee in digital lending?",
+    date: "2024-06-01",
+  },
+  {
+    label: "Outside this corpus",
+    query:
+      "What is the role of CareEdge Global IFSC Limited as an External Credit Assessment Institution under Basel III?",
+    date: "",
+  },
 ];
 const STAGES: Record<string, string> = {
-  understanding_question: "Reading the question",
-  retrieving_official_evidence: "Searching RBI paragraphs (keywords, meaning, cross-references)",
-  checking_regulatory_validity: "Keeping only rules in force on the date",
-  selecting_authoritative_evidence: "Ranking the best passages",
-  building_grounded_answer: "Writing the answer from those passages",
-  checking_claims: "Checking each claim against its cited text",
+  understanding_question: "Reading your question",
+  retrieving_official_evidence: "Finding source passages",
+  checking_regulatory_validity: "Checking which rules applied",
+  selecting_authoritative_evidence: "Ranking the evidence",
+  building_grounded_answer: "Writing a cited answer",
+  checking_claims: "Checking claims against sources",
 };
-const VERDICT_TEXT = { supported: "Supported by the cited text", partially_supported: "Only partly supported by the cited text",
-  not_supported: "Not supported by the cited text" } as const;
-const reducedMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-
-function claimsOf(result: QueryResult): Claim[] {
-  const research = result.research;
-  if (!research) return [];
-  return [...(research.direct_answer ? [research.direct_answer] : []), ...research.sections.flatMap((section) => section.claims)];
-}
-
-/** The passage with the claim's distinctive words marked, so a reader can check the claim at a glance. */
-function Highlighted({ text, claim }: { text: string; claim: string | null }) {
-  const words = new Set((claim ?? "").toLowerCase().match(/[a-z0-9]{5,}/g) ?? []);
-  const parts = text.split(/(\b[\w-]+\b)/);
-  return <div className="passage">{parts.map((part, index) =>
-    words.has(part.toLowerCase()) ? <mark key={index}>{part}</mark> : <span key={index}>{part}</span>)}</div>;
-}
-
-export default function Ask() {
-  const [query, setQuery] = useState(EXAMPLES[0].query);
-  const [asOf, setAsOf] = useState("");
-  const [stages, setStages] = useState<string[]>([]);
+const VERDICTS = {
+  supported: "Model check: supported",
+  partially_supported: "Model check: partly supported",
+  not_supported: "Model check: not supported",
+};
+export default function Ask({ active = true }: { active?: boolean }) {
+  const [query, setQuery] = useState("");
+  const [date, setDate] = useState("");
+  const [history, setHistory] = useState(false);
+  const [mode, setMode] = useState<"live" | "saved">("live");
   const [result, setResult] = useState<QueryResult | null>(null);
-  const [error, setError] = useState<string | null>(null);
+  const [submitted, setSubmitted] = useState("");
+  const [stage, setStage] = useState("");
   const [busy, setBusy] = useState(false);
-  const [draft, setDraft] = useState<string | null>(null); // the direct answer while it is being written
-  const [activeClaim, setActiveClaim] = useState<number | null>(null);
+  const [elapsed, setElapsed] = useState(0);
+  const [error, setError] = useState<string | null>(null);
+  const [draft, setDraft] = useState<string | null>(null);
   const [openChunk, setOpenChunk] = useState<string | null>(null);
-  const [reveal, setReveal] = useState(4); // 0 documents, 1 links, 2 cited passages, 3 answer, 4 claim dots
-
-  const evidence = useMemo(() => new Map((result?.retrieved_evidence ?? []).map((chunk) => [chunk.chunk_id, chunk])), [result]);
-  const claims = result ? claimsOf(result) : [];
-  const cited = new Set(activeClaim !== null ? claims[activeClaim]?.citation_ids ?? [] : []);
-
+  const [activeClaim, setActiveClaim] = useState<Claim | null>(null);
+  const [pane, setPane] = useState<"passage" | "graph">("passage");
+  const controller = useRef<AbortController | null>(null);
+  const citationTrigger = useRef<HTMLElement | null>(null);
+  const passageRef = useRef<HTMLElement>(null);
+  const input = useRef<HTMLTextAreaElement>(null);
+  const evidence = useMemo(
+    () =>
+      new Map((result?.retrieved_evidence ?? []).map((c) => [c.chunk_id, c])),
+    [result],
+  );
+  const openPassage = openChunk ? evidence.get(openChunk) : undefined;
+  useEffect(() => () => controller.current?.abort(), []);
   useEffect(() => {
-    if (!result || reducedMotion()) { setReveal(4); return; }
-    setReveal(0);
-    const timers = [1, 2, 3, 4].map((step) => window.setTimeout(() => setReveal(step), step * 650));
-    return () => timers.forEach(window.clearTimeout);
-  }, [result]);
-
-  async function ask(text = query, date = asOf) {
-    setBusy(true); setError(null); setResult(null); setDraft(null); setStages([]); setActiveClaim(null); setOpenChunk(null);
+    if (!busy) return;
+    const started = Date.now();
+    const id = window.setInterval(
+      () => setElapsed(Math.floor((Date.now() - started) / 1000)),
+      1000,
+    );
+    return () => clearInterval(id);
+  }, [busy]);
+  useEffect(() => {
+    if (!active) return;
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === "Escape" && openChunk) {
+        setOpenChunk(null);
+        citationTrigger.current?.focus();
+      }
+    };
+    window.addEventListener("keydown", handler);
+    return () => window.removeEventListener("keydown", handler);
+  }, [active, openChunk]);
+  async function ask() {
+    if (controller.current || query.trim().length < 3) return;
+    const abort = new AbortController();
+    controller.current = abort;
+    const timer = window.setTimeout(() => abort.abort("timeout"), 180000);
+    setMode("live");
+    setBusy(true);
+    setElapsed(0);
+    setError(null);
+    setResult(null);
+    setDraft(null);
+    setOpenChunk(null);
+    setSubmitted(query.trim());
+    setStage("understanding_question");
     try {
-      setResult(await streamQuery(text, date || null, (stage) => setStages((done) => [...done, stage]),
-        (preview) => { setDraft(null); setResult(preview); }, setDraft));
-    } catch (exc) {
-      setError(exc instanceof Error ? exc.message : String(exc));
+      const answer = await streamQuery(
+        query.trim(),
+        history && date ? date : null,
+        (next) => {
+          if (controller.current === abort) setStage(next);
+        },
+        (preview) => {
+          if (controller.current !== abort) return;
+          setDraft(null);
+          setResult(preview);
+        },
+        (next) => {
+          if (controller.current === abort) setDraft(next);
+        },
+        abort.signal,
+      );
+      if (controller.current === abort) setResult(answer);
+    } catch (e) {
+      if (controller.current !== abort) return;
+      setError(
+        abort.signal.aborted
+          ? abort.signal.reason === "timeout"
+            ? "This request took too long. Please retry, or explore the saved example."
+            : "Research stopped. You can edit your question and try again."
+          : e instanceof TypeError
+            ? "Could not connect to the research service. Please retry, or explore the saved example while it is unavailable."
+            : e instanceof Error
+              ? e.message
+              : "Research could not finish. Please try again.",
+      );
     } finally {
-      setBusy(false);
+      clearTimeout(timer);
+      if (controller.current === abort) {
+        setBusy(false);
+        controller.current = null;
+      }
     }
   }
-
-  const openPassage: Chunk | undefined = openChunk ? evidence.get(openChunk) : undefined;
-  const refused = result && result.research?.status !== "grounded";
-
+  function stopResearch() {
+    const pending = controller.current;
+    controller.current = null;
+    pending?.abort();
+    setBusy(false);
+    setError("Research stopped. You can edit your question and try again.");
+  }
+  function openCitation(id: string, claim?: Claim) {
+    citationTrigger.current = document.activeElement as HTMLElement;
+    setOpenChunk(id);
+    if (claim) setActiveClaim(claim);
+    setPane("passage");
+    requestAnimationFrame(() => {
+      passageRef.current?.focus({ preventScroll: true });
+      if (window.innerWidth < 1150)
+        passageRef.current?.scrollIntoView({
+          behavior: "instant",
+          block: "start",
+        });
+    });
+  }
+  function renderClaim(claim: Claim, key: string) {
+    return (
+      <div
+        className={`claim ${activeClaim === claim ? "active" : ""}`}
+        key={key}
+      >
+        <p>{claim.text}</p>
+        <div className={`claim-verdict ${claim.support ?? "unchecked"}`}>
+          <span className={`dot ${claim.support ?? ""}`} />
+          {claim.support
+            ? VERDICTS[claim.support]
+            : busy
+              ? "Model check pending"
+              : "Not checked"}
+        </div>
+        <div className="citation-list">
+          {claim.citation_ids.map((id) => {
+            const c = evidence.get(id);
+            return (
+              <button
+                key={id}
+                className="citation"
+                onClick={() => openCitation(id, claim)}
+                aria-label={`Read source: ${c?.document_title ?? "passage"}, paragraph ${c?.paragraph_ref ?? "unavailable"}`}
+              >
+                <Icon name="sources" size={14} />
+                {c?.paragraph_ref
+                  ? `Paragraph ${c.paragraph_ref}`
+                  : "Read source"}
+                <Icon name="arrow" size={13} />
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    );
+  }
   return (
-    <div className="grid-ask">
-      <section className="card" aria-labelledby="ask-heading">
-        <h3 id="ask-heading">Your question</h3>
-        <form onSubmit={(event) => { event.preventDefault(); ask(); }}>
-          <label className="sr-only" htmlFor="question">Question</label>
-          <textarea id="question" className="question" value={query} onChange={(event) => setQuery(event.target.value)} />
-          <label className="field">As of (optional: answer with the rules in force on this date)
-            <input type="date" value={asOf} max={new Date().toISOString().slice(0, 10)} onChange={(event) => setAsOf(event.target.value)} />
+    <div className="page research-page">
+      <PageIntro eyebrow="Research workspace" title="Start with a question.">
+        Find the rule, read the cited passage, and judge the answer for
+        yourself. The corpus focuses on non-banking financial company (NBFC)
+        lending.
+      </PageIntro>
+      <div className="research-composer card">
+        <form
+          onSubmit={(e) => {
+            e.preventDefault();
+            ask();
+          }}
+        >
+          <label htmlFor="research-question" className="input-label">
+            What would you like to understand?
           </label>
-          <button className="primary" disabled={busy || query.trim().length < 3}>{busy ? "Researching…" : "Ask"}</button>
+          <textarea
+            ref={input}
+            id="research-question"
+            className="question"
+            maxLength={4000}
+            placeholder="For example, can a lender add interest to penal charges?"
+            value={query}
+            disabled={busy}
+            onChange={(e) => setQuery(e.target.value)}
+          />
+          <div className="composer-actions">
+            <div className="date-control">
+              <label className="checkbox-label">
+                <input
+                  type="checkbox"
+                  checked={history}
+                  disabled={busy}
+                  onChange={(e) => setHistory(e.target.checked)}
+                />
+                Research a past date
+              </label>
+              {history ? (
+                <label className="field date-field">
+                  <span className="sr-only">Research date</span>
+                  <input
+                    type="date"
+                    required
+                    max={new Date().toISOString().slice(0, 10)}
+                    value={date}
+                    disabled={busy}
+                    onChange={(e) => setDate(e.target.value)}
+                  />
+                </label>
+              ) : (
+                <span className="fine-print">
+                  Uses the latest indexed status
+                </span>
+              )}
+            </div>
+            {busy ? (
+              <button
+                className="secondary"
+                type="button"
+                onClick={(event) => {
+                  event.preventDefault();
+                  stopResearch();
+                }}
+              >
+                Stop research
+              </button>
+            ) : (
+              <button className="primary" disabled={query.trim().length < 3}>
+                Research question <Icon name="arrow" size={18} />
+              </button>
+            )}
+          </div>
         </form>
-        <div className="examples">
-          <span className="muted">Try one:</span>
-          {EXAMPLES.map((example) => (
-            <button key={example.label} className="example" disabled={busy}
-              onClick={() => { setQuery(example.query); setAsOf(example.asOf); ask(example.query, example.asOf); }}>
-              <span>{example.label}{example.asOf ? ` · as of ${example.asOf}` : ""}</span>{example.query}
+        <div className="example-row">
+          <span className="mini-label">Try a question</span>
+          {EXAMPLES.map((ex) => (
+            <button
+              className="example-pill"
+              key={ex.label}
+              disabled={busy}
+              onClick={() => {
+                setQuery(ex.query);
+                setDate(ex.date);
+                setHistory(Boolean(ex.date));
+                input.current?.focus();
+              }}
+            >
+              {ex.label}
+              <Icon name="arrow" size={13} />
             </button>
           ))}
         </div>
-        {(busy || stages.length > 0) && (
-          <ol className="stages" aria-live="polite">
-            {stages.map((stage) => <li key={stage} className="done">{STAGES[stage] ?? stage}</li>)}
-          </ol>
-        )}
-      </section>
-
-      <section className="card" aria-labelledby="answer-heading" aria-live="polite">
-        <h2 id="answer-heading">{result?.research?.display_title ?? "Answer"}</h2>
-        {!result && !error && <p className="muted">Answers come only from RBI paragraphs in force on the date you ask about. Each claim shows whether its cited text supports it.</p>}
-        {error && <p className="status-bad" role="alert">{error}</p>}
-        {!result && draft && <p><strong>Direct answer. </strong>{draft}<span className="muted"> …</span></p>}
-        {result && reveal >= 3 && (
-          <>
-            <p className="muted">As of {result.as_of} · {result.pipeline.selected_evidence_count} passages · {result.pipeline.answer_mode === "checking"
-              ? "checking each claim…" : `${Math.round(result.latency_ms / 100) / 10} s · $${result.estimated_cost_usd.toFixed(4)}`}</p>
-            {result.notices.map((notice, index) => (
-              <div key={index} className={`notice ${notice.kind}`}><strong>{notice.kind === "upcoming" ? "Not yet in force" : notice.kind === "replaced" ? "Replaced" : "Withdrawn"}:</strong> {notice.text}</div>
-            ))}
-            {refused ? (
-              <div className="refusal">
-                <p>{result.research?.direct_answer?.text ?? "The indexed RBI rules do not contain a passage that answers this question, so it was not answered."}</p>
-                <p className="muted">Refusing is deliberate: the system answers only when an RBI passage is a strong enough match.</p>
+      </div>
+      <div className="saved-example-bar">
+        <span>
+          <Icon name="play" size={16} />
+          Want to explore without waiting?
+        </span>
+        <button
+          className="text-link"
+          disabled={busy}
+          onClick={() => setMode(mode === "saved" ? "live" : "saved")}
+        >
+          {mode === "saved" ? "Return to live research" : "Open a saved answer"}
+          <Icon name="arrow" size={16} />
+        </button>
+      </div>
+      {mode === "saved" ? (
+        <SavedExample />
+      ) : (
+        <>
+          {busy && (
+            <div className="research-progress">
+              <div className="progress-heading" role="status">
+                <span className="spinner" />
+                {STAGES[stage] ?? "Researching"}
+                <span className="elapsed">{elapsed}s elapsed</span>
               </div>
-            ) : claims.map((claim, index) => (
-              <div key={index} className={`claim ${activeClaim === index ? "active" : ""}`}
-                onMouseEnter={() => setActiveClaim(index)} onFocus={() => setActiveClaim(index)} tabIndex={0}>
-                <span className={`dot ${reveal >= 4 ? claim.support ?? "" : ""}`} role="img"
-                  aria-label={claim.support ? VERDICT_TEXT[claim.support] : "Not checked"} title={claim.support ? VERDICT_TEXT[claim.support] : "Not checked"} />
-                <div>
-                  {index === 0 && <strong>Direct answer. </strong>}{claim.text}
-                  {claim.support && claim.support !== "supported" && <div className="flag">{VERDICT_TEXT[claim.support]}</div>}
-                  <div>{claim.citation_ids.map((id) => {
-                    const chunk = evidence.get(id);
-                    return <button key={id} className="chip" onClick={() => setOpenChunk(id)}>
-                      {chunk ? `${chunk.document_title.replace(/^Reserve Bank of India \(|\)$/g, "").slice(0, 48)} · para ${chunk.paragraph_ref ?? "?"}` : id}
-                    </button>;
-                  })}</div>
+              <div className="stage-track" aria-hidden="true">
+                {Object.keys(STAGES).map((s, i) => (
+                  <span
+                    key={s}
+                    className={
+                      i <= Object.keys(STAGES).indexOf(stage) ? "reached" : ""
+                    }
+                  />
+                ))}
+              </div>
+              <p>
+                {elapsed >= 25
+                  ? "The service may be waking up or processing a longer answer. You can explore other pages; your research stays here."
+                  : "Sources arrive first. Model-check labels follow when the check finishes."}
+              </p>
+            </div>
+          )}
+          {error && (
+            <div className="notice error-notice" role="alert">
+              <strong>{result ? "The answer is incomplete. " : ""}</strong>
+              {error}
+            </div>
+          )}
+          {!result && !draft && !busy && !error && (
+            <div className="research-empty">
+              <div className="empty-orbit" aria-hidden="true">
+                <Icon name="ask" size={32} />
+              </div>
+              <h2>Your answer begins with evidence.</h2>
+              <p>
+                Enter a question above, or open a saved answer to explore how
+                citations and checks work.
+              </p>
+              <div className="research-steps">
+                <span>
+                  <b>01</b> Ask about a rule
+                </span>
+                <span>
+                  <b>02</b> Inspect its sources
+                </span>
+                <span>
+                  <b>03</b> Review the limits
+                </span>
+              </div>
+            </div>
+          )}
+          {draft && !result && (
+            <article className="card answer-card">
+              <span className="eyebrow">Draft · not yet checked</span>
+              <h2>{submitted}</h2>
+              <p>{draft}</p>
+            </article>
+          )}
+          {result && (
+            <div className="answer-layout">
+              <article className="card answer-card">
+                <div className="eyebrow">
+                  {busy || error
+                    ? "Answer · checks incomplete"
+                    : "Research result"}
                 </div>
+                <h2>{result.research?.display_title ?? submitted}</h2>
+                <p className="answer-meta">
+                  Research date: {result.as_of ?? "latest indexed status"} ·{" "}
+                  {result.pipeline.selected_evidence_count} retrieved passages
+                </p>
+                <details className="question-detail">
+                  <summary>Your question</summary>
+                  <p>{submitted}</p>
+                </details>
+                {result.notices.map((notice, i) => (
+                  <div key={i} className={`notice ${notice.kind}`}>
+                    <strong>
+                      {notice.kind === "upcoming"
+                        ? "Not yet in force"
+                        : notice.kind === "replaced"
+                          ? "Replacement found"
+                          : "Withdrawal found"}
+                    </strong>
+                    <p>{notice.text}</p>
+                  </div>
+                ))}
+                {result.research?.status === "grounded" ? (
+                  <>
+                    {result.research.direct_answer &&
+                      renderClaim(result.research.direct_answer, "direct")}
+                    {result.research.sections.map((s) => (
+                      <section className="answer-section" key={s.id}>
+                        <h3>{s.title}</h3>
+                        {s.claims.map((c, i) => renderClaim(c, `${s.id}-${i}`))}
+                      </section>
+                    ))}
+                  </>
+                ) : (
+                  <div className="refusal">
+                    <h3>Not enough evidence to answer</h3>
+                    <p>
+                      {result.research?.direct_answer?.text ??
+                        "The indexed sources did not provide enough evidence for this question."}
+                    </p>
+                    <p className="muted">
+                      Try a narrower question about NBFC lending, or choose
+                      another research date. A refusal can also be mistaken.
+                    </p>
+                  </div>
+                )}
+                <div className="answer-caution">
+                  Model checks can miss errors. Read the cited text and its
+                  scope before relying on the answer.
+                </div>
+              </article>
+              <aside
+                className="card evidence-panel"
+                ref={passageRef}
+                tabIndex={-1}
+                aria-label="Source evidence"
+              >
+                <div className="panel-heading">
+                  <h2>Behind the answer</h2>
+                  {openChunk && (
+                    <button
+                      className="icon-button"
+                      aria-label="Close selected passage"
+                      onClick={() => {
+                        setOpenChunk(null);
+                        citationTrigger.current?.focus();
+                      }}
+                    >
+                      <Icon name="close" size={18} />
+                    </button>
+                  )}
+                </div>
+                <div className="segmented" aria-label="Evidence view">
+                  <button
+                    aria-pressed={pane === "passage"}
+                    onClick={() => setPane("passage")}
+                  >
+                    Source text
+                  </button>
+                  <button
+                    aria-pressed={pane === "graph"}
+                    onClick={() => setPane("graph")}
+                  >
+                    Evidence graph
+                  </button>
+                </div>
+                {pane === "graph" ? (
+                  <>
+                    <p className="fine-print">
+                      Documents connect to retrieved paragraphs. Highlighted
+                      paragraphs are cited in the answer.
+                    </p>
+                    <EvidenceGraph
+                      result={result}
+                      reveal={4}
+                      highlighted={new Set(activeClaim?.citation_ids ?? [])}
+                      onOpen={openCitation}
+                    />
+                  </>
+                ) : openPassage ? (
+                  <div className="passage-view">
+                    <span className="eyebrow">
+                      {openPassage.paragraph_ref
+                        ? `Paragraph ${openPassage.paragraph_ref}`
+                        : "Source passage"}
+                    </span>
+                    <h3>{openPassage.document_title}</h3>
+                    {openPassage.heading_path && (
+                      <p className="fine-print">{openPassage.heading_path}</p>
+                    )}
+                    <div
+                      className="passage"
+                      role="region"
+                      aria-label="Original passage"
+                      tabIndex={0}
+                    >
+                      {openPassage.text}
+                    </div>
+                    {openPassage.source_url && (
+                      <a
+                        className="text-link"
+                        href={openPassage.source_url}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        Open official source <Icon name="external" size={14} />
+                      </a>
+                    )}
+                  </div>
+                ) : (
+                  <div className="evidence-prompt">
+                    <Icon name="sources" size={30} />
+                    <h3>Follow a citation</h3>
+                    <p>
+                      Select a paragraph below an answer claim to read its
+                      original source here.
+                    </p>
+                    <div className="passage-options">
+                      {result.retrieved_evidence.map((c, i) => (
+                        <button
+                          key={c.chunk_id}
+                          onClick={() => openCitation(c.chunk_id)}
+                        >
+                          <span className="mini-label">
+                            Source {i + 1}
+                            {c.paragraph_ref
+                              ? ` · paragraph ${c.paragraph_ref}`
+                              : ""}
+                          </span>
+                          <span>{c.document_title}</span>
+                          <Icon name="arrow" size={14} />
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </aside>
+              <div className="card trace-card">
+                <TraceDrawer result={result} />
+                {!busy && !error && (
+                  <p className="fine-print">
+                    {result.latency_ms.toLocaleString()} ms · estimated cost $
+                    {result.estimated_cost_usd.toFixed(5)} for this run.
+                    Token-price estimate, not an invoice.
+                  </p>
+                )}
               </div>
-            ))}
-          </>
-        )}
-        {openPassage && (
-          <div style={{ marginTop: 12 }}>
-            <h3>{openPassage.document_title} · paragraph {openPassage.paragraph_ref}</h3>
-            {openPassage.heading_path && <p className="muted">{openPassage.heading_path}</p>}
-            <Highlighted text={openPassage.text} claim={activeClaim !== null ? claims[activeClaim]?.text ?? null : null} />
-            {openPassage.source_url && <p><a href={openPassage.source_url} target="_blank" rel="noreferrer">Open on rbi.org.in</a></p>}
-          </div>
-        )}
-      </section>
-
-      <section className="card evidence" aria-labelledby="evidence-heading">
-        <h2 id="evidence-heading">Evidence graph</h2>
-        {result ? (
-          <>
-            {reveal < 4 && !reducedMotion() && <button className="chip" onClick={() => setReveal(4)}>Skip animation</button>}
-            <EvidenceGraph result={result} reveal={reveal} highlighted={cited} onOpen={setOpenChunk} />
-          </>
-        ) : <p className="muted">The documents and paragraphs behind the answer appear here, including what the in-force filter removed.</p>}
-      </section>
-
-      {result && <section className="card" style={{ gridColumn: "1 / -1" }}><TraceDrawer result={result} /></section>}
+            </div>
+          )}
+        </>
+      )}
     </div>
+  );
+}
+function SavedExample() {
+  const [selected, setSelected] = useState(0);
+  const target = useRef<HTMLElement>(null);
+  const passages = [
+    ...new Map(
+      saved.record.claims.flatMap((c) => c.cited).map((c) => [c.chunk_id, c]),
+    ).values(),
+  ];
+  const passage = passages[selected];
+  return (
+    <section className="saved-example">
+      <div className="notice">
+        <strong>Saved evaluation answer · not live research</strong>
+        <p>
+          This is the original answer and evidence from a saved test. Its claims
+          were not model-checked. Explore the citations, then try your own
+          question above.
+        </p>
+        <SourceNote file={saved.file}>Question {saved.record.id}</SourceNote>
+      </div>
+      <div className="answer-layout">
+        <article className="card answer-card">
+          <div className="eyebrow">Recorded question</div>
+          <h2>{saved.question.question}</h2>
+          {saved.record.claims.map((claim, i) => (
+            <div className="claim" key={i}>
+              <p>{claim.text}</p>
+              <span className="claim-verdict unchecked">
+                Not checked in this run
+              </span>
+              <div className="citation-list">
+                {claim.cited.map((c) => (
+                  <button
+                    className="citation"
+                    key={c.chunk_id}
+                    onClick={() => {
+                      setSelected(
+                        passages.findIndex((p) => p.chunk_id === c.chunk_id),
+                      );
+                      target.current?.focus({ preventScroll: true });
+                      if (innerWidth < 1150)
+                        target.current?.scrollIntoView({ block: "start" });
+                    }}
+                  >
+                    <Icon name="sources" size={14} />
+                    Read source{" "}
+                    {passages.findIndex((p) => p.chunk_id === c.chunk_id) + 1}
+                    <Icon name="arrow" size={13} />
+                  </button>
+                ))}
+              </div>
+            </div>
+          ))}
+        </article>
+        <aside
+          className="card evidence-panel"
+          ref={target}
+          tabIndex={-1}
+          aria-label="Saved source evidence"
+        >
+          <div className="eyebrow">
+            Original source text · {selected + 1} of {passages.length}
+          </div>
+          <h3>{passage.title}</h3>
+          <div
+            className="passage"
+            role="region"
+            aria-label="Saved original passage"
+            tabIndex={0}
+          >
+            {passage.text}
+          </div>
+          <a
+            className="text-link"
+            href={saved.question.gold[0].url}
+            target="_blank"
+            rel="noreferrer"
+          >
+            Open official source <Icon name="external" size={14} />
+          </a>
+          <p className="fine-print">
+            A cited passage can contain the expected evidence even when the
+            answer leaves out important conditions. Evidence coverage is not
+            answer completeness.
+          </p>
+        </aside>
+      </div>
+    </section>
   );
 }

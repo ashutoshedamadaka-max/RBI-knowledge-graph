@@ -1,228 +1,574 @@
-import { useEffect, useState } from "react";
-import { getJson } from "../api";
-
-/* Every number on this screen comes from a saved evaluation run served by /quality. Nothing is computed
-   here except formatting; a run that does not exist shows "not yet measured". */
-const RUNG_NAMES: Record<string, string> = {
-  rung0: "Original search", bm25: "Exact words", "dense-openai": "Meaning (OpenAI)", "dense-bge": "Meaning (free model)",
-  hybrid: "Both combined", "hybrid+as-of": "+ in-force filter", "rerank-cohere": "+ re-ranking (chosen)", "rerank-bge": "+ free re-ranker",
-};
+import { useState } from "react";
+import { count, evidenceUrl, headline, ratio, REPORT } from "../quality";
+import { Icon, NextPage, PageIntro, SourceNote } from "../components/UI";
 const TYPE_NAMES: Record<string, string> = {
-  single_fact: "Simple fact", applies_to: "Who it applies to", multi_hop: "Needs two paragraphs", change_over_time: "About a past date",
-  false_premise: "False premise", withdrawn_trap: "Trick: withdrawn rule", unanswerable: "Not answerable from the rulebook",
+  single_fact: "Simple fact",
+  applies_to: "Who it applies to",
+  multi_hop: "Linked evidence",
+  change_over_time: "Past-date question",
+  false_premise: "False premise",
+  withdrawn_trap: "Withdrawn-rule trap",
+  unanswerable: "Unanswerable",
 };
-const EDGE_NAMES: Record<string, string> = {
-  APPLIES_TO: "Who a rule applies to", REQUIRES: "What a rule requires", DEFINES: "Defines a term", REFERS_TO: "Refers to another paragraph",
+const RUNG_NAMES: Record<string, string> = {
+  rung0: "Original search",
+  bm25: "Keyword search",
+  "dense-openai": "OpenAI meaning search",
+  "dense-bge": "Local meaning search",
+  hybrid: "Hybrid search",
+  "hybrid+as-of": "+ Date filtering",
+  "rerank-cohere": "+ Cohere re-ranking",
+  "rerank-bge": "+ Local re-ranking",
 };
-const SOURCE_NAMES: Record<string, string> = {
-  hand: "Labelled by hand", "model-drafted, reviewed by Ashu": "AI-drafted, checked by hand", "fresh: model-drafted, reviewed by Ashu": "Fresh paragraphs, AI-drafted, checked",
-};
-
-type Rate = { value: number | null; low?: number; high?: number; n: number; numerator?: number; denominator?: number };
-type Source = { status: "measured" | "not yet measured"; file: string; data?: any };
-type Report = Record<string, any>; // sources by name (each a Source), plus "spend"
-
-const pct = (value: number | null | undefined) => (value === null || value === undefined ? "—" : `${Math.round(value * 1000) / 10}%`);
-
-function Tile({ title, rate, note, file, lowerIsBetter }: { title: string; rate?: Rate; note?: string; file?: string; lowerIsBetter?: boolean }) {
+const interval = (m: any) =>
+  m?.low == null
+    ? "No interval computed"
+    : `95% interval [${m.low}, ${m.high}]`;
+function RateCard({
+  title,
+  metric,
+  note,
+}: {
+  title: string;
+  metric: any;
+  note: string;
+}) {
   return (
-    <div className="card tile">
-      <div className="muted">{title}</div>
-      {rate && rate.value !== null ? (
-        <>
-          <div className="value"><span className="num">{pct(rate.value)}</span></div>
-          {rate.low !== undefined && <div className="range">95% range {pct(rate.low)} – {pct(rate.high)} · n = {rate.n}{lowerIsBetter ? " · lower is better" : ""}</div>}
-        </>
-      ) : <div className="value muted">not yet measured</div>}
-      {note && <div className="range">{note}</div>}
-      {file && <div className="range">Source: <code>{file}</code></div>}
+    <div className="metric-card">
+      <span className="metric-label">{title}</span>
+      <strong>{count(metric)}</strong>
+      <p>{note}</p>
+      <SourceNote file="answers-test-gpt-4o-mini.json">
+        n = {metric.n} questions · {interval(metric)}
+      </SourceNote>
     </div>
   );
 }
-
-function Bars({ rows, max = 1, format = pct }: { rows: [string, number | null][]; max?: number; format?: (v: number) => string }) {
-  return <div>{rows.map(([label, value]) => (
-    <div className="bar-row" key={label}>
-      <span>{label}</span>
-      <div className="bar" role="img" aria-label={`${label}: ${value === null ? "not measured" : format(value)}`}><span style={{ width: `${value === null ? 0 : (value / max) * 100}%` }} /></div>
-      <span className="num">{value === null ? "—" : format(value)}</span>
-    </div>
-  ))}</div>;
-}
-
 export default function Quality() {
-  const [report, setReport] = useState<Report | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => { getJson<Report>("/quality").then(setReport).catch((exc) => setError(exc.message)); }, []);
-  if (error) return <p className="status-bad" role="alert">{error}</p>;
-  if (!report) return <p className="muted">Loading saved evaluation runs…</p>;
-
-  const answers = report.answers_test.status === "measured" ? report.answers_test : report.answers_dev;
-  const split = report.answers_test.status === "measured" ? "held-out test set" : "dev set (test not yet run)";
-  const results = answers.data?.results ?? {};
-  const ladder = report.ladder.data?.results ?? {};
-  const chosen = ladder["rerank-cohere"];
-  const perQuestion = results.cost_usd?.per_question_answer_plus_rerank;
-  const checker = report.claim_checker.data?.by_source ?? {};
-  const checkerRow = Object.entries(checker)[0] as [string, any] | undefined;
-  const replay = report.replay.data;
-  const graphQuality = report.graph_quality.data?.results ?? {};
-  const comparison = report.answers_dev.data?.model_cost_comparison;
-  const firstPrompt = report.answers_dev_first_prompt.data?.results;
-
+  const [split, setSplit] = useState<"test" | "dev">("test");
+  const h = headline(REPORT);
+  const r = h.results;
+  const source = REPORT[`answers_${split}`];
+  const shown = source.data.results;
+  const ladder = REPORT.ladder.data.results;
+  const graph = REPORT.graph_quality.data.results;
+  const replay = REPORT.replay.data;
   return (
     <div className="page">
-      <section className="hero">
-        <div className="eyebrow">Evals</div>
-        <h1>How I know it works, and where it doesn't</h1>
-        <p className="lead">"It seems to answer well" is not evidence. Every claim about quality on this site comes from an automated test run against an answer key, with the run saved so the number can be traced back.</p>
+      <PageIntro
+        eyebrow="Results & limits"
+        title="Inspect the evidence. Keep the limits in view."
+      >
+        Saved experiments show what this prototype did on its test questions.
+        They do not establish legal correctness, production reliability, or
+        business impact.
+      </PageIntro>
+      <nav className="section-nav" aria-label="Results sections">
+        {[
+          ["overview-results", "Headline results"],
+          ["search-results", "Search comparisons"],
+          ["failure-results", "Failure cases"],
+          ["method-results", "Method & limits"],
+        ].map(([id, label]) => (
+          <button
+            key={id}
+            onClick={() =>
+              document.getElementById(id)?.scrollIntoView({ block: "start" })
+            }
+          >
+            {label}
+          </button>
+        ))}
+      </nav>
+      <section id="overview-results">
+        <div className="quality-callout">
+          <div>
+            <div className="eyebrow">Held-out evidence coverage</div>
+            <h2>
+              {count(r.gold_sentence_cited)} expected evidence sentences cited.
+            </h2>
+            <p>
+              A filled square means an expected evidence sentence appeared
+              inside a cited passage. An empty square means it did not.
+            </p>
+            <div
+              className="squares"
+              role="img"
+              aria-label="51 of 57 expected evidence sentences present in cited passages"
+            >
+              {Array.from({ length: 57 }, (_, i) => (
+                <span key={i} className={i < 51 ? "" : "miss"} />
+              ))}
+            </div>
+            <SourceNote file={h.file}>
+              n = 57 evidence sentences · {interval(r.gold_sentence_cited)}
+            </SourceNote>
+          </div>
+          <div>
+            <h3>What that proves</h3>
+            <p>
+              The answer cited a passage containing expected source evidence.
+            </p>
+            <h3 style={{ marginTop: 24 }}>What it does not prove</h3>
+            <p>
+              That the answer understood the rule, included every condition, or
+              applied it to the right kind of lender. Answer correctness and
+              hallucination rate are not independently measured.
+            </p>
+          </div>
+        </div>
+        <div className="result-grid">
+          <RateCard
+            title="All expected evidence cited"
+            metric={r.question_all_gold_cited}
+            note="Answerable questions whose citations contained all expected evidence."
+          />
+          <RateCard
+            title="Withdrawn evidence cited"
+            metric={r.withdrawn_trap_cited_withdrawn}
+            note="Trap questions citing a withdrawn rule. Lower is better."
+          />
+          <RateCard
+            title="Unanswerable questions refused"
+            metric={r.unanswerable_refused}
+            note="Questions labelled unanswerable that the system declined."
+          />
+          <RateCard
+            title="Answerable questions refused"
+            metric={r.answerable_wrongly_refused}
+            note="Missed opportunities to answer. Lower is better."
+          />
+        </div>
       </section>
-      <section>
-        <h2>How quality is measured</h2>
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <div className="eyebrow">Look beyond the average</div>
+            <h2>Results by question type.</h2>
+          </div>
+          <div
+            className="segmented"
+            aria-label="Question results dataset"
+            style={{ margin: 0 }}
+          >
+            <button
+              aria-pressed={split === "test"}
+              onClick={() => setSplit("test")}
+            >
+              Held-out test
+            </button>
+            <button
+              aria-pressed={split === "dev"}
+              onClick={() => setSplit("dev")}
+            >
+              Development
+            </button>
+          </div>
+        </div>
+        <div
+          className="table-wrap"
+          tabIndex={0}
+          role="region"
+          aria-label="Scrollable data table"
+        >
+          <table>
+            <caption className="sr-only">
+              Evidence citation results by question type on the {split} set
+            </caption>
+            <thead>
+              <tr>
+                <th>Question type</th>
+                <th>Questions</th>
+                <th>Answered</th>
+                <th>Expected evidence cited</th>
+                <th>95% interval</th>
+              </tr>
+            </thead>
+            <tbody>
+              {Object.entries(shown.by_type).map(
+                ([type, row]: [string, any]) => (
+                  <tr key={type}>
+                    <td>{TYPE_NAMES[type] ?? type}</td>
+                    <td>{row.questions}</td>
+                    <td>{row.answered}</td>
+                    <td>
+                      {row.gold_sentence_cited
+                        ? count(row.gold_sentence_cited)
+                        : "No positive evidence target"}
+                    </td>
+                    <td>
+                      {row.gold_sentence_cited
+                        ? `[${row.gold_sentence_cited.low}, ${row.gold_sentence_cited.high}]`
+                        : "Not computed"}
+                    </td>
+                  </tr>
+                ),
+              )}
+            </tbody>
+          </table>
+        </div>
+        <SourceNote file={source.file}>
+          Each rate uses evidence sentences as its denominator; question counts
+          are shown separately.
+        </SourceNote>
+      </section>
+      <section className="section-block" id="search-results">
+        <div className="section-heading">
+          <div>
+            <div className="eyebrow">Development experiments</div>
+            <h2>Improve the evidence before the answer.</h2>
+          </div>
+        </div>
         <div className="grid-2">
-          <div className="card kicker-card"><span className="pm-term">Answer key</span><h3>181 questions with known answers</h3><p>Each question comes with the exact RBI sentence that answers it, copied from the source document. A question passes only if the answer cites a passage containing that sentence. No AI grades its own work.</p></div>
-          <div className="card kicker-card"><span className="pm-term">Held-out set</span><h3>Tune on two thirds, test on one third</h3><p>The questions were split before any testing. Everything was tuned on the larger part; the smaller part was run once, at the end, so the headline numbers are not flattered by tuning.</p></div>
-          <div className="card kicker-card"><span className="pm-term">Coverage</span><h3>Seven kinds of question</h3><p>Simple facts, "who does this apply to", two-paragraph questions, questions about a past date, trick questions about withdrawn rules, questions with a false premise, and questions the rulebook cannot answer.</p></div>
-          <div className="card kicker-card"><span className="pm-term">Confidence</span><h3>Ranges, not just averages</h3><p>With dozens of questions, results carry uncertainty. Each headline number shows a 95% range: the true rate very likely lies inside it.</p></div>
+          <div className="card">
+            <h3>Expected evidence in the top five</h3>
+            <p className="fine-print">
+              Each bar uses the same development evidence targets. These are
+              retrieval results, not correct-answer rates.
+            </p>
+            <div className="chart-bars">
+              {Object.entries(ladder).map(([key, row]: [string, any]) => (
+                <div
+                  className={`bar-row ${key === "rerank-cohere" ? "chosen" : ""}`}
+                  key={key}
+                >
+                  <span>{RUNG_NAMES[key] ?? key}</span>
+                  <div className="bar" aria-hidden="true">
+                    <span
+                      style={{
+                        width: `${(row["recall@5"].numerator / row["recall@5"].denominator) * 100}%`,
+                      }}
+                    />
+                  </div>
+                  <strong>
+                    {row["recall@5"].numerator}/{row["recall@5"].denominator}
+                  </strong>
+                </div>
+              ))}
+            </div>
+            <SourceNote file="ladder-dev.json">
+              n = 105 evidence spans · no intervals computed
+            </SourceNote>
+          </div>
+          <div className="card">
+            <h3>Complexity has to earn its place.</h3>
+            <p>
+              The date filter removed withdrawn evidence from the tested traps.
+              Cohere improved ranking. Graph cross-references recovered some
+              linked evidence in a separate comparison.
+            </p>
+            <p className="muted">
+              The full retrieval ladder was not measured on the held-out set.
+              The graph comparison did not include Cohere, so the graph’s
+              incremental benefit in the final answering path remains unproven.
+            </p>
+            <a className="text-link" href="#built">
+              Explore the design decisions <Icon name="arrow" size={16} />
+            </a>
+          </div>
         </div>
-        <p className="muted" style={{ marginTop: 10 }}>Questions were drafted by an AI from RBI paragraphs and spot-checked by me (all 30 sampled questions kept). Measured on the {split}.</p>
+        <details className="disclosure">
+          <summary>Open retrieval metrics, timings, and costs</summary>
+          <div>
+            <div
+              className="table-wrap"
+              tabIndex={0}
+              role="region"
+              aria-label="Scrollable data table"
+            >
+              <table>
+                <thead>
+                  <tr>
+                    <th>Approach</th>
+                    <th>Recall at 5</th>
+                    <th>Recall at 10</th>
+                    <th>Mean reciprocal rank</th>
+                    <th>Median / 95th percentile (ms)</th>
+                    <th>Estimated cost / query (USD)</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(ladder).map(([name, row]: [string, any]) => (
+                    <tr key={name}>
+                      <td>{RUNG_NAMES[name] ?? name}</td>
+                      <td>{ratio(row["recall@5"])}</td>
+                      <td>{ratio(row["recall@10"])}</td>
+                      <td>
+                        {typeof row.mrr === "object"
+                          ? row.mrr.value
+                          : (row.mrr ?? row.MRR ?? "Not measured")}
+                      </td>
+                      <td>
+                        {row.latency_ms.p50} / {row.latency_ms.p95}
+                      </td>
+                      <td>{row.cost_per_query_usd}</td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+            <SourceNote file="ladder-dev.json">
+              Development set · n = 118 questions; recall denominator = 105
+              spans · no intervals computed
+            </SourceNote>
+          </div>
+        </details>
+        <details className="disclosure">
+          <summary>Open graph extraction quality</summary>
+          <div>
+            <p className="fine-print">
+              Precision: correct predicted links / predicted links. Recall:
+              correct links found / gold links. Each label source is reported
+              separately. Non-entity edge metrics compare sentences, not every
+              endpoint.
+            </p>
+            <div
+              className="table-wrap"
+              tabIndex={0}
+              role="region"
+              aria-label="Scrollable data table"
+            >
+              <table>
+                <thead>
+                  <tr>
+                    <th>Label source</th>
+                    <th>Relationship</th>
+                    <th>Precision</th>
+                    <th>Recall</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  {Object.entries(graph).flatMap(
+                    ([label, types]: [string, any]) =>
+                      Object.entries(types)
+                        .filter(([key]) => key !== "provisions")
+                        .map(([type, m]: [string, any]) => (
+                          <tr key={`${label}-${type}`}>
+                            <td>{label}</td>
+                            <td>{type.toLowerCase().replaceAll("_", " ")}</td>
+                            <td>
+                              {m.precision.denominator
+                                ? ratio(m.precision)
+                                : "Undefined: no predictions"}
+                            </td>
+                            <td>{ratio(m.recall)}</td>
+                          </tr>
+                        )),
+                  )}
+                </tbody>
+              </table>
+            </div>
+            <SourceNote file="graph-quality.json">
+              Denominators shown in each cell · no intervals computed
+            </SourceNote>
+            <p className="fine-print">
+              “Applies to” links are shown for exploration but do not filter
+              answers. Only paragraph cross-reference expansion participates in
+              retrieval.
+            </p>
+          </div>
+        </details>
+        <details className="disclosure">
+          <summary>Open withdrawal and replacement replay</summary>
+          <div>
+            <p>
+              A deterministic historical replay, using templated questions and
+              immediate approval assumptions. It does not test generated-answer
+              correctness or live monitoring delay.
+            </p>
+            <div
+              className="table-wrap"
+              tabIndex={0}
+              role="region"
+              aria-label="Scrollable data table"
+            >
+              <table>
+                <thead>
+                  <tr>
+                    <th>Replay measure</th>
+                    <th>Observed result</th>
+                    <th>Scope</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Withdrawals detected</td>
+                    <td>{ratio(replay.withdrawal_detection.recall)}</td>
+                    <td>Retired-document cases</td>
+                  </tr>
+                  <tr>
+                    <td>Stale evidence used</td>
+                    <td>{ratio(replay.stale_answer_rate.evidence)}</td>
+                    <td>Templated replay answers</td>
+                  </tr>
+                  <tr>
+                    <td>Automatically trusted successors correct</td>
+                    <td>{ratio(replay.auto_trust_precision)}</td>
+                    <td>Explicit replacement statements only</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+            <SourceNote file="replay-report.json">
+              Denominators shown in each row · no intervals computed
+            </SourceNote>
+            <p className="fine-print">
+              Full successor recall, live time to switch, and a before/after
+              stale-answer baseline are not measured.
+            </p>
+          </div>
+        </details>
       </section>
-      <h2>Headline results</h2>
-      <div className="tiles">
-        <Tile title="Answers that cite the right RBI paragraph" rate={results.question_all_gold_cited} file={answers.file}
-          note={results.gold_sentence_cited ? `Counting every answer sentence in the key: ${Math.round(results.gold_sentence_cited.value * results.gold_sentence_cited.n)} of ${results.gold_sentence_cited.n}` : undefined} />
-        <Tile title="Withdrawn rules cited on trap questions" rate={results.withdrawn_trap_cited_withdrawn} lowerIsBetter file={answers.file} />
-        <Tile title="Unanswerable questions refused" rate={results.unanswerable_refused} file={answers.file} />
-        <Tile title="Answerable questions wrongly refused" rate={results.answerable_wrongly_refused} lowerIsBetter file={answers.file} />
-        <Tile title="Right paragraph in the top 5 (retrieval)" rate={chosen ? { value: chosen["recall@5"].value, n: chosen["recall@5"].denominator } : undefined}
-          note={chosen ? `${chosen["recall@5"].numerator} of ${chosen["recall@5"].denominator} gold sentences, dev set` : undefined} file={report.ladder.file} />
-        <div className="card tile">
-          <div className="muted">Cost per 1,000 questions</div>
-          <div className="value">{perQuestion ? <span className="num">${(perQuestion * 1000).toFixed(2)}</span> : "not yet measured"}</div>
-          <div className="range">Answer + claim check (gpt-4o-mini) + re-ranking at Cohere list price</div>
+      <section className="section-block" id="failure-results">
+        <div className="section-heading">
+          <div>
+            <div className="eyebrow">Failure analysis</div>
+            <h2>Real cases that still need work.</h2>
+          </div>
         </div>
-        <div className="card tile">
-          <div className="muted">Answer time, 95th percentile</div>
-          <div className="value">{answers.data?.latency_ms_p95 ? <span className="num">{(answers.data.latency_ms_p95 / 1000).toFixed(1)} s</span> : "not yet measured"}</div>
-          <div className="range">Median {results.latency_ms_p50 ? `${(results.latency_ms_p50 / 1000).toFixed(1)} s` : "—"} · includes a rate-limited trial re-ranking key</div>
+        <p className="prose muted">
+          These are saved held-out failures or model flags. A checker flag is a
+          signal to inspect, not an independent verdict.
+        </p>
+        <div className="card">
+          {h.data.failures.slice(0, 4).map((failure: any) => (
+            <article className="failure-card" key={failure.id}>
+              <div className="eyebrow">
+                {TYPE_NAMES[failure.type]} · {failure.id}
+              </div>
+              <h3>{failure.question}</h3>
+              <p>{failure.reasons.join(" ")}</p>
+              {failure.flagged_claims.slice(0, 1).map((c: any, i: number) => (
+                <blockquote key={i}>
+                  “{c.text}”<br />
+                  <span className="fine-print">
+                    Model checker: {c.verdict.replaceAll("_", " ")}
+                  </span>
+                </blockquote>
+              ))}
+            </article>
+          ))}
+          <SourceNote file={h.file} />
         </div>
-      </div>
-
-      <div className="two-col">
-        <section className="card">
-          <span className="pm-term">Experiment</span>
-          <h2>Finding the right paragraph: eight approaches, one change at a time</h2>
-          <p className="muted">How often the paragraph that answers the question is in the top 5 results (105 answer sentences, dev set). Each bar changes one thing from an earlier one.</p>
-          <Bars rows={Object.entries(ladder).map(([name, row]: [string, any]) => [RUNG_NAMES[name] ?? name, row["recall@5"]?.value ?? null])} />
-          <p className="muted">Withdrawn rules reaching the top 5 on 13 trick questions: {Object.entries(ladder).map(([name, row]: [string, any]) => `${RUNG_NAMES[name] ?? name} ${row["withdrawn_trap_leak@5"].numerator}`).join(" · ")}. The in-force filter is what takes this to zero.</p>
-        </section>
-        <section className="card">
-          <span className="pm-term">Segmentation</span>
-          <h2>Results by kind of question</h2>
-          <p className="muted">Where the product is strong and where it is weaker. Ranges in brackets.</p>
-          <div className="table-wrap"><table>
-            <thead><tr><th>Type</th><th>Questions</th><th>Answered</th><th>Right sentence cited</th></tr></thead>
-            <tbody>{Object.entries(results.by_type ?? {}).map(([type, row]: [string, any]) => (
-              <tr key={type}><td>{TYPE_NAMES[type] ?? type.replaceAll("_", " ")}</td><td>{row.questions}</td><td>{row.answered}</td>
-                <td>{row.gold_sentence_cited ? <><span className="num">{pct(row.gold_sentence_cited.value)}</span> <span className="muted">({pct(row.gold_sentence_cited.low)}–{pct(row.gold_sentence_cited.high)})</span></> : "—"}</td></tr>
-            ))}</tbody>
-          </table></div>
-        </section>
-      </div>
-
-      <div className="two-col">
-        <section className="card">
-          <span className="pm-term">Validation</span>
-          <h2>Can the claim checker be trusted?</h2>
-          <p className="muted">The checker is itself an AI, so it was tested against 50 claims labelled separately.</p>
-          {checkerRow ? (
-            <>
-              <p>Of <span className="num">{checkerRow[1]["unsupported_caught (recall)"].denominator}</span> claims the labels mark as not fully supported, the checker flagged <span className="num">{checkerRow[1]["unsupported_caught (recall)"].numerator}</span>; <span className="num">{checkerRow[1]["flags_correct (precision)"].numerator}</span> of its {checkerRow[1]["flags_correct (precision)"].denominator} flags were right.</p>
-              <p className="muted">Label source: {checkerRow[0]}. A weak checker is why unsupported claims are flagged on screen, not rewritten (ADR-030).</p>
-            </>
-          ) : <p className="muted">not yet measured</p>}
-        </section>
-        <section className="card">
-          <span className="pm-term">Simulation</span>
-          <h2>Handling rule changes: a replay of real history</h2>
-          <p className="muted">RBI's real withdrawals and replacements were replayed day by day, and the product was asked questions along the way.</p>
-          {replay ? <ReplaySummary replay={replay} /> : <p className="muted">not yet measured</p>}
-        </section>
-      </div>
-
-      <div className="two-col">
-        <section className="card">
-          <span className="pm-term">Precision and recall</span>
-          <h2>Knowledge graph accuracy</h2>
-          <p className="muted"><strong>Precision</strong>: of the links it made, how many were right. <strong>Recall</strong>: of the links that exist, how many it found. Checked on hand-labelled paragraphs.</p>
-          <div className="table-wrap"><table>
-            <thead><tr><th>Labels</th><th>Link type</th><th>Precision</th><th>Recall</th></tr></thead>
-            <tbody>{Object.entries(graphQuality).flatMap(([source, edges]: [string, any]) =>
-              Object.entries(edges).filter(([key]) => key !== "provisions").map(([edge, m]: [string, any]) => (
-                <tr key={source + edge}><td>{SOURCE_NAMES[source] ?? source}</td><td>{EDGE_NAMES[edge] ?? edge}</td>
-                  <td>{m.precision.numerator}/{m.precision.denominator}</td><td>{m.recall.numerator}/{m.recall.denominator}</td></tr>
-              )))}</tbody>
-          </table></div>
-        </section>
-        <section className="card">
-          <span className="pm-term">Unit economics</span>
-          <h2>Cost</h2>
-          <p>Total model spend for the whole build and every evaluation run: <span className="num">${report.spend.total_usd.toFixed(2)}</span> (budget $20).</p>
-          <Bars rows={Object.entries(report.spend.by_phase_usd as Record<string, number>).map(([phase, usd]): [string, number] => [`Phase ${phase}`, usd])} max={Math.max(...(Object.values(report.spend.by_phase_usd) as number[]), 0.01)} format={(v) => `$${v.toFixed(3)}`} />
-          {comparison && <p>Answer model on the dev set: gpt-4o-mini <span className="num">${comparison["gpt-4o-mini_measured_usd"]}</span> measured, gpt-4o <span className="num">${comparison["gpt-4o_projected_usd"]}</span> projected from the same tokens (about {Math.round(comparison["gpt-4o_projected_usd"] / comparison["gpt-4o-mini_measured_usd"] * 10) / 10}×). gpt-4o was not run, for cost (ADR-029).</p>}
-        </section>
-      </div>
-
-      {firstPrompt && (
-        <section className="card" style={{ marginTop: 16 }}>
-          <span className="pm-term">Iteration</span>
-          <h2>One fix, measured: the answer instructions</h2>
-          <p>The first dev run wrongly refused <span className="num">{pct(firstPrompt.answerable_wrongly_refused.value)}</span> of answerable questions: passages for past dates were labelled with today's "withdrawn" status, so the model would not use them. After labelling each passage as in force on the question's date: <span className="num">{pct(report.answers_dev.data.results.answerable_wrongly_refused.value)}</span>. The cost: unanswerable questions refused fell from {pct(firstPrompt.unanswerable_refused.value)} to {pct(report.answers_dev.data.results.unanswerable_refused.value)}.</p>
-        </section>
-      )}
-
-      <section className="card" style={{ marginTop: 16 }}>
-        <span className="pm-term">Failure analysis</span>
-        <h2>Where it still fails: real cases from the {split}</h2>
-        <p className="muted">Questions where the answer missed the expected paragraph, or where the checker flagged a sentence. Shown on purpose: knowing the failure modes is how the next iteration is chosen.</p>
-        <div className="table-wrap"><table>
-          <thead><tr><th>Question</th><th>Type</th><th>What went wrong</th></tr></thead>
-          <tbody>{(answers.data?.failures ?? []).map((item: any) => (
-            <tr key={item.id}><td>{item.question ?? item.id}</td><td>{TYPE_NAMES[item.type] ?? item.type.replaceAll("_", " ")}</td>
-              <td>{[...item.reasons, ...item.flagged_claims.map((c: any) => `claim ${c.verdict.replaceAll("_", " ")}: “${c.text.slice(0, 120)}”`)].join("; ")}</td></tr>
-          ))}</tbody>
-        </table></div>
       </section>
-
-      <section className="card" style={{ marginTop: 16 }}>
-        <h2>Run history</h2>
-        <p className="muted">Each number on this page traces to one of these saved runs and the code version that produced it.</p>
-        <div className="table-wrap"><table>
-          <thead><tr><th>Run</th><th>File</th><th>Generated</th><th>Commit</th></tr></thead>
-          <tbody>{Object.entries(report).filter(([name]) => name !== "spend").map(([name, source]) => (
-            <tr key={name}><td>{name.replaceAll("_", " ")}</td><td><code>{source.file}</code></td>
-              <td>{source.data?.generated_at?.slice(0, 16).replace("T", " ") ?? source.data?.run_manifest?.built_at?.slice(0, 16) ?? (source.status === "measured" ? "—" : "not yet measured")}</td>
-              <td><code>{((source as Source).data?.run_manifest?.git_commit ?? "").slice(0, 7)}</code></td></tr>
-          ))}</tbody>
-        </table></div>
+      <section className="section-block" id="method-results">
+        <div className="section-heading">
+          <div>
+            <div className="eyebrow">Method & limits</div>
+            <h2>What to keep in mind.</h2>
+          </div>
+        </div>
+        <div className="grid-2">
+          <div className="card">
+            <h3>A small, mostly drafted benchmark</h3>
+            <p>
+              118 development questions and 63 held-out questions share the same
+              corpus. Questions were model-drafted; the held-out set remains
+              marked drafted. Some development labels were reviewed, edited, or
+              rejected.
+            </p>
+            <SourceNote file="answers-test-gpt-4o-mini.json">
+              n = 63 test questions
+            </SourceNote>
+            <SourceNote file="answers-dev-gpt-4o-mini.json">
+              n = 118 development questions
+            </SourceNote>
+            <p className="fine-print" style={{ marginTop: 16 }}>
+              Rejected development questions remained in the published runs. An
+              aborted test attempt was discarded after a startup data mutation.
+              The published test is the restored rerun.
+            </p>
+          </div>
+          <div className="card">
+            <h3>The checker needs stronger validation</h3>
+            <p>
+              The checker caught only 6 of 21 claims labelled not fully
+              supported. Exact agreement was 29 of 50 claims. These labels were
+              drafted by Claude; confirmed independent human correctness labels
+              are missing.
+            </p>
+            <SourceNote file="claim-checker-quality.json">
+              n = 21 not-fully-supported claims / 50 total claims · no intervals
+              computed
+            </SourceNote>
+          </div>
+          <div className="card">
+            <h3>Cost is an estimate, not a bill</h3>
+            <p>
+              $
+              {Number(
+                (r.cost_usd.per_question_answer_plus_rerank * 1000).toFixed(5),
+              )}{" "}
+              per 1,000 questions, scaled from the saved mean for answering,
+              checking, and re-ranking at the recorded list price. Hosting and
+              initial corpus preparation are excluded.
+            </p>
+            <SourceNote file={h.file}>
+              n = 63 questions · no cost interval computed
+            </SourceNote>
+            <p className="fine-print" style={{ marginTop: 14 }}>
+              Total actual project spend and production cost per question are
+              not measured. The spend ledger is incomplete.
+            </p>
+          </div>
+          <div className="card">
+            <h3>Uncertainty stays visible</h3>
+            <p>
+              The saved confidence intervals come from resampling this dataset.
+              They do not cover label errors, new domains, or new users.
+              Evidence-span intervals do not account for clustering within
+              questions.
+            </p>
+            <ul className="quality-limits">
+              <li>Independent answer correctness: not measured.</li>
+              <li>Hallucination rate: not measured.</li>
+              <li>Semantic citation precision: not measured.</li>
+              <li>Customer time saved and adoption: not measured.</li>
+            </ul>
+          </div>
+        </div>
       </section>
+      <details className="disclosure">
+        <summary>Browse the saved report files</summary>
+        <div>
+          <div
+            className="table-wrap"
+            tabIndex={0}
+            role="region"
+            aria-label="Scrollable data table"
+          >
+            <table>
+              <thead>
+                <tr>
+                  <th>Report</th>
+                  <th>Saved file</th>
+                </tr>
+              </thead>
+              <tbody>
+                {Object.entries(REPORT).map(([name, s]: [string, any]) => (
+                  <tr key={name}>
+                    <td>{name.replaceAll("_", " ")}</td>
+                    <td>
+                      <a
+                        href={evidenceUrl(s.file)}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {s.file}
+                      </a>
+                    </td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </details>
+      <NextPage
+        href="#ask"
+        title="See the evidence in an answer."
+        text="Explore a saved example, or research your own question."
+      />
     </div>
-  );
-}
-
-function ReplaySummary({ replay }: { replay: any }) {
-  const ratio = (m: any) => (m ? `${m.numerator}/${m.denominator}` : "—");
-  const rows: [string, string, string?][] = [
-    ["Withdrawals detected", ratio(replay.withdrawal_detection?.recall), `${replay.withdrawal_detection?.false_alarms ?? "—"} false alarms`],
-    ["Successor links from RBI text: precision", ratio(replay.successor_links_from_rbi_text?.precision)],
-    ["Auto-trusted links that were right", ratio(replay.auto_trust_precision)],
-    ["Stale answers (a retired rule used)", ratio(replay.stale_answer_rate?.evidence), "lower is better"],
-    ["Days to switch to the new rule", String(replay.time_to_switch_days?.max ?? "—"), "worst case"],
-    ["Inferred successor suggestions", "not yet measured", replay.candidate_suggestions?.note],
-  ];
-  return (
-    <table><tbody>{rows.map(([name, value, note]) => (
-      <tr key={name}><td>{name}</td><td><span className={value === "not yet measured" ? "muted" : "num"}>{value}</span></td><td className="muted">{note}</td></tr>
-    ))}</tbody></table>
   );
 }

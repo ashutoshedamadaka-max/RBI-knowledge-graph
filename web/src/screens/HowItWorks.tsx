@@ -1,144 +1,316 @@
 import { useEffect, useState } from "react";
-import { Report, count, headline, ratio, useQuality } from "../quality";
+import { Icon, NextPage, PageIntro, SourceNote } from "../components/UI";
 
-interface Step { title: string; short: string; what: string; why: string; term: string; evidence: (r: Report) => string; guard?: boolean }
-
-const ladder = (r: Report, rung: string) => r.ladder?.data?.results?.[rung];
-const top5 = (r: Report, rung: string) => ratio(ladder(r, rung)?.["recall@5"]);
-const leaks = (r: Report, rung: string) => ratio(ladder(r, rung)?.["withdrawn_trap_leak@5"]);
-
-const STEPS: Step[] = [
-  { title: "Question and date", short: "You ask, optionally 'as of' a past date",
-    what: "You type a question in plain English. You can also pick a date, for example 1 June 2024, to ask what the rules were then rather than today.",
-    why: "Compliance work often looks backwards: was a loan made in 2024 compliant with the rules of 2024? Most tools only know 'now'.",
-    term: "Input", evidence: () => "Every answer states the date it answers for." },
-  { title: "Search two ways", short: "Exact words and meaning, combined",
-    what: "The question is matched against about 2,750 passages cut from the 88 RBI documents, in two ways at once: by exact words (good for legal terms such as 'penal charges') and by meaning (so 'late payment fees' still finds 'penal charges'). The two result lists are merged.",
-    why: "Either method alone misses things. Combining them is the single biggest gain in finding the right paragraph.",
-    term: "Recall", evidence: (r) => `Right paragraph in the top 5: ${top5(r, "bm25")} with exact words only, ${top5(r, "hybrid")} with both combined (dev set).` },
-  { title: "Follow cross-references", short: "Bring in paragraphs the results point to",
-    what: "RBI paragraphs often say 'subject to paragraph 12'. The knowledge graph knows these links, so the paragraphs a top result points to are pulled in too.",
-    why: "Some answers need two paragraphs together. Without the link, the second one is often missed.",
-    term: "Coverage", evidence: (r) => {
-      const on = r.graph_on_off?.data?.results;
-      const off = on?.["hybrid+as-of"]?.by_type?.multi_hop?.["recall@5"]; const withGraph = on?.graph?.by_type?.multi_hop?.["recall@5"];
-      return off && withGraph ? `Questions that need two paragraphs: ${ratio(off)} found without the graph, ${ratio(withGraph)} with it.` : "Measured on the Knowledge graph page.";
-    } },
-  { title: "Keep only rules in force", short: "Drop anything withdrawn or not yet active on that date", guard: true,
-    what: "Every paragraph carries the dates its rule was in force. Anything withdrawn, replaced or not yet in effect on the date asked is removed, and the system notes why.",
-    why: "This is the core promise: never answer from a dead rule. It is a guardrail, not a ranking preference.",
-    term: "Guardrail", evidence: (r) => `Trick questions where a withdrawn rule reached the top 5: ${leaks(r, "hybrid")} before this filter, ${leaks(r, "hybrid+as-of")} after it.` },
-  { title: "Rank the best passages", short: "A specialist model re-reads the top 30",
-    what: "A ranking model (Cohere Rerank) reads the 30 best candidates side by side with the question and puts the most relevant first.",
-    why: "Search is fast but approximate. A second, careful read puts the paragraph that actually answers the question at the top.",
-    term: "Precision", evidence: (r) => `Right paragraph in the top 5: ${top5(r, "hybrid+as-of")} before re-ranking, ${top5(r, "rerank-cohere")} after.` },
-  { title: "Decide whether to answer", short: "Decline when the best match is weak", guard: true,
-    what: "If even the best passage is a poor match, the product says the indexed RBI rules do not answer the question, instead of writing something plausible.",
-    why: "A confident wrong answer is worse than no answer in compliance. Declining is a feature.",
-    term: "Guardrail", evidence: (r) => {
-      const chosen = r.abstention?.data?.curve_without_scope_guard?.find((p: any) => Math.abs(p.threshold - 0.3431) < 0.001);
-      return chosen ? `At the chosen setting (dev set): ${ratio(chosen.unanswerable_refused)} unanswerable questions declined, ${ratio(chosen.answerable_refused)} answerable ones wrongly declined.` : "Tuned on the dev set; see Evals.";
-    } },
-  { title: "Write the answer", short: "Only from the passages, citing each one",
-    what: "A language model (GPT-4o mini) writes a short answer using only the selected passages. Every sentence must point to the paragraph it came from, and answers about a past date say so.",
-    why: "Grounding every sentence in a cited paragraph is what makes the answer checkable by a human in seconds.",
-    term: "Grounding", evidence: (r) => `Answers that cited the right RBI paragraph: ${count(headline(r).results.question_all_gold_cited)} (${headline(r).split}).` },
-  { title: "Check every claim", short: "A second AI reads each sentence against its source", guard: true,
-    what: "A separate AI call reads each sentence next to the paragraph it cites and marks it supported, partly supported or not supported. Anything not fully supported is flagged on screen, never silently kept.",
-    why: "Even grounded answers can over-generalise. Showing the flag lets the reader decide, rather than hiding uncertainty.",
-    term: "Trust & safety", evidence: (r) => {
-      const row: any = Object.values(r.claim_checker?.data?.by_source ?? {})[0];
-      return row ? `Honest limit: of ${row["unsupported_caught (recall)"].denominator} claims a reviewer marked as not fully supported, the checker flagged ${row["unsupported_caught (recall)"].numerator}. That is why it flags rather than rewrites.` : "Validated on the Evals page.";
-    } },
+const STEPS = [
+  {
+    title: "Question & date",
+    icon: "ask",
+    input: "A lending question",
+    middle: ["The question", "The research date"],
+    output: "A research request",
+    what: "A question starts with a scope and a date.",
+    body: "A rule can be valid for a past loan and withdrawn today. You can ask about the latest indexed rules or choose a historical date.",
+    why: "The date is part of the question, not an afterthought.",
+    evidence:
+      "The same question can be researched at different dates. This is a product capability, not a measured accuracy claim.",
+  },
+  {
+    title: "Search two ways",
+    icon: "search",
+    input: "Your question",
+    middle: ["Exact words", "Meaning"],
+    output: "Combined candidates",
+    what: "Find precise terms and the meaning behind them.",
+    body: "Keyword search finds exact regulatory language. OpenAI embeddings find similar meaning. Reciprocal rank fusion merges the lists without asking either method to do every job.",
+    why: "Different search methods have different blind spots.",
+    evidence:
+      "Expected evidence in the top five: 62 of 105 with keyword search; 81 of 105 with combined search. Development set; no confidence interval computed.",
+    file: "ladder-dev.json",
+  },
+  {
+    title: "Follow references",
+    icon: "graph",
+    input: "A source paragraph",
+    middle: ["“See paragraph…”", "Linked provision"],
+    output: "Related evidence",
+    what: "Follow the links a paragraph already contains.",
+    body: "The knowledge graph adds provisions referenced by search results. It helps recover evidence that matters because of a relationship, even when the wording is different.",
+    why: "Use the graph for a specific retrieval job.",
+    evidence:
+      "Linked-question evidence in the top five: 22 of 26 without the graph, 24 of 26 with it. Development comparison without re-ranking; no interval computed.",
+    file: "ladder-graph-dev.json",
+  },
+  {
+    title: "Check validity",
+    icon: "sources",
+    input: "Retrieved candidates",
+    middle: ["Out of force", "Valid on date"],
+    output: "Eligible evidence",
+    what: "Remove evidence that did not apply on the date.",
+    body: "Document status and in-force dates determine whether a passage can be used. Withdrawn documents remain available for historical questions when their recorded dates allow it.",
+    why: "A relevant paragraph can still be the wrong version.",
+    guard: true,
+    evidence:
+      "Withdrawn evidence reached the top five on 12 of 13 traps before filtering and 0 of 13 after filtering. Development set; no interval computed.",
+    file: "ladder-dev.json",
+  },
+  {
+    title: "Re-rank evidence",
+    icon: "evals",
+    input: "Eligible passages",
+    middle: ["Read with question", "Reorder by relevance"],
+    output: "Strongest matches",
+    what: "Give the strongest evidence a second look.",
+    body: "Cohere Rerank reads the candidate passages with the question and moves the strongest matches to the top. This adds a model call and cost.",
+    why: "Judge quality, latency, and cost together.",
+    evidence:
+      "Expected evidence in the top five: 92 of 105 before re-ranking, 94 of 105 after. Development set; no interval computed.",
+    file: "ladder-dev.json",
+  },
+  {
+    title: "Answer or decline",
+    icon: "ask",
+    input: "Best evidence match",
+    middle: ["Enough evidence?", "Too weak?"],
+    output: "Answer or decline",
+    what: "Make room for “I cannot answer that.”",
+    body: "A weak best match can trigger a refusal before generation. The answer model may also decline. This helps contain unsupported answers, but the decision is imperfect.",
+    why: "Evaluate both missed answers and unwanted answers.",
+    guard: true,
+    evidence:
+      "5 of 7 unanswerable held-out questions were refused (95% interval [0.2857, 1]); 1 of 49 answerable questions was wrongly refused (95% interval [0, 0.0612]).",
+    file: "answers-test-gpt-4o-mini.json",
+  },
+  {
+    title: "Write & cite",
+    icon: "sources",
+    input: "Selected evidence",
+    middle: ["A concise answer", "Passage citations"],
+    output: "Inspectable claims",
+    what: "Keep the answer connected to its sources.",
+    body: "GPT-4o mini writes from selected passages and attaches citations. Each citation opens the source text so the reader can check conditions and scope.",
+    why: "Citations make inspection possible; they do not prove correct interpretation.",
+    evidence:
+      "51 of 57 expected evidence sentences appeared in cited passages on the held-out set. 95% interval [0.807, 0.9649].",
+    file: "answers-test-gpt-4o-mini.json",
+  },
+  {
+    title: "Check the claims",
+    icon: "check",
+    input: "Answer + citations",
+    middle: ["Compare to source", "Attach check labels"],
+    output: "Answer with limits",
+    what: "Show a second opinion, with its limitations.",
+    body: "Another GPT-4o mini call labels each claim supported, partly supported, or unsupported by its citations. These labels are shown to the reader; they do not automatically rewrite the answer.",
+    why: "A checker needs to be evaluated as carefully as the system it checks.",
+    guard: true,
+    evidence:
+      "The checker caught 6 of 21 claims labelled not fully supported. Labels were model-drafted; no confirmed personal-review ground truth or confidence interval.",
+    file: "claim-checker-quality.json",
+  },
 ];
-
-const LOOP = [
-  { title: "Check RBI every day", tag: "Scheduled job", text: "A daily job visits RBI's pages for every rule in the library and RBI's official register of withdrawn circulars." },
-  { title: "Spot what changed", tag: "Detection", text: "It notices RBI's 'Withdrawn' stamp, a listing in the register, or a new rule that says it replaces older ones." },
-  { title: "Link old to new", tag: "Trust rule", text: "A replacement is trusted automatically only when RBI's own text says so explicitly. Anything less goes to a human review queue." },
-  { title: "Retire the old rule", tag: "Lifecycle", text: "The old rule stays in the library for history, but stops being used for questions about dates after it ended." },
-];
-
-export default function HowItWorks() {
-  const { report } = useQuality();
-  const [lit, setLit] = useState(0);
-  const [selected, setSelected] = useState<number | null>(null);
-  const reduced = window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
-
+export default function HowItWorks({ active = true }: { active?: boolean }) {
+  const [step, setStep] = useState(0);
+  const [playing, setPlaying] = useState(false);
   useEffect(() => {
-    if (selected !== null || reduced) return;
-    const timer = window.setInterval(() => setLit((step) => (step + 1) % STEPS.length), 1500);
-    return () => window.clearInterval(timer);
-  }, [selected, reduced]);
-
-  const shown = selected ?? lit;
-  const step = STEPS[shown];
-  const replay = report?.replay?.data;
-
+    if (!active) setPlaying(false);
+  }, [active]);
+  const [reduced, setReduced] = useState(
+    () => matchMedia("(prefers-reduced-motion: reduce)").matches,
+  );
+  useEffect(() => {
+    const m = matchMedia("(prefers-reduced-motion: reduce)");
+    const change = () => setReduced(m.matches);
+    m.addEventListener("change", change);
+    return () => m.removeEventListener("change", change);
+  }, []);
+  useEffect(() => {
+    if (!playing || reduced) return;
+    const timer = setInterval(
+      () =>
+        setStep((s) => {
+          if (s === STEPS.length - 1) {
+            setPlaying(false);
+            return s;
+          }
+          return s + 1;
+        }),
+      6500,
+    );
+    const hide = () => {
+      if (document.hidden) setPlaying(false);
+    };
+    document.addEventListener("visibilitychange", hide);
+    return () => {
+      clearInterval(timer);
+      document.removeEventListener("visibilitychange", hide);
+    };
+  }, [playing, reduced]);
+  const chosen = STEPS[step];
+  const select = (i: number) => {
+    setStep(i);
+    setPlaying(false);
+  };
   return (
     <div className="page">
-      <section className="hero">
-        <div className="eyebrow">How this works</div>
-        <h1>From a question to a checked answer in eight steps</h1>
-        <p className="lead">The product is a pipeline: each step either finds better evidence or removes a way to be wrong. Steps with a dashed border are <strong>guardrails</strong>: they exist to stop a bad answer, not to make a good one better. Click any step to pause the animation and read about it.</p>
-      </section>
-
-      <section>
-        <div className="pipeline" role="list" aria-label="The answer pipeline">
-          {STEPS.map((item, index) => (
-            <button key={item.title} role="listitem" className={`pipe-step ${item.guard ? "guard" : ""} ${index === lit && selected === null ? "lit" : ""}`}
-              aria-pressed={selected === index} onClick={() => setSelected(selected === index ? null : index)}>
-              <strong>{item.title}</strong><span>{item.short}</span>
+      <PageIntro
+        eyebrow="How it works"
+        title="From a question to evidence you can inspect."
+      >
+        A visual tour of the research pipeline. Choose a step to explore it, or
+        play the walkthrough at your own pace.
+      </PageIntro>
+      <section
+        className="walkthrough"
+        aria-label="Interactive research pipeline"
+      >
+        <div className="step-nav" aria-label="Pipeline steps">
+          {STEPS.map((s, i) => (
+            <button
+              key={s.title}
+              aria-pressed={step === i}
+              aria-controls="pipeline-detail"
+              onClick={() => select(i)}
+            >
+              <span className="step-number">
+                {String(i + 1).padStart(2, "0")}
+              </span>
+              <span>{s.title}</span>
+              {s.guard && <span className="guard-marker">Check</span>}
             </button>
           ))}
         </div>
-        <p className="muted" style={{ fontSize: 13 }}>"Dev set" numbers come from the questions used while tuning the product; the final results on questions it never saw are on the Evals page.</p>
-        <p className="flow-arrow">Question → search → cross-references → in-force filter → ranking → answer-or-decline → answer → claim check → shown with its evidence, time and cost.</p>
-        <div className="step-detail card rise" key={shown} aria-live="polite">
-          <div>
-            <span className="pm-term">{step.term}</span>
-            <h2 style={{ marginTop: 8 }}>{shown + 1}. {step.title}</h2>
-            <p>{step.what}</p>
-            <p><strong>Why it matters.</strong> {step.why}</p>
+        <div className="walkthrough-stage" id="pipeline-detail">
+          <div
+            className="diagram-stage"
+            key={step}
+            aria-label={`Illustration: ${chosen.input} to ${chosen.middle.join(" and ")} to ${chosen.output}`}
+          >
+            <div className="diagram-node">
+              <Icon name={chosen.icon} size={26} />
+              <strong>{chosen.input}</strong>
+            </div>
+            <span className="diagram-flow">
+              <Icon name="arrow" />
+            </span>
+            <div className="diagram-stack">
+              {chosen.middle.map((label, i) => (
+                <div
+                  className={`diagram-node ${step === 3 && i === 0 ? "struck" : "accent"}`}
+                  key={label}
+                  style={{ animationDelay: `${i * 120}ms` }}
+                >
+                  {label}
+                </div>
+              ))}
+            </div>
+            <span className="diagram-flow">
+              <Icon name="arrow" />
+            </span>
+            <div className="diagram-node">
+              <Icon name={step === 7 ? "check" : "sources"} size={26} />
+              <strong>{chosen.output}</strong>
+            </div>
           </div>
-          <div>
-            <h3>Evidence</h3>
-            <p>{report ? step.evidence(report) : "Loading the saved results…"}</p>
-            {selected !== null && <button className="chip" onClick={() => setSelected(null)}>Resume the animation</button>}
+          <div className="eyebrow">
+            Step {step + 1} / {STEPS.length}
+            {chosen.guard ? " · Quality check" : ""}
+          </div>
+          <h2>{chosen.what}</h2>
+          <p>{chosen.body}</p>
+          <p>
+            <strong>{chosen.why}</strong>
+          </p>
+          <div className="step-evidence">
+            <p>{chosen.evidence}</p>
+            {chosen.file && <SourceNote file={chosen.file} />}
+          </div>
+          <div className="step-controls">
+            <button
+              className="secondary"
+              disabled={step === 0}
+              onClick={() => select(step - 1)}
+            >
+              Previous
+            </button>
+            {!reduced && (
+              <button
+                className="text-link"
+                onClick={() => {
+                  if (step === STEPS.length - 1) setStep(0);
+                  setPlaying(!playing);
+                }}
+              >
+                <Icon name="play" size={14} />
+                {playing ? "Pause tour" : "Play tour"}
+              </button>
+            )}
+            <button
+              className="secondary"
+              disabled={step === STEPS.length - 1}
+              onClick={() => select(step + 1)}
+            >
+              Next <Icon name="arrow" size={14} />
+            </button>
+            <span className="fine-print">
+              {playing
+                ? "Playing · select a step to pause"
+                : "Explore at your own pace"}
+            </span>
           </div>
         </div>
       </section>
-
-      <section>
-        <div className="eyebrow">Keeping the rulebook current</div>
-        <h2>The daily monitoring loop</h2>
-        <p className="prose">Answering from the rule in force only works if the product knows when a rule stops being in force. This loop runs every day, separately from the questions.</p>
+      <section className="section-block">
+        <div className="section-heading">
+          <div>
+            <div className="eyebrow">A separate workflow</div>
+            <h2>Keep the source history connected.</h2>
+          </div>
+          <a className="text-link" href="#sources">
+            Inspect the library <Icon name="arrow" size={15} />
+          </a>
+        </div>
         <div className="loop">
-          {LOOP.map((item, index) => (
-            <div key={item.title} className={`loop-step ${index === lit % LOOP.length && selected === null ? "lit" : ""}`}>
-              <div className="tag">{index + 1} · {item.tag}</div>
-              <h3>{item.title}</h3>
-              <p style={{ margin: 0, fontSize: 14 }}>{item.text}</p>
+          {[
+            [
+              "Observe",
+              "Check official pages for withdrawal notices and replacement statements.",
+            ],
+            [
+              "Compare",
+              "Detect changes to source content and recorded status.",
+            ],
+            [
+              "Resolve",
+              "Trust explicit replacement evidence. Queue uncertain matches for review.",
+            ],
+            [
+              "Retain",
+              "Retire the old rule for current questions and preserve it for history.",
+            ],
+          ].map(([title, text], i) => (
+            <div className="loop-step" key={title}>
+              <span>{String(i + 1).padStart(2, "0")}</span>
+              <h3>{title}</h3>
+              <p>{text}</p>
             </div>
           ))}
         </div>
-        {replay && (
-          <div className="stat-strip">
-            <div className="stat"><div className="big"><span className="num">{ratio(replay.withdrawal_detection?.recall)}</span></div><div className="label">withdrawals detected in a replay of real RBI history ({replay.withdrawal_detection?.false_alarms} false alarms)</div></div>
-            <div className="stat"><div className="big"><span className="num">{ratio(replay.stale_answer_rate?.evidence)}</span></div><div className="label">replayed answers that used a rule already out of force</div></div>
-            <div className="stat"><div className="big"><span className="num">{ratio(replay.auto_trust_precision)}</span></div><div className="label">automatically trusted replacements that were right</div></div>
-          </div>
-        )}
+        <p className="fine-print" style={{ marginTop: 18 }}>
+          The monitoring schedule is configured. A historical replay tests the
+          logic; it does not establish a live detection-time guarantee.
+          Published replacement links and inferred suggestions have different
+          trust levels.
+        </p>
+        <SourceNote file="replay-report.json">
+          Replay results and assumptions
+        </SourceNote>
       </section>
-
-      <section>
-        <h2>What you see on screen</h2>
-        <div className="grid-3">
-          <div className="card kicker-card"><h3>Every sentence has a source</h3><p>Click a citation to read the RBI paragraph, with the words that support the sentence highlighted.</p></div>
-          <div className="card kicker-card"><h3>Every sentence has a status</h3><p>Green: the cited text supports it. Amber: only partly. Red: it does not. Flags are shown, never hidden.</p></div>
-          <div className="card kicker-card"><h3>Every answer has a receipt</h3><p>The trace shows what each step found and removed, how long it took and what it cost, typically a fraction of a cent.</p></div>
-        </div>
-      </section>
+      <NextPage
+        href="#built"
+        title="Why build it this way?"
+        text="Explore the choices, experiments, and trade-offs behind the system."
+      />
     </div>
   );
 }

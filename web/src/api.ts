@@ -4,7 +4,12 @@ const BASE = (import.meta.env.VITE_API_BASE_URL ?? "").replace(/\/+$/, "");
 
 export type Verdict = "supported" | "partially_supported" | "not_supported";
 
-export interface Claim { title: string | null; text: string; citation_ids: string[]; support: Verdict | null }
+export interface Claim {
+  title: string | null;
+  text: string;
+  citation_ids: string[];
+  support: Verdict | null;
+}
 export interface Research {
   status: "grounded" | "insufficient_evidence" | "out_of_scope";
   display_title: string | null;
@@ -12,11 +17,22 @@ export interface Research {
   sections: { id: string; title: string; claims: Claim[] }[];
 }
 export interface Chunk {
-  chunk_id: string; document_id: string; document_title: string; text: string; source_url: string | null;
-  paragraph_ref: string | null; heading_path: string | null; lifecycle: string; in_force_from: string | null;
+  chunk_id: string;
+  document_id: string;
+  document_title: string;
+  text: string;
+  source_url: string | null;
+  paragraph_ref: string | null;
+  heading_path: string | null;
+  lifecycle: string;
+  in_force_from: string | null;
   in_force_to: string | null;
 }
-export interface Notice { kind: "replaced" | "withdrawn" | "upcoming"; text: string; evidence_excerpt: string | null }
+export interface Notice {
+  kind: "replaced" | "withdrawn" | "upcoming";
+  text: string;
+  evidence_excerpt: string | null;
+}
 export interface Trace {
   timings_ms?: Record<string, number>;
   candidates?: Record<string, string[]>;
@@ -28,20 +44,42 @@ export interface Trace {
   cost_usd?: Record<string, number>;
 }
 export interface QueryResult {
-  request_id: string; research: Research | null; retrieved_evidence: Chunk[]; as_of: string | null;
-  notices: Notice[]; latency_ms: number; estimated_cost_usd: number; in_scope: boolean;
-  pipeline: { retrieval_method: string; answer_mode: string; selected_evidence_count: number };
+  request_id: string;
+  research: Research | null;
+  retrieved_evidence: Chunk[];
+  as_of: string | null;
+  notices: Notice[];
+  latency_ms: number;
+  estimated_cost_usd: number;
+  in_scope: boolean;
+  pipeline: {
+    retrieval_method: string;
+    answer_mode: string;
+    selected_evidence_count: number;
+  };
   trace: Trace;
 }
 
-export async function streamQuery(query: string, asOf: string | null, onStage: (stage: string) => void,
-                                  onAnswer?: (preview: QueryResult) => void,
-                                  onPartial?: (text: string) => void): Promise<QueryResult> {
+export async function streamQuery(
+  query: string,
+  asOf: string | null,
+  onStage: (stage: string) => void,
+  onAnswer?: (preview: QueryResult) => void,
+  onPartial?: (text: string) => void,
+  signal?: AbortSignal,
+): Promise<QueryResult> {
   const response = await fetch(`${BASE}/query/stream`, {
-    method: "POST", headers: { "Content-Type": "application/json" },
+    method: "POST",
+    headers: { "Content-Type": "application/json" },
+    signal,
     body: JSON.stringify({ query, ...(asOf ? { as_of: asOf } : {}) }),
   });
-  if (!response.ok || !response.body) throw new Error(`The research service answered ${response.status}.`);
+  if (!response.ok || !response.body)
+    throw new Error(
+      response.status === 429
+        ? "The service is busy. Please wait a moment and try again."
+        : "The research service is unavailable. Your question is still here; please try again.",
+    );
   const reader = response.body.getReader();
   const decoder = new TextDecoder();
   let buffer = "";
@@ -60,18 +98,38 @@ export async function streamQuery(query: string, asOf: string | null, onStage: (
       if (kind === "answer" && onAnswer) {
         // The answer before its claim check: shown at once; the verdicts arrive with the result.
         const body = JSON.parse(data);
-        onAnswer({ ...body, request_id: "", trace: {}, latency_ms: 0, estimated_cost_usd: 0, in_scope: true,
-          pipeline: { retrieval_method: "", answer_mode: "checking", selected_evidence_count: body.retrieved_evidence.length } });
+        onAnswer({
+          ...body,
+          request_id: "",
+          trace: {},
+          latency_ms: 0,
+          estimated_cost_usd: 0,
+          in_scope: true,
+          pipeline: {
+            retrieval_method: "",
+            answer_mode: "checking",
+            selected_evidence_count: body.retrieved_evidence.length,
+          },
+        });
       }
       if (kind === "result") return JSON.parse(data);
       if (kind === "error") throw new Error(JSON.parse(data).detail);
     }
   }
-  throw new Error("The research service closed the connection without an answer.");
+  throw new Error(
+    "The research service closed the connection without an answer.",
+  );
 }
 
-export async function getJson<T>(path: string): Promise<T> {
-  const response = await fetch(`${BASE}${path}`);
-  if (!response.ok) throw new Error((await response.json().catch(() => ({}))).detail ?? `Request failed (${response.status}).`);
+export async function getJson<T>(
+  path: string,
+  signal?: AbortSignal,
+): Promise<T> {
+  const response = await fetch(`${BASE}${path}`, { signal });
+  if (!response.ok)
+    throw new Error(
+      (await response.json().catch(() => ({}))).detail ??
+        `Request failed (${response.status}).`,
+    );
   return response.json();
 }

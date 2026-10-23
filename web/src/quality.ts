@@ -1,34 +1,31 @@
-import { useEffect, useState } from "react";
-import { getJson } from "./api";
-
-/* Every number in the story pages comes from the saved evaluation runs served by /quality.
-   Fetched once per visit and shared by every page. */
+import saved from "./data/quality.json";
+// Results travel with the release; reading the case study never waits for a sleeping API.
 export type Report = Record<string, any>;
-
-let pending: Promise<Report> | null = null;
-
-export function useQuality(): { report: Report | null; error: string | null } {
-  const [report, setReport] = useState<Report | null>(null);
-  const [error, setError] = useState<string | null>(null);
-  useEffect(() => {
-    pending ??= getJson<Report>("/quality");
-    pending.then(setReport).catch((exc) => { pending = null; setError(exc.message); });
-  }, []);
-  return { report, error };
+export const REPORT: Report = saved;
+export const REPO =
+  "https://github.com/ashutoshedamadaka-max/RBI-knowledge-graph";
+export const evidenceUrl = (file: string) =>
+  `${REPO}/blob/main/data/evaluation/${file.replace(/^data\/evaluation\//, "")}`;
+export function useQuality() {
+  return { report: REPORT, error: null };
 }
-
 export const pct = (value: number | null | undefined) =>
-  value === null || value === undefined ? "—" : `${Math.round(value * 100)}%`;
-
-export const ratio = (m: { numerator: number; denominator: number } | undefined) => (m ? `${m.numerator} of ${m.denominator}` : "—");
-
-/** The answer results to headline: the held-out test run when it exists, otherwise dev (labelled as such). */
+  value == null ? "Not measured" : `${Number((value * 100).toFixed(2))}%`;
+export const ratio = (
+  m: { numerator: number; denominator: number } | undefined,
+) => (m ? `${m.numerator} of ${m.denominator}` : "Not measured");
 export function headline(report: Report) {
   const test = report.answers_test?.status === "measured";
   const source = test ? report.answers_test : report.answers_dev;
-  return { results: source?.data?.results ?? {}, data: source?.data ?? {}, split: test ? "held-out test set" : "dev set", file: source?.file };
+  return {
+    results: source?.data?.results ?? {},
+    data: source?.data ?? {},
+    split: test ? "held-out test set" : "development set",
+    file: source?.file,
+  };
 }
-
-/** Correct answers among those with an answer key, as "a of b" from a bootstrap rate (value × n). */
+/** Recover the integer count from the saved rounded rate: evidence coverage, not correctness. */
 export const count = (rate: { value: number | null; n: number } | undefined) =>
-  rate && rate.value !== null ? `${Math.round(rate.value * rate.n)} of ${rate.n}` : "—";
+  rate && rate.value !== null
+    ? `${Math.round(rate.value * rate.n)} of ${rate.n}`
+    : "Not measured";
