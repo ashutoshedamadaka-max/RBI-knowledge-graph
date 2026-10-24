@@ -177,3 +177,14 @@
 .live-strip .text-link { font-size: 13px; }
 .results-anchor { scroll-margin-top: 24px; }
 @media (prefers-reduced-motion: reduce) { .live-strip-steps li { animation: none !important; } }
+
+/* When a run finishes, the answer briefly glows so the eye knows where to land. */
+.answer-card { scroll-margin-top: 24px; }
+.answer-card.just-arrived { animation: answer-arrived 2.2s ease both; }
+.answer-card h2:focus { outline: none; }
+.answer-card h2:focus-visible { outline: 2px solid var(--brand); outline-offset: 4px; border-radius: 4px; }
+@keyframes answer-arrived {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 40%, transparent); border-color: var(--brand); }
+  100% { box-shadow: 0 0 0 14px transparent; border-color: var(--line); }
+}
+@media (prefers-reduced-motion: reduce) { .answer-card.just-arrived { animation: none !important; border-color: var(--brand); } }

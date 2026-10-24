@@ -55,6 +55,25 @@ export default function Ask({ active = true }: { active?: boolean }) {
   const controller = useRef<AbortController | null>(null);
   const resultsRef = useRef<HTMLDivElement>(null); // where the live strip and the answer begin
   const mechanicsRef = useRef<HTMLDivElement>(null); // the full "behind this answer" panel, below the answer
+  const answerRef = useRef<HTMLElement>(null);
+  const answerHeadingRef = useRef<HTMLHeadingElement>(null);
+  const [answerArrived, setAnswerArrived] = useState(false);
+  const wasBusy = useRef(false);
+  // When a run finishes, bring the reader back to the answer (unless they are already looking at it).
+  useEffect(() => {
+    const finished = wasBusy.current && !busy;
+    wasBusy.current = busy;
+    if (!finished || !result || error || mode !== "live") return;
+    const card = answerRef.current;
+    if (!card) return;
+    const box = card.getBoundingClientRect();
+    const inView = box.top >= 0 && box.top < window.innerHeight * 0.6;
+    if (!inView) revealPipeline(card);
+    answerHeadingRef.current?.focus({ preventScroll: true });
+    setAnswerArrived(true);
+    const timer = window.setTimeout(() => setAnswerArrived(false), 2200);
+    return () => window.clearTimeout(timer);
+  }, [busy, result, error, mode]);
   const citationTrigger = useRef<HTMLElement | null>(null);
   const passageRef = useRef<HTMLElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
@@ -370,13 +389,13 @@ export default function Ask({ active = true }: { active?: boolean }) {
           )}
           {(result || openPassage) && (
             <div className={`answer-layout ${!result ? "source-preview-layout" : ""}`}>
-              {result && <article className="card answer-card">
+              {result && <article ref={answerRef} className={`card answer-card ${answerArrived ? "just-arrived" : ""}`}>
                 <div className="eyebrow">
                   {busy || error
                     ? "Answer · checks incomplete"
                     : "Research result"}
                 </div>
-                <h2>{result.research?.display_title ?? submitted}</h2>
+                <h2 ref={answerHeadingRef} tabIndex={-1}>{result.research?.display_title ?? submitted}</h2>
                 <p className="answer-meta">
                   Research date: {result.as_of ?? "latest indexed status"} ·{" "}
                   {result.pipeline.selected_evidence_count} retrieved passages
