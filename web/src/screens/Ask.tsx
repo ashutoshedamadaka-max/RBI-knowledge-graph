@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
 import { Claim, PipelineStep, QueryResult, streamQuery } from "../api";
-import LivePipeline from "../components/LivePipeline";
+import LivePipeline, { LiveStrip, PipelinePill, PipelinePreview, revealPipeline, runFacts } from "../components/LivePipeline";
 import { Icon, PageIntro, SourceNote } from "../components/UI";
 import saved from "../data/example.json";
 const EXAMPLES = [
@@ -53,6 +53,8 @@ export default function Ask({ active = true }: { active?: boolean }) {
   const [firstTextMs, setFirstTextMs] = useState<number | null>(null);
   const [answerMs, setAnswerMs] = useState<number | null>(null);
   const controller = useRef<AbortController | null>(null);
+  const resultsRef = useRef<HTMLDivElement>(null); // where the live strip and the answer begin
+  const mechanicsRef = useRef<HTMLDivElement>(null); // the full "behind this answer" panel, below the answer
   const citationTrigger = useRef<HTMLElement | null>(null);
   const passageRef = useRef<HTMLElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
@@ -101,6 +103,8 @@ export default function Ask({ active = true }: { active?: boolean }) {
     setFirstTextMs(null);
     setAnswerMs(null);
     setSubmitted(query.trim());
+    // Take the reader to where the answer will appear, instead of leaving them at the question box.
+    requestAnimationFrame(() => requestAnimationFrame(() => revealPipeline(resultsRef.current)));
     setStage("understanding_question");
     try {
       const answer = await streamQuery(
@@ -321,7 +325,9 @@ export default function Ask({ active = true }: { active?: boolean }) {
         <SavedExample />
       ) : (
         <>
-          {submitted && <LivePipeline steps={steps} busy={busy} elapsed={elapsed} firstTextMs={firstTextMs} answerMs={answerMs} result={result} error={error} onOpen={openCitation} highlighted={new Set(activeClaim?.citation_ids ?? [])} />}
+          {/* Answer first: a slim live strip, then the answer; the full mechanics follow below (linked). */}
+          <div ref={resultsRef} className="results-anchor" />
+          {submitted && <LiveStrip steps={steps} busy={busy} error={error} onDetails={() => revealPipeline(mechanicsRef.current)} />}
           {busy && !steps.length && (
             <div className="research-progress">
               <div className="progress-heading" role="status">
@@ -352,17 +358,7 @@ export default function Ask({ active = true }: { active?: boolean }) {
                 Enter a question above, or open a saved answer to explore how
                 citations and checks work.
               </p>
-              <div className="research-steps">
-                <span>
-                  <b>01</b> Ask about a rule
-                </span>
-                <span>
-                  <b>02</b> Inspect its sources
-                </span>
-                <span>
-                  <b>03</b> Review the limits
-                </span>
-              </div>
+              <PipelinePreview />
             </div>
           )}
           {draft && !result && (
@@ -385,6 +381,13 @@ export default function Ask({ active = true }: { active?: boolean }) {
                   Research date: {result.as_of ?? "latest indexed status"} ·{" "}
                   {result.pipeline.selected_evidence_count} retrieved passages
                 </p>
+                {steps.length > 0 && (
+                  <button className="behind-link" onClick={() => revealPipeline(mechanicsRef.current)}>
+                    <strong>How this answer was made</strong>
+                    <span>{runFacts(steps)}</span>
+                    <Icon name="arrow" size={14} />
+                  </button>
+                )}
                 <details className="question-detail">
                   <summary>Your question</summary>
                   <p>{submitted}</p>
@@ -511,6 +514,12 @@ export default function Ask({ active = true }: { active?: boolean }) {
               </aside>
             </div>
           )}
+          {submitted && (
+            <div ref={mechanicsRef} className="pipeline-anchor" id="behind-this-answer">
+              <LivePipeline steps={steps} busy={busy} elapsed={elapsed} firstTextMs={firstTextMs} answerMs={answerMs} result={result} error={error} onOpen={openCitation} highlighted={new Set(activeClaim?.citation_ids ?? [])} />
+            </div>
+          )}
+          {submitted && <PipelinePill steps={steps} busy={busy} target={mechanicsRef} />}
         </>
       )}
     </div>

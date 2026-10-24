@@ -116,3 +116,73 @@ function RunGraph({ chunks, result, edges, highlighted, onOpen, busy }: {chunks:
     {!!chunks.length && <details className="graph-text-list"><summary>Browse the passages as a list</summary>{chunks.map((c,i)=><button key={c.chunk_id} onClick={()=>onOpen(c.chunk_id)}><span>{String(i+1).padStart(2,'0')}</span>{c.document_title}{c.paragraph_ref ? ` · ${c.paragraph_ref}` : ''}</button>)}</details>}
   </div>;
 }
+
+const reducedMotion = () => window.matchMedia?.("(prefers-reduced-motion: reduce)").matches ?? false;
+
+/** Bring the live pipeline into view (instantly when the reader prefers reduced motion). */
+export function revealPipeline(target: HTMLElement | null) {
+  target?.scrollIntoView({ behavior: reducedMotion() ? "auto" : "smooth", block: "start" });
+}
+
+/** Before a question is asked: set the expectation that the work behind the answer will be visible. */
+export function PipelinePreview() {
+  return <div className="pipeline-preview" aria-label="What happens when you ask">
+    <div className="pipeline-preview-copy">
+      <span className="mini-label">Behind every answer</span>
+      <p>When you ask, you can watch each step run live: the search, the date check, the ranking, the writing and the claim check, with the real sources, timings and cost.</p>
+    </div>
+    <ol className="pipeline-preview-steps">
+      {STEPS.map(([id, title]) => <li key={id}>{title}</li>)}
+    </ol>
+  </div>;
+}
+
+/** The facts a reader cares about once a run is done, for the answer header and the floating pill. */
+export function runFacts(steps: PipelineStep[]) {
+  const byId = new Map(steps.map(s => [s.id, s]));
+  const done = steps.filter(s => s.status === "complete").length;
+  const filter = byId.get("in_force_filter");
+  const check = byId.get("claim_check");
+  const cost = steps.reduce((total, s) => total + (s.cost_usd ?? 0), 0);
+  const parts = [`${done} steps`];
+  if (filter?.inspected_count) parts.push(`${filter.inspected_count} passages checked for date`);
+  if (filter?.count) parts.push(`${filter.count} excluded`);
+  if (check?.status === "complete" && check.count != null) parts.push(`${check.count} claims checked`);
+  if (cost > 0) parts.push(money(cost));
+  return parts.join(" · ");
+}
+
+/** A small floating pill while the pipeline is off-screen: live status during a run, a way back afterwards. */
+export function PipelinePill({ steps, busy, target }: { steps: PipelineStep[]; busy: boolean; target: { current: HTMLElement | null } }) {
+  const [hidden, setHidden] = useState(true);
+  useEffect(() => {
+    const node = target.current;
+    if (!node || typeof IntersectionObserver === "undefined") return;
+    const observer = new IntersectionObserver(([entry]) => setHidden(entry.isIntersecting), { threshold: 0.15 });
+    observer.observe(node);
+    return () => observer.disconnect();
+  }, [target, steps.length > 0]);
+  if (hidden || (!busy && !steps.length)) return null;
+  const running = steps.find(s => s.status === "running");
+  const title = running ? STEPS.find(s => s[0] === running.id)?.[1] : null;
+  return <button className={`pipeline-pill ${busy ? "live" : ""}`} onClick={() => revealPipeline(target.current)}>
+    <i aria-hidden="true" />
+    <span>{busy ? <>Live · {title ?? "Starting"}</> : <>How this answer was made</>}</span>
+    <Icon name="arrow" size={14} />
+  </button>;
+}
+
+/** A one-line live status that sits right above the answer: the steps ticking along, and a link to the detail. */
+export function LiveStrip({ steps, busy, error, onDetails }: { steps: PipelineStep[]; busy: boolean; error: string | null; onDetails: () => void }) {
+  const byId = new Map(steps.map(s => [s.id, s]));
+  const running = steps.find(s => s.status === "running");
+  const title = running ? STEPS.find(s => s[0] === running.id)?.[1] : null;
+  const label = busy ? (title ? `${title}…` : "Starting the research…") : error ? "This run did not finish" : `Done · ${runFacts(steps)}`;
+  return <div className={`live-strip ${busy ? "live" : ""}`} role="status" aria-live="polite">
+    <ol className="live-strip-steps" aria-hidden="true">
+      {STEPS.map(([id]) => <li key={id} className={byId.get(id)?.status ?? "waiting"} />)}
+    </ol>
+    <span className="live-strip-label">{label}</span>
+    <button className="text-link" onClick={onDetails}>{busy ? "Watch it live" : "See how"} <Icon name="arrow" size={14} /></button>
+  </div>;
+}
