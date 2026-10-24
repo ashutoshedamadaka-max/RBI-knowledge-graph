@@ -33,7 +33,6 @@ from app.retrieval.query_service import RegulatoryQueryService  # noqa: E402
 
 PRICES = {"gpt-4o-mini": (0.15, 0.60), "gpt-4o": (2.50, 10.00)}  # USD per million input / output tokens, OpenAI list
 ANSWERABLE = {"single_fact", "applies_to", "multi_hop", "change_over_time", "false_premise"}
-COHERE_PRICE_PER_SEARCH = 0.002
 
 
 def interval(values: list[float], seed: int = 7, resamples: int = 2000) -> dict:
@@ -133,7 +132,9 @@ def main() -> None:
                         for kind, rows in sorted(by_type.items())},
             "latency_ms_p50": sorted(row["latency_ms"] for row in records if "latency_ms" in row)[len(records) // 2] if records else None,
             "cost_usd": {"answers_including_claim_check": round(answer_cost, 4),
-                         "per_question_answer_plus_rerank": round(answer_cost / max(len(records), 1) + COHERE_PRICE_PER_SEARCH, 5)},
+                         # Each answer's cost already includes the query embedding and the reported re-ranking charge
+                         # (live pipeline events, Oct 2026), so nothing is added here; the key name is kept for the dashboard.
+                         "per_question_answer_plus_rerank": round(answer_cost / max(len(records), 1), 5)},
         },
         "records": records,
         "run_manifest": {

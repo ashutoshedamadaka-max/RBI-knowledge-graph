@@ -16,3 +16,4 @@ frontend/dist/
 # Phase 6 web app
 node_modules/
 web/dist/
+web/.vite/

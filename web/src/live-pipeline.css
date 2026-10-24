@@ -1,0 +1,130 @@
+/* Behind this answer: the live pipeline on the Ask screen. Uses the site's tokens from styles.css. */
+.live-pipeline { margin: 20px 0; border: 1px solid var(--line); border-radius: var(--radius); background: var(--surface); padding: 22px; }
+.live-pipeline.is-live { border-color: color-mix(in srgb, var(--brand) 45%, var(--line)); }
+.pipeline-header { display: flex; justify-content: space-between; align-items: flex-start; gap: 16px; }
+.pipeline-header h2 { margin: 0; font-size: 21px; }
+.pipeline-header .eyebrow { margin-bottom: 6px; }
+.pipeline-header-actions { display: flex; align-items: center; gap: 10px; }
+.execution-status { display: inline-flex; align-items: center; gap: 8px; font-size: 12px; color: var(--muted); }
+.execution-status i { width: 8px; height: 8px; border-radius: 50%; background: var(--muted); }
+.execution-status.active { color: var(--brand); }
+.execution-status.active i { background: var(--brand); animation: live-dot 1.2s ease-in-out infinite; }
+@keyframes live-dot { 50% { opacity: 0.25; transform: scale(0.8); } }
+
+.run-metrics { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 10px; margin: 18px 0 12px; }
+.run-metrics > div { background: var(--surface-2); border-radius: 10px; padding: 10px 12px; min-width: 0; }
+.run-metrics span { display: block; font-size: 11px; color: var(--muted); }
+.run-metrics strong { display: block; font: 600 18px var(--font-display); font-variant-numeric: tabular-nums; }
+.pipeline-announcement { font-size: 13px; color: var(--muted); margin-bottom: 16px; min-height: 1.6em; }
+
+.pipeline-workbench { display: grid; grid-template-columns: minmax(230px, 300px) minmax(0, 1fr); gap: 18px; align-items: start; }
+.pipeline-rail { display: grid; gap: 4px; }
+.rail-heading { display: flex; justify-content: space-between; align-items: center; padding: 0 4px 6px; }
+.pipeline-step { display: grid; grid-template-columns: 30px minmax(0, 1fr) auto; gap: 10px; align-items: center; width: 100%; text-align: left;
+  padding: 8px 10px; border: 1px solid transparent; border-radius: 10px; background: none; transition: background 0.2s, border-color 0.2s; }
+.pipeline-step:hover:not(:disabled) { background: var(--surface-2); }
+.pipeline-step:disabled { opacity: 1; cursor: default; }
+.pipeline-step.selected { border-color: var(--line); background: var(--surface-2); }
+.pipeline-step-marker { display: grid; place-items: center; width: 26px; height: 26px; border-radius: 50%; font-size: 11px; font-weight: 600;
+  font-variant-numeric: tabular-nums; background: var(--surface-2); color: var(--muted); border: 1px solid var(--line); }
+.step-copy { min-width: 0; }
+.step-copy strong { display: block; font-size: 13px; line-height: 1.3; }
+.step-copy small { display: block; font-size: 11px; color: var(--muted); line-height: 1.35; }
+.step-duration { font-size: 11px; color: var(--muted); font-variant-numeric: tabular-nums; white-space: nowrap; }
+.pipeline-step.waiting, .pipeline-step.not-run { opacity: 0.55; }
+.pipeline-step.complete .pipeline-step-marker { background: var(--brand); color: var(--brand-ink); border-color: var(--brand); }
+.pipeline-step.running .pipeline-step-marker { border-color: var(--brand); color: var(--brand); animation: step-ring 1.4s ease-out infinite; }
+.pipeline-step.skipped .pipeline-step-marker { border-style: dashed; }
+.pipeline-step.skipped .step-copy strong { color: var(--muted); }
+.pipeline-step.failed .pipeline-step-marker, .pipeline-step.interrupted .pipeline-step-marker { border-color: var(--bad); color: var(--bad); }
+.pipeline-step.failed .step-duration { color: var(--bad); }
+.step-pulse { color: var(--brand); font-weight: 600; }
+@keyframes step-ring {
+  0% { box-shadow: 0 0 0 0 color-mix(in srgb, var(--brand) 45%, transparent); }
+  100% { box-shadow: 0 0 0 8px transparent; }
+}
+
+.pipeline-evidence { min-width: 0; display: grid; gap: 12px; }
+.live-graph-heading { display: flex; justify-content: space-between; align-items: baseline; gap: 10px; font-size: 12px; color: var(--muted); }
+.run-graph { position: relative; padding: 12px; min-height: 240px; }
+.run-graph svg { width: 100%; height: auto; display: block; }
+.run-graph .graph-column-label { font-size: 9px; letter-spacing: 0.12em; opacity: 0.6; }
+.graph-source-edge { fill: none; stroke: var(--canvas-text); stroke-opacity: 0.22; stroke-width: 1.2; animation: edge-in 0.6s ease both; }
+.graph-reference-edge { fill: none; stroke: var(--lime); stroke-width: 1.4; stroke-dasharray: 5 4; animation: edge-in 0.6s ease both; }
+.graph-claim-edge { fill: none; stroke: var(--lime); stroke-opacity: 0.55; stroke-width: 1.4; animation: edge-in 0.6s ease both; }
+@keyframes edge-in { from { opacity: 0; } to { opacity: 1; } }
+.graph-document-node { fill: #4f8f74; stroke: var(--canvas-text); stroke-opacity: 0.35; }
+.run-graph .graph-node-label { font-size: 9px; opacity: 0.8; }
+.graph-passage-node { cursor: pointer; animation: edge-in 0.45s ease both; }
+.graph-passage-node > circle:not(.graph-hit-ring) { fill: #8fb8a2; }
+.graph-passage-node .graph-hit-ring { fill: transparent; }
+.graph-passage-node:hover > circle:not(.graph-hit-ring),
+.graph-passage-node:focus-visible > circle:not(.graph-hit-ring),
+.graph-passage-node.highlighted > circle:not(.graph-hit-ring) { fill: var(--lime); }
+.graph-passage-node:focus-visible { outline: none; }
+.graph-passage-node:focus-visible .graph-hit-ring { stroke: var(--lime); stroke-width: 2; }
+.graph-passage-node.highlighted .graph-hit-ring { fill: color-mix(in srgb, var(--lime) 22%, transparent); }
+.graph-claim-node { stroke: var(--canvas-text); stroke-opacity: 0.4; }
+.graph-claim-node.supported { fill: #6fd09a; }
+.graph-claim-node.partially_supported { fill: #f0c46a; }
+.graph-claim-node.not_supported { fill: #ff8f8a; }
+.graph-claim-node.pending { fill: transparent; stroke-dasharray: 3 3; stroke-opacity: 0.8; }
+.run-graph .graph-pending-label { font-size: 10px; opacity: 0.6; }
+.graph-scope-note { display: block; font-size: 11px; opacity: 0.7; margin-top: 6px; }
+.graph-awaiting { display: grid; place-items: center; text-align: center; gap: 8px; min-height: 216px; color: var(--canvas-text); }
+.graph-awaiting p { margin: 0; font-size: 12px; opacity: 0.7; }
+.graph-seed { display: grid; place-items: center; width: 56px; height: 56px; border-radius: 50%;
+  border: 1px solid color-mix(in srgb, var(--canvas-text) 30%, transparent); }
+.graph-seed.breathing { animation: breathe 2.2s ease-in-out infinite; }
+@keyframes breathe { 50% { transform: scale(1.08); border-color: var(--lime); } }
+.graph-text-list { margin-top: 10px; font-size: 12px; }
+.graph-text-list summary { cursor: pointer; opacity: 0.85; }
+.graph-text-list button { display: flex; gap: 10px; width: 100%; text-align: left; background: none; border: 0; color: var(--canvas-text); padding: 5px 0; font-size: 12px; }
+.graph-text-list button span { opacity: 0.6; font-variant-numeric: tabular-nums; }
+.graph-text-list button:hover { color: var(--lime); }
+.graph-key { display: flex; flex-wrap: wrap; gap: 14px; font-size: 11px; color: var(--muted); }
+.graph-key span { display: inline-flex; align-items: center; gap: 6px; }
+.graph-key i { display: inline-block; width: 10px; height: 10px; }
+.key-document { background: #4f8f74; border-radius: 3px; }
+.key-passage { background: #8fb8a2; border-radius: 50%; }
+.key-claim { background: #6fd09a; border-radius: 50%; }
+.pipeline-step-detail { background: var(--surface-2); border-radius: 12px; padding: 14px 16px; }
+.pipeline-step-detail .eyebrow { margin-bottom: 6px; }
+.pipeline-step-detail p { margin: 0 0 8px; font-size: 14px; }
+.pipeline-step-detail details { margin-top: 8px; font-size: 13px; }
+.pipeline-step-detail summary { cursor: pointer; font-weight: 600; }
+.pipeline-step-detail ul { margin: 8px 0 0; padding-left: 18px; }
+.step-technical { display: flex; flex-wrap: wrap; gap: 6px; }
+.step-technical span { font: 11px ui-monospace, monospace; background: var(--surface); border: 1px solid var(--line); border-radius: 6px; padding: 2px 7px; }
+.pipeline-step-detail .ranking-changes { list-style: none; padding-left: 0; }
+.ranking-changes li { display: flex; justify-content: space-between; gap: 12px; padding: 3px 0; border-bottom: 1px solid var(--line); }
+.ranking-changes strong { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+.run-accounting { margin-top: 18px; border-top: 1px solid var(--line); padding-top: 12px; }
+.run-accounting > summary { cursor: pointer; font-weight: 600; font-size: 14px; }
+.run-accounting > summary span { font-weight: 400; color: var(--muted); font-size: 12px; margin-left: 8px; }
+.accounting-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 24px; margin-top: 14px; }
+.accounting-grid h3 { font-size: 14px; margin: 0 0 10px; }
+.time-row { display: grid; grid-template-columns: minmax(110px, 160px) minmax(0, 1fr) 72px; gap: 10px; align-items: center; font-size: 12px; margin: 5px 0; }
+.time-row b { text-align: right; font-weight: 600; font-variant-numeric: tabular-nums; }
+.time-bar { height: 8px; background: var(--surface-2); border-radius: 4px; overflow: hidden; }
+.time-bar i { display: block; height: 100%; background: var(--brand); border-radius: 4px; transition: width 0.4s ease; }
+.cost-row { display: flex; justify-content: space-between; gap: 12px; font-size: 12px; padding: 6px 0; border-bottom: 1px solid var(--line); }
+.cost-row small { display: block; color: var(--muted); font-size: 11px; }
+.cost-row b { font-variant-numeric: tabular-nums; white-space: nowrap; }
+.answer-layout.source-preview-layout { grid-template-columns: minmax(0, 1fr); }
+
+@media (max-width: 1100px) {
+  .pipeline-workbench { grid-template-columns: minmax(0, 1fr); }
+  .pipeline-rail { grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); }
+}
+@media (max-width: 760px) {
+  .live-pipeline { padding: 16px; }
+  .run-metrics { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+  .pipeline-rail { grid-template-columns: minmax(0, 1fr); }
+  .accounting-grid { grid-template-columns: minmax(0, 1fr); }
+  .time-row { grid-template-columns: minmax(90px, 120px) minmax(0, 1fr) 62px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .live-pipeline *, .live-pipeline *::before, .live-pipeline *::after { animation: none !important; transition: none !important; }
+}

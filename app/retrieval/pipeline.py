@@ -14,6 +14,7 @@ from datetime import date
 
 from app.config.settings import Settings
 from app.observability.errors import log_failure
+from app.observability.pipeline import PipelineRun, public_passage
 from app.models.chunks import ChunkMetadata, VectorSearchResult
 from app.retrieval.hybrid import BM25, CohereReranker, Dense, GraphExpansion, OpenAIEmbedder, corpus_embeddings, rrf
 from app.retrieval.vector_store import UNSETTLED, is_current_guidance
@@ -34,6 +35,7 @@ class Retrieved:
 # query service per request; keeping the index on the instance rebuilt it (~15 s) for every question.
 _INDEXES: dict = {}
 _BUILD_LOCK = threading.Lock()
+_EXPANSION_LOCK = threading.Lock()
 
 
 class ApprovedRetriever:
@@ -76,11 +78,17 @@ class ApprovedRetriever:
         if rows:
             self._build(rows)
 
-    def search(self, query: str, day: date, limit: int, filtered: bool = True) -> Retrieved:
+    def search(self, query: str, day: date, limit: int, filtered: bool = True, run: PipelineRun | None = None) -> Retrieved:
+        run = run or PipelineRun()
+        run.start("prepare", "Opening the indexed corpus and preparing search.")
         rows = self.store._chunks()
         if not rows or not query.strip():
+            run.finish("prepare", "No searchable passages are available.")
+            for stage in ("bm25", "openai_embeddings", "graph_cross_references", "in_force_filter", "cohere_rerank"):
+                run.skip(stage, "No searchable passages.")
             return Retrieved([], None)
         bm25, dense, expansion = self._build(rows)
+        run.finish("prepare", f"{len(rows)} indexed passages available.", count=len(rows))
         trace: dict = {"timings_ms": {}, "candidates": {}}
         clock_start = time.perf_counter()
 
@@ -92,27 +100,56 @@ class ApprovedRetriever:
         def ids(indices) -> list[str]:
             return [rows[index]["chunk_id"] for index in indices[:TRACE_TOP]]
 
+        def passages(indices):
+            return [public_passage(rows[index]) for index in indices[:TRACE_TOP]]
+
         steps = ["bm25"]
+        run.start("bm25", "Matching the words in your question.", model="BM25 keyword search")
         order = bm25.rank(query)
         trace["candidates"]["bm25"] = ids(order)
         lap("bm25")
+        run.finish("bm25", f"{len(order)} passages matched; showing the leading {min(len(order), TRACE_TOP)}.",
+                   count=len(order), evidence=passages(order))
         if dense is not None:
+            run.start("openai_embeddings", "Searching by meaning and combining the rankings.", model="text-embedding-3-small")
             try:
-                dense_order = dense.rank(query)
+                if hasattr(dense, "rank_with_usage"):
+                    dense_order, query_tokens = dense.rank_with_usage(query)
+                else:
+                    dense_order, query_tokens = dense.rank(query), None
                 trace["candidates"]["openai_embeddings"] = ids(dense_order)
                 order = rrf(order, dense_order)
                 trace["candidates"]["fused"] = ids(order)
                 steps.append("openai_embeddings")
+                run.finish("openai_embeddings", f"Combined keyword and meaning search into {len(order)} candidates.",
+                           evidence=passages(order), count=len(order), input_tokens=query_tokens,
+                           cost_usd=query_tokens * OpenAIEmbedder.price_per_million / 1_000_000 if query_tokens is not None else None,
+                           cost_basis="Input tokens × configured $0.02 per million; query embedding only.")
             except Exception as exc:
                 log_failure(logger, "dense_query_failed", exc)
+                run.finish("openai_embeddings", "Meaning search failed; continuing with keyword results.", status="failed", cost_usd=None)
             lap("openai_embeddings")
+        else:
+            run.skip("openai_embeddings", "Meaning search is unavailable; using keyword search.")
         if expansion is not None:
-            order = expansion(order)
-            trace["graph_added"] = [{"from": rows[a]["chunk_id"], "to": rows[b]["chunk_id"]} for a, b in expansion.last_added]
+            run.start("graph_cross_references", "Following references in the leading passages.")
+            with _EXPANSION_LOCK:
+                order = expansion(order)
+                added = list(expansion.last_added)
+            trace["graph_added"] = [{"from": rows[a]["chunk_id"], "to": rows[b]["chunk_id"]} for a, b in added]
             steps.append("graph_cross_references")
             lap("graph_cross_references")
+            # Include both endpoints of every displayed edge; no invented relationships.
+            visible_added = added[:TRACE_TOP]
+            run.finish("graph_cross_references", f"{len(added)} referenced passages added to the ranking.", count=len(added),
+                       evidence=[public_passage(rows[i]) for i in dict.fromkeys(i for pair in visible_added for i in pair)] + passages(order),
+                       edges=trace["graph_added"][:TRACE_TOP])
+        else:
+            run.skip("graph_cross_references", "No reference graph is available for this corpus.")
         unfiltered = order[:limit]
         if filtered:
+            run.start("in_force_filter", f"Checking source validity on {day}.")
+            inspected_count = min(len(order), self.settings.rerank_candidates)
             removed = [index for index in order[:self.settings.rerank_candidates] if not is_current_guidance(rows[index], day)]
             trace["filtered_out"] = [{"chunk_id": rows[index]["chunk_id"], "document_title": rows[index]["document_title"],
                                       "reason": why_excluded(rows[index], day)} for index in removed[:TRACE_TOP]]
@@ -120,9 +157,15 @@ class ApprovedRetriever:
             order = [index for index in order if is_current_guidance(rows[index], day)]
             steps.append("in_force_filter")
             lap("in_force_filter")
+            run.finish("in_force_filter", f"{len(removed)} of the leading candidates excluded for this date.",
+                       count=len(removed), removed=trace["filtered_out"], evidence=passages(order),
+                       inspected_count=inspected_count)
+        else:
+            run.skip("in_force_filter", "Historical unfiltered retrieval requested.")
         order = order[:self.settings.rerank_candidates]
         top_score = None
         if filtered and self.settings.cohere_api_key and order:
+            run.start("cohere_rerank", f"Re-ranking {len(order)} passages against the question.", model="rerank-v3.5")
             reranker = CohereReranker(self.settings.cohere_api_key, waits=self.rerank_waits)
             try:
                 before = list(order)
@@ -132,9 +175,17 @@ class ApprovedRetriever:
                                     "score": round(reranker.scores.get(before.index(index), 0.0), 4)}
                                    for rank, index in enumerate(order[:TRACE_TOP], start=1)]
                 steps.append("cohere_rerank")
+                units = reranker.search_units if getattr(reranker, "usage_reported", False) else None
+                run.finish("cohere_rerank", f"Re-ranked {len(order)} passages; selected the leading {min(limit, len(order))}.",
+                           evidence=passages(order[:limit]), ranking=trace["rerank"], search_units=units,
+                           cost_usd=units * self.settings.cohere_cost_per_thousand_searches / 1000 if units is not None else None,
+                           cost_basis=f"Reported search units × configured ${self.settings.cohere_cost_per_thousand_searches:g} per thousand.")
             except Exception as exc:  # keep the fused order; no abstention score this time
                 log_failure(logger, "rerank_failed", exc)
+                run.finish("cohere_rerank", "Re-ranking failed; keeping the combined search order.", status="failed", cost_usd=None)
             lap("cohere_rerank")
+        else:
+            run.skip("cohere_rerank", "Re-ranking is unavailable or there are no eligible passages.")
         results = [VectorSearchResult(**rows[index], similarity_score=round(1 / (rank + 1), 6))
                    for rank, index in enumerate(order[:limit])]
         return Retrieved(results, top_score, steps, trace,

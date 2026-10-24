@@ -90,6 +90,12 @@ class Dense:
         scores = self.matrix @ self.embedder.embed([query], query=True)[0]
         return np.argsort(-scores).tolist()
 
+    def rank_with_usage(self, query: str):
+        # The corpus matrix is shared, but per-question usage must never be shared.
+        embedder = OpenAIEmbedder(self.embedder.api_key, self.embedder.model)
+        scores = self.matrix @ embedder.embed([query], query=True)[0]
+        return np.argsort(-scores).tolist(), embedder.tokens
+
 
 def rrf(*rankings: list[int], depth: int = 100) -> list[int]:
     """Reciprocal rank fusion of the top ``depth`` of each ranking."""
@@ -117,6 +123,7 @@ class CohereReranker:
                 break
         response.raise_for_status()
         body = response.json()
+        self.usage_reported = "search_units" in body.get("meta", {}).get("billed_units", {})
         self.search_units += body.get("meta", {}).get("billed_units", {}).get("search_units", 0)
         self.top_score = max((item["relevance_score"] for item in body["results"]), default=0.0)
         self.scores = {item["index"]: item["relevance_score"] for item in body["results"]}

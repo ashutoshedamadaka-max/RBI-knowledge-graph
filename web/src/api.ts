@@ -34,6 +34,8 @@ export interface Notice {
   evidence_excerpt: string | null;
 }
 export interface Trace {
+  stages?: PipelineStep[];
+  cost_scope?: string;
   timings_ms?: Record<string, number>;
   candidates?: Record<string, string[]>;
   graph_added?: { from: string; to: string }[];
@@ -42,6 +44,26 @@ export interface Trace {
   rerank?: { chunk_id: string; before: number; after: number; score: number }[];
   tokens?: Record<string, number>;
   cost_usd?: Record<string, number>;
+}
+export interface PipelineStep {
+  id: string;
+  status: "running" | "complete" | "skipped" | "failed";
+  started_ms: number;
+  duration_ms?: number | null;
+  summary: string;
+  model?: string;
+  count?: number;
+  inspected_count?: number;
+  supported_count?: number;
+  evidence?: Chunk[];
+  edges?: {from: string; to: string}[];
+  removed?: {chunk_id: string; document_title: string; reason: string}[];
+  ranking?: {chunk_id: string; before: number; after: number; score: number}[];
+  input_tokens?: number | null;
+  output_tokens?: number | null;
+  search_units?: number | null;
+  cost_usd?: number | null;
+  cost_basis?: string;
 }
 export interface QueryResult {
   request_id: string;
@@ -67,6 +89,7 @@ export async function streamQuery(
   onAnswer?: (preview: QueryResult) => void,
   onPartial?: (text: string) => void,
   signal?: AbortSignal,
+  onPipeline?: (step: PipelineStep) => void,
 ): Promise<QueryResult> {
   const response = await fetch(`${BASE}/query/stream`, {
     method: "POST",
@@ -94,6 +117,7 @@ export async function streamQuery(
       const kind = /^event: (.+)$/m.exec(block)?.[1];
       const data = /^data: (.*)$/m.exec(block)?.[1] ?? "{}";
       if (kind === "progress") onStage(JSON.parse(data).stage);
+      if (kind === "pipeline") onPipeline?.(JSON.parse(data));
       if (kind === "partial" && onPartial) onPartial(JSON.parse(data).text);
       if (kind === "answer" && onAnswer) {
         // The answer before its claim check: shown at once; the verdicts arrive with the result.

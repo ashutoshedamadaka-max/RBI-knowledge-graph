@@ -25,6 +25,7 @@ class Settings(BaseSettings):
     openai_answer_model: str = "gpt-4o-mini"
     openai_input_cost_per_million: float = 0.15
     openai_output_cost_per_million: float = 0.60
+    cohere_cost_per_thousand_searches: float = 2.0  # configured estimate; not invoice pricing
     openai_timeout_seconds: float = 45.0
     openai_max_output_tokens: int = 900
     chunk_size: int = 900

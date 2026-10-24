@@ -17,6 +17,7 @@ from app.models.retrieval import RetrievalRoute
 from app.observability.costs import CostEvent, CostTracker, estimate_openai_cost
 from app.observability.events import QueryEvent, log_query_event
 from app.observability.errors import log_failure
+from app.observability.pipeline import PipelineRun, public_passage
 from app.retrieval.pipeline import ApprovedRetriever
 from app.retrieval.service import VectorRetrievalService
 from app.retrieval.vector_store import is_current_guidance
@@ -45,8 +46,10 @@ class RegulatoryQueryService:
         as_of: date | None = None,
         on_answer: Callable[[dict], None] | None = None,
         on_partial: Callable[[str], None] | None = None,
+        on_pipeline: Callable[[dict], None] | None = None,
     ) -> QueryResponse:
         started = perf_counter()
+        run = PipelineRun(on_pipeline)
         day = as_of or clock.now().date()
         request_id = request_id or f"req_{uuid4().hex}"
         if progress:
@@ -55,21 +58,29 @@ class RegulatoryQueryService:
         if progress:
             progress("retrieving_official_evidence")
         # ADR-026/027: hybrid search, cited paragraphs, the in-force filter on ``day``, Cohere re-ranking.
-        retrieved = self.retriever.search(user_query, day, limit)
+        retrieved = self.retriever.search(user_query, day, limit, run=run)
         if retrieved.top_score is not None and retrieved.top_score < self.settings.abstain_below:
-            return self._abstain_response(user_query, request_id, started, day, retrieved)
+            for step in ("source_selection", "answer", "claim_check"):
+                run.skip(step, "Evidence relevance was below the answer threshold; no answer was generated.")
+            response = self._abstain_response(user_query, request_id, started, day, retrieved)
+            return response.model_copy(update={"trace": {**retrieved.trace, "stages": run.snapshot(), "cost_scope": "model_services"},
+                                                "estimated_cost_usd": sum(s.get("cost_usd") or 0 for s in run.snapshot())})
 
         if progress:
             progress("checking_regulatory_validity")
         evidence: list[ChunkMetadata] = list(retrieved.results)
+        run.start("source_selection", "Checking replacements and assembling the answer's sources.")
         notices, successor_evidence = self._change_notices(user_query, evidence, day, limit, retrieved.unfiltered)
         candidate_evidence_count = len(evidence) + len(successor_evidence)
         merged = list({chunk.chunk_id: chunk for chunk in successor_evidence + evidence}.values())[:limit]
         excluded_after_validity_check = candidate_evidence_count - len(merged)
+        run.finish("source_selection", f"{len(merged)} passages selected; {len(notices)} source-history notices.",
+                   count=len(merged), evidence=[public_passage(c.model_dump(mode="json")) for c in merged])
         if progress:
             progress("selecting_authoritative_evidence")
         if progress:
             progress("building_grounded_answer")
+        run.start("answer", "Writing an answer from the selected passages.")
         sections = self.vector.store.sections(merged)  # empty unless chunks belong to sections (structure chunker)
         generation_started = perf_counter()
         generation = self.generator.generate(user_query, merged, **({"sections": sections} if sections else {}),
@@ -96,13 +107,18 @@ class RegulatoryQueryService:
             })
 
         answer_ms = round((perf_counter() - generation_started) * 1000, 1)
+        run.finish("answer", "Source excerpts returned after a citation fallback." if fallback_used else "Answer ready; claim checks follow when applicable.",
+                   model=generation.model, input_tokens=generation.input_tokens, output_tokens=generation.output_tokens,
+                   cost_usd=generation.estimated_cost_usd,
+                   cost_basis=f"Configured rates: ${self.settings.openai_input_cost_per_million:g} input / ${self.settings.openai_output_cost_per_million:g} output per million tokens.")
         checker_cost, checker_usage = 0.0, {}
-        check_started = perf_counter()
         if on_answer:  # show the answer now; the claim check (several seconds) adds its verdicts afterwards
             on_answer({"research": research.model_dump(mode="json"), "as_of": str(day),
                        "retrieved_evidence": [chunk.model_dump(mode="json") for chunk in merged],
                        "notices": [notice.model_dump(mode="json") for notice in notices]})
+        check_started = perf_counter()
         if research.status is ResearchStatus.GROUNDED and not fallback_used and generation.model != "deterministic":
+            run.start("claim_check", "Comparing each claim with its cited passages.", model=self.settings.openai_extraction_model)
             if progress:
                 progress("checking_claims")
             # ADR-030: every claim is checked against its own citations and flagged, never rewritten.
@@ -113,14 +129,24 @@ class RegulatoryQueryService:
                 checker_cost = estimate_openai_cost(checker_usage.get("prompt_tokens", 0), checker_usage.get("completion_tokens", 0),
                                                     self.settings.openai_input_cost_per_million,
                                                     self.settings.openai_output_cost_per_million)
+                supported = sum(v["verdict"] == "supported" for v in verdicts)
+                run.finish("claim_check", f"{len(verdicts)} claims checked; {supported} labelled supported. Model checks can miss errors.",
+                           count=len(verdicts), supported_count=supported,
+                           input_tokens=checker_usage.get("prompt_tokens"), output_tokens=checker_usage.get("completion_tokens"),
+                           cost_usd=checker_cost if checker_usage else None,
+                           cost_basis="Reported token usage × configured generation rates.")
             except Exception as exc:  # the answer stands; its claims simply carry no verdict
                 log_failure(logger, "claim_check_failed", exc)
+                run.finish("claim_check", "Claim checking failed; the answer remains unchecked.", status="failed", cost_usd=None)
+        else:
+            run.skip("claim_check", "No model claim check for refusals or source-excerpt answers.")
         trace = {**retrieved.trace, "timings_ms": {**retrieved.trace.get("timings_ms", {}), "answer": answer_ms,
                  **({"claim_check": round((perf_counter() - check_started) * 1000, 1)} if checker_usage else {})},
                  "tokens": {"answer_input": generation.input_tokens, "answer_output": generation.output_tokens,
                             "check_input": checker_usage.get("prompt_tokens", 0),
                             "check_output": checker_usage.get("completion_tokens", 0)},
-                 "cost_usd": {"answer": generation.estimated_cost_usd, "claim_check": checker_cost}}
+                 "cost_usd": {"answer": generation.estimated_cost_usd, "claim_check": checker_cost},
+                 "stages": run.snapshot(), "cost_scope": "model_services"}
         answer = research_to_markdown(research)
         if notices:
             answer = "### What changed\n" + "\n".join(f"- {item.text}" for item in notices) + "\n\n" + answer
@@ -155,7 +181,7 @@ class RegulatoryQueryService:
         ))
         return QueryResponse(
             request_id=request_id, answer=answer, citations=citations, route=RetrievalRoute.HYBRID, in_scope=True,
-            retrieved_evidence=merged, latency_ms=latency_ms, estimated_cost_usd=generation.estimated_cost_usd + checker_cost,
+            retrieved_evidence=merged, latency_ms=latency_ms, estimated_cost_usd=sum(s.get("cost_usd") or 0 for s in run.snapshot()),
             citation_valid=citation_valid, research=research, as_of=day, notices=notices, trace=trace,
             pipeline=QueryPipelineSummary(
                 candidate_evidence_count=candidate_evidence_count,

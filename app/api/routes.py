@@ -203,9 +203,12 @@ async def query_stream(request: Request, payload: QueryRequest) -> StreamingResp
     def answered(body: dict) -> None:  # the answer before its claim check, so it shows sooner
         loop.call_soon_threadsafe(events.put_nowait, ("answer", body))
 
+    def pipeline(body: dict) -> None:
+        loop.call_soon_threadsafe(events.put_nowait, ("pipeline", body))
+
     async def stream():
         task = asyncio.create_task(
-            run_in_threadpool(service.query, payload.query, payload.top_k, request_id, progress, payload.as_of, answered, partial)
+            run_in_threadpool(service.query, payload.query, payload.top_k, request_id, progress, payload.as_of, answered, partial, pipeline)
         )
         while not task.done() or not events.empty():
             try:
@@ -222,7 +225,7 @@ async def query_stream(request: Request, payload: QueryRequest) -> StreamingResp
             yield "event: error\ndata: {\"detail\": \"The RBI research service is temporarily unavailable.\"}\n\n"
 
     return StreamingResponse(
-        stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache"},
+        stream(), media_type="text/event-stream", headers={"Cache-Control": "no-cache, no-transform", "X-Accel-Buffering": "no"},
         background=BackgroundTask(request.app.state.durable_state.sync),
     )
 

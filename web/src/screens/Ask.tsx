@@ -1,7 +1,6 @@
 import { useEffect, useMemo, useRef, useState } from "react";
-import { Claim, QueryResult, streamQuery } from "../api";
-import EvidenceGraph from "../components/EvidenceGraph";
-import TraceDrawer from "../components/TraceDrawer";
+import { Claim, PipelineStep, QueryResult, streamQuery } from "../api";
+import LivePipeline from "../components/LivePipeline";
 import { Icon, PageIntro, SourceNote } from "../components/UI";
 import saved from "../data/example.json";
 const EXAMPLES = [
@@ -50,15 +49,17 @@ export default function Ask({ active = true }: { active?: boolean }) {
   const [draft, setDraft] = useState<string | null>(null);
   const [openChunk, setOpenChunk] = useState<string | null>(null);
   const [activeClaim, setActiveClaim] = useState<Claim | null>(null);
-  const [pane, setPane] = useState<"passage" | "graph">("passage");
+  const [steps, setSteps] = useState<PipelineStep[]>([]);
+  const [firstTextMs, setFirstTextMs] = useState<number | null>(null);
+  const [answerMs, setAnswerMs] = useState<number | null>(null);
   const controller = useRef<AbortController | null>(null);
   const citationTrigger = useRef<HTMLElement | null>(null);
   const passageRef = useRef<HTMLElement>(null);
   const input = useRef<HTMLTextAreaElement>(null);
   const evidence = useMemo(
     () =>
-      new Map((result?.retrieved_evidence ?? []).map((c) => [c.chunk_id, c])),
-    [result],
+      new Map([...steps.flatMap(s => s.evidence ?? []), ...(result?.retrieved_evidence ?? [])].map((c) => [c.chunk_id, c])),
+    [result, steps],
   );
   const openPassage = openChunk ? evidence.get(openChunk) : undefined;
   useEffect(() => () => controller.current?.abort(), []);
@@ -85,6 +86,7 @@ export default function Ask({ active = true }: { active?: boolean }) {
   async function ask() {
     if (controller.current || query.trim().length < 3) return;
     const abort = new AbortController();
+    const requestedAt = performance.now();
     controller.current = abort;
     const timer = window.setTimeout(() => abort.abort("timeout"), 180000);
     setMode("live");
@@ -94,6 +96,10 @@ export default function Ask({ active = true }: { active?: boolean }) {
     setResult(null);
     setDraft(null);
     setOpenChunk(null);
+    setActiveClaim(null);
+    setSteps([]);
+    setFirstTextMs(null);
+    setAnswerMs(null);
     setSubmitted(query.trim());
     setStage("understanding_question");
     try {
@@ -107,13 +113,24 @@ export default function Ask({ active = true }: { active?: boolean }) {
           if (controller.current !== abort) return;
           setDraft(null);
           setResult(preview);
+          setAnswerMs(performance.now() - requestedAt);
         },
         (next) => {
-          if (controller.current === abort) setDraft(next);
+          if (controller.current === abort) {
+            setDraft(next);
+            if (next.trim()) setFirstTextMs(value => value ?? performance.now() - requestedAt);
+          }
         },
         abort.signal,
+        (step) => {
+          if (controller.current !== abort) return;
+          setSteps(previous => previous.some(s => s.id === step.id) ? previous.map(s => s.id === step.id ? step : s) : [...previous, step]);
+        },
       );
-      if (controller.current === abort) setResult(answer);
+      if (controller.current === abort) {
+        setResult(answer);
+        if (answer.trace.stages) setSteps(answer.trace.stages);
+      }
     } catch (e) {
       if (controller.current !== abort) return;
       setError(
@@ -146,10 +163,9 @@ export default function Ask({ active = true }: { active?: boolean }) {
     citationTrigger.current = document.activeElement as HTMLElement;
     setOpenChunk(id);
     if (claim) setActiveClaim(claim);
-    setPane("passage");
     requestAnimationFrame(() => {
       passageRef.current?.focus({ preventScroll: true });
-      if (window.innerWidth < 1150)
+      if (passageRef.current)
         passageRef.current?.scrollIntoView({
           behavior: "instant",
           block: "start",
@@ -305,22 +321,13 @@ export default function Ask({ active = true }: { active?: boolean }) {
         <SavedExample />
       ) : (
         <>
-          {busy && (
+          {submitted && <LivePipeline steps={steps} busy={busy} elapsed={elapsed} firstTextMs={firstTextMs} answerMs={answerMs} result={result} error={error} onOpen={openCitation} highlighted={new Set(activeClaim?.citation_ids ?? [])} />}
+          {busy && !steps.length && (
             <div className="research-progress">
               <div className="progress-heading" role="status">
                 <span className="spinner" />
                 {STAGES[stage] ?? "Researching"}
                 <span className="elapsed">{elapsed}s elapsed</span>
-              </div>
-              <div className="stage-track" aria-hidden="true">
-                {Object.keys(STAGES).map((s, i) => (
-                  <span
-                    key={s}
-                    className={
-                      i <= Object.keys(STAGES).indexOf(stage) ? "reached" : ""
-                    }
-                  />
-                ))}
               </div>
               <p>
                 {elapsed >= 25
@@ -365,9 +372,9 @@ export default function Ask({ active = true }: { active?: boolean }) {
               <p>{draft}</p>
             </article>
           )}
-          {result && (
-            <div className="answer-layout">
-              <article className="card answer-card">
+          {(result || openPassage) && (
+            <div className={`answer-layout ${!result ? "source-preview-layout" : ""}`}>
+              {result && <article className="card answer-card">
                 <div className="eyebrow">
                   {busy || error
                     ? "Answer · checks incomplete"
@@ -422,7 +429,7 @@ export default function Ask({ active = true }: { active?: boolean }) {
                   Model checks can miss errors. Read the cited text and its
                   scope before relying on the answer.
                 </div>
-              </article>
+              </article>}
               <aside
                 className="card evidence-panel"
                 ref={passageRef}
@@ -430,7 +437,7 @@ export default function Ask({ active = true }: { active?: boolean }) {
                 aria-label="Source evidence"
               >
                 <div className="panel-heading">
-                  <h2>Behind the answer</h2>
+                  <h2>Source evidence</h2>
                   {openChunk && (
                     <button
                       className="icon-button"
@@ -444,34 +451,7 @@ export default function Ask({ active = true }: { active?: boolean }) {
                     </button>
                   )}
                 </div>
-                <div className="segmented" aria-label="Evidence view">
-                  <button
-                    aria-pressed={pane === "passage"}
-                    onClick={() => setPane("passage")}
-                  >
-                    Source text
-                  </button>
-                  <button
-                    aria-pressed={pane === "graph"}
-                    onClick={() => setPane("graph")}
-                  >
-                    Evidence graph
-                  </button>
-                </div>
-                {pane === "graph" ? (
-                  <>
-                    <p className="fine-print">
-                      Documents connect to retrieved paragraphs. Highlighted
-                      paragraphs are cited in the answer.
-                    </p>
-                    <EvidenceGraph
-                      result={result}
-                      reveal={4}
-                      highlighted={new Set(activeClaim?.citation_ids ?? [])}
-                      onOpen={openCitation}
-                    />
-                  </>
-                ) : openPassage ? (
+                {openPassage ? (
                   <div className="passage-view">
                     <span className="eyebrow">
                       {openPassage.paragraph_ref
@@ -510,7 +490,7 @@ export default function Ask({ active = true }: { active?: boolean }) {
                       original source here.
                     </p>
                     <div className="passage-options">
-                      {result.retrieved_evidence.map((c, i) => (
+                      {(result?.retrieved_evidence ?? []).map((c, i) => (
                         <button
                           key={c.chunk_id}
                           onClick={() => openCitation(c.chunk_id)}
@@ -529,16 +509,6 @@ export default function Ask({ active = true }: { active?: boolean }) {
                   </div>
                 )}
               </aside>
-              <div className="card trace-card">
-                <TraceDrawer result={result} />
-                {!busy && !error && (
-                  <p className="fine-print">
-                    {result.latency_ms.toLocaleString()} ms · estimated cost $
-                    {result.estimated_cost_usd.toFixed(5)} for this run.
-                    Token-price estimate, not an invoice.
-                  </p>
-                )}
-              </div>
             </div>
           )}
         </>
