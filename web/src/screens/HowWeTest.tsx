@@ -3,6 +3,7 @@ import { REPORT } from "../quality";
 import { NextPage, PageIntro, SourceNote } from "../components/UI";
 import examples from "../data/question-examples.json";
 import { EvalHeadline, ExperimentLog, MetricTree, NextBets } from "../components/EvalShowcase";
+import SystemHealth from "../components/SystemHealth";
 import "../evals.css";
 
 /* How the product is tested: the method only. The numbers themselves live on the Results tab. */
@@ -84,6 +85,7 @@ export default function HowWeTest() {
 
       <EvalHeadline />
       <MetricTree />
+      <SystemHealth />
       <ExperimentLog />
       <NextBets />
 

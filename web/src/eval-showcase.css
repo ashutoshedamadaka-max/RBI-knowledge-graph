@@ -87,3 +87,22 @@
 @media (prefers-reduced-motion: reduce) {
   .big-numbers > div, .exp-bar-track span { animation: none !important; }
 }
+
+/* System health dashboard */
+.health-groups { display: grid; gap: 22px; }
+.health-group { display: grid; grid-template-columns: minmax(200px, 260px) minmax(0, 1fr); gap: 18px; align-items: start;
+  padding-top: 18px; border-top: 1px solid var(--line); }
+.health-group:first-child { border-top: 0; padding-top: 0; }
+.health-group-head h3 { margin: 0 0 6px; font-size: 17px; }
+.health-group-head p { margin: 0; font-size: 13px; color: var(--muted); }
+.health-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 10px; }
+.health-card { display: grid; gap: 4px; align-content: start; padding: 14px 16px; border-radius: 12px; border: 1px solid var(--line); background: var(--surface); }
+.health-card.good { border-top: 3px solid var(--ok); }
+.health-card.watch { border-top: 3px solid var(--warn); }
+.health-top { display: flex; justify-content: space-between; gap: 8px; align-items: baseline; }
+.tech-term { font: 600 11px ui-monospace, monospace; color: var(--brand); }
+.health-set { font-size: 10px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.08em; }
+.health-card strong { font: 600 24px/1.2 var(--font-display); font-variant-numeric: tabular-nums; }
+.health-name { font-size: 13px; font-weight: 600; }
+.health-card p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.45; }
+@media (max-width: 900px) { .health-group { grid-template-columns: minmax(0, 1fr); } }
