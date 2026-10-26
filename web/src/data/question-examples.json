@@ -1,0 +1,92 @@
+{
+ "source": "data/evaluation/v2/dev.jsonl",
+ "examples": [
+  {
+   "type": "single_fact",
+   "id": "q027",
+   "question": "What must an NBFC provide to borrowers regarding recovery grievance redressal?",
+   "as_of": null,
+   "reviewed": true,
+   "evidence": {
+    "document": "Reserve Bank of India (Non-Banking Financial Companies – Responsible Business Conduct) Directions, 2025 (Updated as on July 1, 2026)",
+    "paragraph": "92",
+    "span": "The details of this mechanism shall be provided to the borrower at the time of loan disbursal."
+   },
+   "altered_fact": null
+  },
+  {
+   "type": "applies_to",
+   "id": "q054",
+   "question": "Which existing projects or loans are exempt from the provisions mentioned in paragraph 118?",
+   "as_of": null,
+   "reviewed": true,
+   "evidence": {
+    "document": "Reserve Bank of India (Non-Banking Financial Companies – Resolution of Stressed Assets) Directions, 2025 (updated as on October 1, 2026)",
+    "paragraph": "120",
+    "span": "existing projects which are specified in paragraph 102"
+   },
+   "altered_fact": null
+  },
+  {
+   "type": "multi_hop",
+   "id": "q104",
+   "question": "What are the requirements for an SPE when the originator has purchased loans from another lender, particularly regarding board representation and compliance with capital adequacy guidelines?",
+   "as_of": null,
+   "reviewed": true,
+   "evidence": {
+    "document": "Reserve Bank of India (Non-Banking Financial Companies – Securitisation Transactions) Directions, 2025 (Updated as on July 01, 2026)",
+    "paragraph": "29",
+    "span": "only one of either the originator or the lender from whom loans were purchased by the originator, may have the representative on the board of the SPE."
+   },
+   "altered_fact": null
+  },
+  {
+   "type": "change_over_time",
+   "id": "q131",
+   "question": "What were the requirements for qualifying assets for NBFC-MFIs as of January 29, 2024?",
+   "as_of": "2024-01-29",
+   "reviewed": true,
+   "evidence": {
+    "document": "Master Direction - Reserve Bank of India (Regulatory Framework for Microfinance Loans) Directions, 2022 (Updated as on 10-10-2024)",
+    "paragraph": "8",
+    "span": "Qualifying assets of NBFC-MFIs shall constitute a minimum of 60 percent of the total assets (netted off by intangible assets), on an ongoing basis."
+   },
+   "altered_fact": null
+  },
+  {
+   "type": "withdrawn_trap",
+   "id": "q158",
+   "question": "How should a bank calculate its capital requirements when it provides credit protection on a securitisation exposure?",
+   "as_of": null,
+   "reviewed": true,
+   "evidence": {
+    "document": "Master Direction - Reserve Bank of India (Securitisation of Standard Assets) Directions, 2021 (Updated as on 05-12-2022)",
+    "paragraph": "97",
+    "span": "it must calculate its capital requirements as if it directly holds the portion of the securitisation exposure on which it has provided credit protection"
+   },
+   "altered_fact": null
+  },
+  {
+   "type": "false_premise",
+   "id": "q188",
+   "question": "What are the obligations of a card-issuer regarding the disclosure of a cardholder's PIN or code?",
+   "as_of": null,
+   "reviewed": true,
+   "evidence": {
+    "document": "Reserve Bank of India (Non-Banking Financial Companies – Credit Cards: Issuance and Conduct) Directions, 2025",
+    "paragraph": "75",
+    "span": "shall be under an obligation not to disclose the cardholder’s PIN or code to anyone, except to the cardholder."
+   },
+   "altered_fact": "The year of the directions is incorrectly stated as 2023 instead of 2025."
+  },
+  {
+   "type": "unanswerable",
+   "id": "q166",
+   "question": "What are the risk weights applicable to SCBs' exposures to NBFCs as per the latest RBI guidelines?",
+   "as_of": null,
+   "reviewed": true,
+   "evidence": null,
+   "altered_fact": null
+  }
+ ]
+}

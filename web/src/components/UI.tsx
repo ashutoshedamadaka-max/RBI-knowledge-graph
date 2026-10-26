@@ -31,6 +31,12 @@ export function Icon({ name, size = 20 }: { name: string; size?: number }) {
         <path d="M4 3v17h17M8 16v-5M13 16V7M18 16V4" />
       </>
     ),
+    testing: (
+      <>
+        <path d="M9 3h6M10 3v6l-5 9a2 2 0 0 0 2 3h10a2 2 0 0 0 2-3l-5-9V3" />
+        <path d="M7.5 14h9" />
+      </>
+    ),
     sources: (
       <>
         <path d="M5 2h10l4 4v16H5Z" />

@@ -295,9 +295,9 @@ export default function HowIBuilt() {
         </div>
       </section>
       <NextPage
-        href="#evals"
-        title="Inspect the results and the limits."
-        text="See the saved measurements, uncertainty, and real failure cases."
+        href="#testing"
+        title="See how it is tested."
+        text="The test process, the kinds of question, and what each measure means."
       />
     </div>
   );

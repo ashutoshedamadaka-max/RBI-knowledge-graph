@@ -4,6 +4,7 @@ import Ask from "./screens/Ask";
 import HowItWorks from "./screens/HowItWorks";
 import HowIBuilt from "./screens/HowIBuilt";
 import Quality from "./screens/Quality";
+import HowWeTest from "./screens/HowWeTest";
 import Sources from "./screens/Sources";
 import { Icon } from "./components/UI";
 import { REPO } from "./quality";
@@ -13,7 +14,8 @@ const SCREENS = {
   ask: "Ask a question",
   how: "How it works",
   built: "Build decisions",
-  evals: "Results & limits",
+  testing: "How we test",
+  evals: "Results",
   sources: "Source library",
   graph: "Explore the graph",
 } as const;
@@ -115,7 +117,7 @@ export default function App() {
           </div>
           <div className="nav-group">
             <span className="nav-label">Behind the product</span>
-            {(["how", "built", "evals"] as Screen[]).map(navLink)}
+            {(["how", "built", "testing", "evals"] as Screen[]).map(navLink)}
           </div>
         </nav>
         <div className="sidebar-bottom">
@@ -162,6 +164,11 @@ export default function App() {
           {visited.has("built") && (
             <div hidden={screen !== "built"}>
               <HowIBuilt />
+            </div>
+          )}
+          {visited.has("testing") && (
+            <div hidden={screen !== "testing"}>
+              <HowWeTest />
             </div>
           )}
           {visited.has("evals") && (
