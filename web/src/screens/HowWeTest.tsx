@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { REPORT } from "../quality";
 import { NextPage, PageIntro, SourceNote } from "../components/UI";
 import examples from "../data/question-examples.json";
+import { EvalHeadline, ExperimentLog, MetricTree, NextBets } from "../components/EvalShowcase";
 import "../evals.css";
 
 /* How the product is tested: the method only. The numbers themselves live on the Results tab. */
@@ -24,30 +25,6 @@ const TYPES: Record<string, { name: string; tests: string; passes: string }> = {
   false_premise: { name: "False premise", tests: "Does it correct a question built on a wrong fact?", passes: "The answer cites the paragraph with the true fact." },
   unanswerable: { name: "Not in the rulebook", tests: "Does it decline when its sources do not cover the question?", passes: "The product declines instead of answering." },
 };
-
-const MEASURES = [
-  { name: "Right paragraph cited", role: "North-star metric", better: "Higher is better",
-    question: "Did the answer point to the RBI paragraph that actually answers the question?",
-    how: "A question passes only if every sentence in its answer key appears inside a passage the answer cites." },
-  { name: "Withdrawn rule cited", role: "Guardrail", better: "Target: zero",
-    question: "On trick questions about withdrawn rules, did the answer quote the dead rule?",
-    how: "A trap question fails if any cited passage contains the withdrawn sentence." },
-  { name: "Unanswerable questions declined", role: "Guardrail", better: "Higher is better",
-    question: "When the rulebook does not cover a question, did it decline instead of guessing?",
-    how: "Counted on questions labelled 'not in the rulebook': a pass is no answer given." },
-  { name: "Answerable questions wrongly declined", role: "Counter-metric", better: "Lower is better",
-    question: "Did caution make it refuse questions it could have answered?",
-    how: "The balance to the guardrail above: declining everything would score perfectly there, and terribly here." },
-  { name: "Right paragraph in the top 5 searched", role: "Diagnostic", better: "Higher is better",
-    question: "Before any answer is written, did search put the right paragraph near the top?",
-    how: "Used to compare search designs during development; it measures finding, not answering." },
-  { name: "Claim-checker catch rate", role: "Tool validation", better: "Higher is better",
-    question: "When a sentence is not fully supported by its source, does the automatic checker flag it?",
-    how: "The checker's verdicts compared with 50 separately labelled sentences." },
-  { name: "Cost and answer time", role: "Operational", better: "Lower is better",
-    question: "What does a question cost to answer, and how long does it take?",
-    how: "Model charges from reported usage at list prices, and measured time per question." },
-];
 
 function TestFlow() {
   const [lit, setLit] = useState(0);
@@ -99,14 +76,19 @@ export default function HowWeTest() {
   const test = REPORT.answers_test?.data?.questions;
   return (
     <div className="page">
-      <PageIntro eyebrow="How we test" title="How do you know an AI answer is right? Test it like a product.">
-        An AI that sounds confident is not evidence of anything. This product is tested against an answer key it never
-        sees, on questions locked away from tuning, and scored by a script rather than by another AI's opinion. This page
-        explains the method; the <a href="#evals">Results</a> tab shows the numbers.
+      <PageIntro eyebrow="How we test" title="An evaluation programme, run like a product launch.">
+        A confident-sounding AI is not evidence of anything. This product has a defined success metric, guardrails that stop it
+        being gamed, a locked test set it never saw during tuning, and a log of every experiment that changed it. Here is
+        what was measured, what it showed, and what comes next.
       </PageIntro>
 
+      <EvalHeadline />
+      <MetricTree />
+      <ExperimentLog />
+      <NextBets />
+
       <section className="section-block">
-        <div className="section-heading"><div><div className="eyebrow">The test process</div><h2>Six steps, from question to score.</h2></div></div>
+        <div className="section-heading"><div><div className="eyebrow">Method · the test process</div><h2>How every number above was produced.</h2></div></div>
         <TestFlow />
         <div className="split-visual" aria-label="How the questions are split">
           <div className="split-bar">
@@ -140,21 +122,6 @@ export default function HowWeTest() {
           })}
         </div>
         <SourceNote file="v2/dev.jsonl">Example questions</SourceNote>
-      </section>
-
-      <section className="section-block">
-        <div className="section-heading"><div><div className="eyebrow">Reading the scorecard</div><h2>What each measure means.</h2></div></div>
-        <p className="prose muted">Every number on the Results tab answers one of these questions. The label in each card says what role the measure plays, in product terms.</p>
-        <div className="measure-grid">
-          {MEASURES.map((measure) => (
-            <article className="card measure-card" key={measure.name}>
-              <div className="measure-tags"><span className="pm-tag">{measure.role}</span><span className="direction-tag">{measure.better}</span></div>
-              <h3>{measure.name}</h3>
-              <p className="measure-question">{measure.question}</p>
-              <p className="fine-print">{measure.how}</p>
-            </article>
-          ))}
-        </div>
       </section>
 
       <section className="section-block">
